@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>List Family Trees</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
     <h1>List of Your Family Trees</h1>
@@ -25,7 +26,7 @@
                 <form action="?action=view_tree" method="get" style="display: inline;">
                 <input type="hidden" name="action" value="view_tree">
                 <input type="hidden" name="tree_id" value="<?php echo $tree['id']; ?>">
-                    <button type="submit">View</button>
+                    <button type="submit">View<?php</button>
                 </form>
 
             </li>
