@@ -1,0 +1,155 @@
+<?php
+class Member {
+    private $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function addMember($treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId) {
+        $query = "INSERT INTO person (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'family_tree_id' => $treeId,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'date_of_birth' => $dateOfBirth ? $dateOfBirth : null,
+            'place_of_birth' => $placeOfBirth ? $placeOfBirth : null,
+            'gender_id' => $genderId
+        ]);
+    }
+    // Fetch relationship types from the database
+    public function getRelationshipTypes($tree_id=1) {
+        $query = "SELECT id, description FROM relationship_type";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getMemberById($memberId) {
+        $query = "SELECT * FROM person WHERE id = :member_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':member_id', $memberId);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function autocompleteMember($term, $memberId, $tree_id=1) {
+        $query = "SELECT id, first_name, last_name FROM person WHERE 
+        (first_name LIKE :term1 OR last_name like :term2) and id != :member_id";
+        $query2 = str_replace(":tree_id", $tree_id, $query);
+        $query2 = str_replace(":term1", '%' . $term . '%', $query2);
+        $query2 = str_replace(":term2", '%'. $term . '%', $query2);
+        $query2 = str_replace(":member_id", $memberId, $query2);
+        //print($query2);
+        $stmt = $this->db->prepare($query);
+        //$stmt->bindValue(':tree_id', '%' . $tree_id . '%');
+        $stmt->bindValue(':term1', '%' . $term . '%');
+        $stmt->bindValue(':term2', '%' . $term . '%');
+        $stmt->bindParam(':member_id', $memberId);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //apachelog($results);
+        $labels = [];
+        foreach($results as $result) {
+            $labels[] = [   
+                    'label' => $result['first_name'] . ' ' . $result['last_name'],
+                    'id' => $result['id']
+            ];
+
+        }
+
+        return $labels;
+
+
+    }
+    // public function deleteMember($memberId) {
+    //     $query = "DELETE FROM person WHERE id = :member_id";
+    //     $stmt = $this->db->prepare($query);
+    //     $stmt->bindParam(':member_id', $memberId);
+    //     $status = $stmt->execute();
+    //     if($status) {
+    //         print "failed";
+    //     } else {
+    //         print "success";
+    //     }
+    // }
+
+    public function deleteMember($memberId) {
+        $query = "DELETE FROM person WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute(['id' => $memberId]);
+    }
+    public function getMemberRelationships($memberId) {
+        $query = "SELECT pr.id, p1.first_name AS person1_first_name, p1.last_name AS person1_last_name, 
+                         p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
+                         p1.id as person1_id, p2.id as person2_id,
+                         rt.description AS relationship_description
+                  FROM person_relationship pr
+                  INNER JOIN person p1 ON pr.person_id1 = p1.id
+                  INNER JOIN person p2 ON pr.person_id2 = p2.id
+                  INNER JOIN relationship_type rt ON pr.relationship_type_id = rt.id
+                  WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':memberId', $memberId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function updateMemberRelationship($relationshipId, $personId1, $relationshipTypeId) {
+        $query = "UPDATE person_relationship SET person_id1 = :person_id1, 
+                  relationship_type_id = :relationship_type_id WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':person_id1', $personId1);
+        $stmt->bindParam(':relationship_type_id', $relationshipTypeId);
+        $stmt->bindParam(':id', $relationshipId);
+        return $stmt->execute();
+    }
+
+    public function updateMember($memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId) {
+        $query = "UPDATE person SET first_name = :first_name, last_name = :last_name, date_of_birth = :date_of_birth,
+                  place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
+                  gender_id = :gender_id WHERE id = :id";
+        if(!$dateOfDeath) $dateOfDeath=null;
+        if(!$dateOfBirth) $dateOfBirth=null;
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':first_name', $firstName);
+        $stmt->bindParam(':last_name', $lastName);
+        $stmt->bindParam(':date_of_birth', $dateOfBirth);
+        $stmt->bindParam(':place_of_birth', $placeOfBirth);
+        $stmt->bindParam(':date_of_death', $dateOfDeath);
+        $stmt->bindParam(':place_of_death', $placeOfDeath);
+        $stmt->bindParam(':gender_id', $genderId);
+        $stmt->bindParam(':id', $memberId);
+        return $stmt->execute();
+    }
+
+    public function getRelationships($memberId) {
+        $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
+                         p1.id as person1_id, p2.id as person2_id
+                  FROM person_relationship pr
+                  JOIN person p1 ON pr.person_id1 = p1.id
+                  JOIN person p2 ON pr.person_id2 = p2.id
+                  JOIN relationship_type rt ON pr.relationship_type_id = rt.id
+                  WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['memberId' => $memberId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId) {
+        $query = "INSERT INTO person_relationship (person_id1, person_id2, relationship_type_id,family_tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:family_tree_id)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'person_id1' => $personId1,
+            'person_id2' => $personId2,
+            'relationship_type_id' => $relationshipTypeId,
+            'family_tree_id'=>$treeId
+        ]);
+    }
+
+    public function deleteRelationship($relationshipId) {
+        $query = "DELETE FROM person_relationship WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute(['id' => $relationshipId]);
+    }
+}
+?>

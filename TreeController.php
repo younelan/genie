@@ -1,0 +1,76 @@
+<?php
+require_once 'Tree.php';
+
+class TreeController {
+    private $tree;
+    private $userId;
+
+    public function __construct($db, $userId) {
+        $this->tree = new Tree($db);
+        $this->userId = $userId;
+    }
+    public function getRelationshipTypes() {
+        $relationshipTypes = $this->memberModel->getRelationshipTypes();
+        echo json_encode($relationshipTypes);
+        exit;
+    }
+    
+    public function listTrees() {
+        $trees = $this->tree->getAllTreesByOwner($this->userId);
+        include 'list_trees.php';
+    }
+    public function searchMembers() {
+        $treeId = $_GET['tree_id'];
+        $query = $_GET['query'];
+        $members = $this->tree->searchMembers($treeId, $query);
+        echo json_encode($members);
+    }
+    public function addTree() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $success = $this->tree->addTree($this->userId, $name, $description);
+            if ($success) {
+                header("Location: index.php?action=list_trees");
+                exit();
+            } else {
+                $error = "Failed to add tree.";
+            }
+        }
+        include 'add_tree.php';
+    }
+    public function viewTree() {
+        $familyTreeId = $_GET['tree_id']??$_GET['family_tree_id']; // Get family_tree_id from the request
+        include 'view_tree.php';
+    }
+
+    public function getTreeData() {
+        $familyTreeId = $_GET['family_tree_id']; // Get family_tree_id from the request
+        //$treeModel = new Tree();
+        $treeData = $this->tree->getTreeData($familyTreeId);
+        header('Content-Type: application/json');
+        echo json_encode($treeData);
+    }
+    public function deleteTree() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $treeId = $_POST['tree_id'];
+            $success = $this->tree->deleteTree($treeId, $this->userId);
+            if ($success) {
+                header("Location: index.php?action=list_trees");
+                exit();
+            } else {
+                $error = "Failed to delete tree.";
+            }
+        }
+    }
+
+    public function listMembers($treeId, $page) {
+        $limit = 70; // Number of members per page
+        $offset = ($page - 1) * $limit;
+        $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
+        $totalMembers = $this->tree->countMembersByTreeId($treeId);
+        $totalPages = ceil($totalMembers / $limit);
+        include 'list_members.php';
+    }
+}
+?>
