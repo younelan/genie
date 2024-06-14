@@ -4,20 +4,22 @@ Genie is a rudimentary php web app to track ancestors, genealogy tree and relati
 
 Though you can have multiple trees and in theory once auth is in, you could use it collaboratively, for now it is meant to be run locally. I wouldn't recommend putting this on the internet as is
 
-As is, no warranties.
+Written relatively quickly, needs serious refactor. As is, no warranties.
 
 Until I have vetted the app more carefully, I have removed auth.
 
 ## Features:
-_ multiple trees
-_ Multiple people can have as many relationships as possible
-_ optionally display the tree using D3
+- multiple trees
+- Multiple people can have as many relationships as possible
+- optionally display the tree using D3
 
 ## Todo:
-_ Add auth
-_ Buggy edit relationships
-_ permissions
-_ check for input
+- Add auth
+- Buggy edit relationships
+- permissions to edit tree per user
+- check for input, this was meant to be run localhost
+- add custom fields to both the relationship and the people
+- refactor into classes, more mvc, better folder structure
 
 ## Setup
 
@@ -25,5 +27,10 @@ _ check for input
 - put in a web accessible folder
 - ```mysql -u youruser <schema.sql```
 - lock down your server before user, there is no auth
-
+- on the tree
+    - edit - add members
+        - add people to the tree
+        - on the person page, add relationships betwen people
+        - note: do not use edit relationship, it is buggy right now. Instead, just delete the relationship and create another one
+    - view - view a family graphically using D3
 Happy tracking
