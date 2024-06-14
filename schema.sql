@@ -1,55 +1,106 @@
-CREATE TABLE user (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+CREATE TABLE `family_tree` (
+  `id` int NOT NULL,
+  `owner_id` int NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `description` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Optional: Roles can be stored in a separate table and linked via foreign key
-CREATE TABLE family_tree (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    owner_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `gender` (
+  `id` int NOT NULL,
+  `description` VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE gender (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    description VARCHAR(50) NOT NULL
+CREATE TABLE `person` (
+  `id` int NOT NULL,
+  `family_tree_id` int NOT NULL,
+  `first_name` VARCHAR(100) NOT NULL,
+  `middle_name` VARCHAR(100) DEFAULT NULL,
+  `last_name` VARCHAR(100) DEFAULT NULL,
+  `alias1` VARCHAR(100) DEFAULT NULL,
+  `alias2` VARCHAR(100) DEFAULT NULL,
+  `alias3` VARCHAR(100) DEFAULT NULL,
+  `date_of_birth` DATE DEFAULT NULL,
+  `body` VARCHAR(4000) DEFAULT NULL,
+  `place_of_birth` VARCHAR(255) DEFAULT NULL,
+  `date_of_death` DATE DEFAULT NULL,
+  `place_of_death` VARCHAR(255) DEFAULT NULL,
+  `gender_id` int DEFAULT NULL,
+  `spouse_id` int DEFAULT NULL,
+  `optional_fields` json DEFAULT NULL
+); 
+
+CREATE TABLE `person_relationship` (
+  `id` int NOT NULL,
+  `family_tree_id` int NOT NULL,
+  `person_id1` int NOT NULL,
+  `person_id2` int NOT NULL,
+  `relationship_start` DATE DEFAULT NULL,
+  `relationship_end` DATE DEFAULT NULL,
+  `optional_fields` json DEFAULT NULL,
+  `relationship_type_id` int NOT NULL
+); 
+
+CREATE TABLE `relationship_type` (
+  `id` int NOT NULL,
+  `family_tree_id` int NOT NULL,
+  `description` VARCHAR(100) NOT NULL,
+  `optional_fields` json DEFAULT NULL
 );
 
-CREATE TABLE person (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    family_tree_id INT NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    date_of_birth DATE NOT NULL,
-    place_of_birth VARCHAR(255) NOT NULL,
-    date_of_death DATE,
-    place_of_death VARCHAR(255),
-    gender_id INT NOT NULL,
-    spouse_id INT,
-    optional_fields JSON,
+INSERT INTO `relationship_type` (`id`, `family_tree_id`, `description`) VALUES
+(1, 1, 'Fraternal'),
+(2, 1, 'Parent'),
+(3, 1, 'Friend'),
+(4, 1, 'Half Sibling'),
+(5, 1, 'Mariage'),
+(6, 1, 'Fiancailles'),
+(7, 1, 'Child'),
+(8, 1, 'Cousin'),
+(9, 1, 'Step-Parent');
+
+CREATE TABLE `users` (
+  `id` int NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE relationship_type (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    family_tree_id INT NOT NULL,
-    description VARCHAR(100) NOT NULL,
-);
+ALTER TABLE `family_tree`
+  ADD PRIMARY KEY (`id`);
 
-CREATE TABLE person_relationship (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    family_tree_id INT NOT NULL,
-    person_id1 INT NOT NULL,
-    person_id2 INT NOT NULL,
-    relationship_type_id INT NOT NULL
-/*    FOREIGN KEY (family_tree_id) REFERENCES family_tree(id),
-    FOREIGN KEY (person_id1) REFERENCES person(id),
-    FOREIGN KEY (person_id2) REFERENCES person(id),
-    FOREIGN KEY (relationship_type_id) REFERENCES relationship_type(id),
-    CONSTRAINT unique_relationship UNIQUE (person_id1, person_id2, relationship_type_id)*/
-);
+ALTER TABLE `gender`
+  ADD PRIMARY KEY (`id`);
 
+ALTER TABLE `person`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `person_relationship`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `relationship_type`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+ALTER TABLE `family_tree`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `gender`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `person`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `person_relationship`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `relationship_type`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
