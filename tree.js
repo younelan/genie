@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("transform", "translate(40,0)");
 
             const simulation = d3.forceSimulation(data.nodes)
-            .force("link", d3.forceLink(data.links).id(d => d.id).distance(40))
+            .force("link", d3.forceLink(data.links).id(d => d.id).distance(30))
             .force("charge", d3.forceManyBody().strength(-50))
-            .force("center", d3.forceCenter(width / 4, height / 4));
+            .force("center", d3.forceCenter(width / 2, height / 2));
 
         const link = svg.append("g")
             .attr("class", "links")
