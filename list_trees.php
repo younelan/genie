@@ -12,7 +12,7 @@
     .tree-list {font-size: 1.5em;padding:20px;text-align: center;}
 </style>
 <body>
-    <h1>List of Your Family Trees</h1>
+    <h1>Family Trees</h1>
     <ul class=tree-list>
         <?php foreach ($trees as $tree): ?>
             <li>
