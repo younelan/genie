@@ -27,7 +27,7 @@ input,select {
     color: rgb(119, 2, 94);
 }
 th {
-    background-color: #306183;
+    background-color: #36183;
     color: #f3f6fd;
     padding: 5px;
     text-shadow: 1px 1px 5px #643d25;
@@ -39,6 +39,9 @@ table {
     background-color: #fbfaf5;
     color: #a72121;
 }
+table a {
+    color: navy;
+}
 label {
     color: #150c57;
     background-color: #e6eff7;
@@ -48,12 +51,13 @@ label {
     margin-bottom: 5px;
 }
 a {
-    color: #003783;
+    color: #aecedd;
     padding: 1px;
     display: block;
     width:100%;
     text-decoration: none;
 }
+
 a:hover {
     background-color: #306183;
     color: #e7e4ed;
@@ -70,4 +74,5 @@ button {
 }
 body {
     background-color: #081979;    
+    color: #5e94a1;
 }
