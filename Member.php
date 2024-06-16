@@ -155,7 +155,46 @@ class Member {
             'family_tree_id'=>$treeId
         ]);
     }
+    public function swapRelationship($relationshipId) {
+        // Start transaction
+        $this->db->beginTransaction();
 
+        try {
+            // Fetch the current relationship
+            $sql = "SELECT person_id1, person_id2 FROM person_relationship WHERE id = :relationship_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':relationship_id', $relationshipId, PDO::PARAM_INT);
+            $stmt->execute();
+            $relationship = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($relationship) {
+                // Swap the person IDs
+                $personId1 = $relationship['person_id1'];
+                $personId2 = $relationship['person_id2'];
+
+                // Update the relationship with swapped IDs
+                $updateSql = "UPDATE person_relationship SET person_id1 = :person_id2, person_id2 = :person_id1 WHERE id = :relationship_id";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindParam(':person_id1', $personId1, PDO::PARAM_INT);
+                $updateStmt->bindParam(':person_id2', $personId2, PDO::PARAM_INT);
+                $updateStmt->bindParam(':relationship_id', $relationshipId, PDO::PARAM_INT);
+                $updateStmt->execute();
+
+                // Commit transaction
+                $this->db->commit();
+
+                return true; // Indicate success
+            } else {
+                // Rollback transaction if relationship not found
+                $this->db->rollBack();
+                return false; // Indicate failure
+            }
+        } catch (Exception $e) {
+            // Rollback transaction in case of error
+            $this->db->rollBack();
+            throw $e; // Re-throw exception
+        }
+    }   
     public function deleteRelationship($relationshipId) {
         $query = "DELETE FROM person_relationship WHERE id = :id";
         $stmt = $this->db->prepare($query);

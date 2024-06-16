@@ -19,8 +19,13 @@
     .nav li {display:inline-block}
     .nav a {display: inline-block; padding: 4px;  color: #333; text-decoration: none; margin-right: 5px;}
     .nav a:hover {background-color: #f2f2f2;color: red;}
-    </style>
-
+    .relationship-table button {
+        display: inline-block
+    }
+    .relationship-table form {
+        display: inline-block;
+    }
+</style>
 <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
 <div class='nav'>
 <ul class='nav-ul'>

@@ -94,6 +94,11 @@ switch ($action) {
     case 'search_members':
         $treeController->searchMembers();
         break;
+    case 'swap_relationship':
+        //apachelog($_POST['relationship_id']);
+        $memberController->swapRelationshipAction();
+        // /apachelog("hello world");
+        break;
     case 'add_relationship':
         $memberId = $_POST['member_id'] ?? '';
         $personId2 = $_POST['member2_id'] ?? '';

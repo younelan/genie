@@ -148,16 +148,20 @@ function initializeRelationships(memberId) {
                     relationshipsHtml += '<td><a href="index.php?action=view_member&member_id=' + relationship.person2_id + '">' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '</a></td>';
                     relationshipsHtml += '<td>' + relationship.relationship_description + '</td>';
                     relationshipsHtml += '<td>';
-                    relationshipsHtml += '<form class="delete-relationship-form" method="post" style="display:inline;">';
+                    relationshipsHtml += '<form class="delete-relationship-form" method="post">';
                     relationshipsHtml += '<input type="hidden" name="relationship_id" value="' + relationship.id + '">';
                     relationshipsHtml += '<button type="submit">Delete</button>';
                     relationshipsHtml += '</form>';
                     relationshipsHtml += '<button type="button" class="edit-relationship-btn" data-relationship-id="' + relationship.id + '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">Edit</button>';
+                    relationshipsHtml += '<form class="swap-relationship-form" method="post">';
+                    relationshipsHtml += '<input type="hidden" id="swap_relationship_id" name="relationship_id" value="' + relationship.id + '">';
+                    relationshipsHtml += '<button type="button" class="swap-relationship-btn" data-relationship-id="' + relationship.id + '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">⇄</button>';
+                    //relationshipsHtml += '<button type="button" title="Swap Relationship" class="swap-relationship-btn">⇄</button>'
+                    relationshipsHtml += '</form>'
                     relationshipsHtml += '</td>';
                     relationshipsHtml += '</tr>';
                 });
                 $('#relationships-table-body').html(relationshipsHtml); // Update relationships table body
-
                 // Attach event listeners for edit and delete buttons
                 $('.edit-relationship-btn').click(function() {
                     var relationshipId = $(this).data('relationship-id');
@@ -172,7 +176,22 @@ function initializeRelationships(memberId) {
 
                     $('#edit-relationship-modal').show();
                 });
-
+                $('.swap-relationship-btn').click(function(e){
+                    //alert("hi")
+                    var relationshipId = $(this).data('relationship-id'); 
+                    $('#swap_relationship_id').val(relationshipId)
+                    //alert(relationshipId)
+                    e.preventDefault();
+                    //var formData = $(this).serialize();
+                    var formData = {'relationship_id':relationshipId}
+                    $.post('index.php?action=swap_relationship', formData, function(response) {
+                        if (response.success) {
+                            loadRelationships(memberId); // Reload relationships after deletion
+                        } else {
+                            alert('Failed to swap relationship.');
+                        }
+                    }, 'json');
+                })
                 $('.delete-relationship-form').submit(function(e) {
                     e.preventDefault();
                     if (confirm('Are you sure you want to delete this relationship?')) {

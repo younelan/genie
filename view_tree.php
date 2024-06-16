@@ -49,7 +49,6 @@
 <li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Edit Tree</a></li>
 <li><a href="index.php?action=list_trees">Tree List</a></li>
 </ul>
-<input type="text" id="search" placeholder="Search members by name...">
 
 </div>
     <a href="index.php?action=edit_tree&tree_id=<?php echo htmlspecialchars($_GET['family_tree_id']??$_GET['tree_id']); ?>">Back to Home</a>

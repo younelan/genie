@@ -186,6 +186,20 @@ class MemberController {
         // Return JSON response
         return json_encode($response);
     }
+    public function swapRelationshipAction() {
+        $relationshipId = $_POST['relationship_id']; // Or get it from the request in another way
+
+        try {
+            $result = $this->member->swapRelationship($relationshipId);
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Relationship not found']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
     public function deleteMember($memberId) {
         // Implement logic to delete a member from the database or data source
         // Example:
