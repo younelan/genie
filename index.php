@@ -99,7 +99,7 @@ switch ($action) {
         $personId2 = $_POST['member2_id'] ?? '';
         $relationshipTypeId = $_POST['relationship_type'] ?? '';
         $controller = new MemberController($db);
-        //apachelog($_POST);
+        apachelog($_POST);
         $controller->addRelationship($memberId, $personId2, $relationshipTypeId);
         break;
     case 'update_relationship':

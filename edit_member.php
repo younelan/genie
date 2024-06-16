@@ -64,23 +64,53 @@
         </table>
     </div>
 
-    <!-- Form to add new relationship -->
+
+    
     <h2>Add Relationship</h2>
     <form id="add-relationship-form">
         <input type="hidden" id="member_id" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
-        <input type="hidden" name="member2_id" value="<?php echo htmlspecialchars($member['id']); ?>">
         <input type="hidden" name="family_tree_id" value="<?php echo htmlspecialchars($member['family_tree_id']); ?>">
 
-        <label for="autocomplete_member">Person:</label>
-        <input type="text" id="autocomplete_member" name="autocomplete_member" autocomplete="off" required><br>
+        <!-- Radio buttons to choose between existing or new member -->
+        <label><input type="radio" name="member_type" value="existing" checked> Add Relationship with Existing Member</label><br>
+        <label><input type="radio" name="member_type" value="new"> Add Relationship with New Member</label><br><br>
 
-        <label for="relationship_type">Relationship Type:</label>
-        <select name="relationship_type" id="relationship_type">
-            <!-- Options will be dynamically filled via AJAX -->
-        </select><br>
+        <!-- Section for existing member selection -->
+        <div id="existing-member-section">
+            <label for="autocomplete_member">Select Existing Member:</label>
+            <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
+            <datalist id="autocomplete-options"></datalist><br>
+
+            <!-- Hidden fields for person IDs and relationship type -->
+            <input type="hidden" name="person_id1" id="person_id1" value="<?php echo htmlspecialchars($member['id']); ?>">
+            <input type="hidden" name="person_id2" id="person_id2" value="">
+            <input type="hidden" name="relationship_type" id="relationship_type" value="">
+
+            <label for="relationship_type_select">Relationship Type:</label>
+            <select name="relationship_type_select" id="relationship_type_select">
+                <!-- Options will be populated dynamically via AJAX -->
+            </select><br>
+        </div>
+
+        <!-- Section for new member form -->
+        <div id="new-member-section" style="display:none;">
+            <label for="new_first_name">First Name:</label>
+            <input type="text" id="new_first_name" name="new_first_name"><br>
+
+            <label for="new_last_name">Last Name:</label>
+            <input type="text" id="new_last_name" name="new_last_name"><br>
+
+            <label for="relationship_type_new">Relationship Type:</label>
+            <select name="relationship_type_new" id="relationship_type_new">
+                <!-- Options will be populated dynamically via AJAX -->
+            </select><br>
+        </div>
 
         <button type="button" id="add-relationship-btn">Add Relationship</button>
     </form>
+
+
+
 
     <!-- Form to edit relationship (hidden by default) -->
     <div id="edit-relationship-modal" style="display: none;">
@@ -105,6 +135,13 @@
             <button type="button" id="update-relationship-btn">Update Relationship</button>
         </form>
     </div>
+    <hr>
+    <h2>Delete Member</h2>
+    Warning, this can not be undone
+    <form method="post" class='delete-member-form' action="index.php?action=delete_member">
+                    <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+                    <button type="submit">Delete</button>
+    </form>
 
     <!-- External JavaScript file -->
     <script>
@@ -119,6 +156,15 @@
                 initializeRelationships(memberId);
             };
             document.head.appendChild(script);
+        });
+
+        $(document).ready(function() {
+            // Handle delete tree form submission with confirmation
+            $('.delete-member-form').submit(function(event) {
+                if (!confirm('Are you sure you want to delete this tree?')) {
+                    event.preventDefault();
+                }
+            });
         });
     </script>
 </body>

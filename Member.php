@@ -6,10 +6,18 @@ class Member {
         $this->db = $db;
     }
 
-    public function addMember($treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId) {
+    public function addMember($new_member) {
+        //$treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId
+        $treeId = $new_member['treeId']??null;
+        $firstName = $new_member['firstName']??null;
+        $lastName = $new_member['lastName']??null;
+        $dateOfBirth = $new_member['dateOfBirth']??null;
+        $placeOfBirth = $new_member['placeOfBirth']??null;
+        $genderId = $new_member['genderId']??null;
+
         $query = "INSERT INTO person (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([
+        $result = $stmt->execute([
             'family_tree_id' => $treeId,
             'first_name' => $firstName,
             'last_name' => $lastName,
@@ -17,6 +25,8 @@ class Member {
             'place_of_birth' => $placeOfBirth ? $placeOfBirth : null,
             'gender_id' => $genderId
         ]);
+        apachelog("Inserted member " . $this->db->lastInsertId());
+        return $this->db->lastInsertId();
     }
     // Fetch relationship types from the database
     public function getRelationshipTypes($tree_id=1) {

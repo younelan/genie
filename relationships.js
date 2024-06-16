@@ -1,33 +1,117 @@
+$(document).ready(function() {
+});
+
+
+
 function initializeRelationships(memberId) {
     $(function() {
-        // Autocomplete setup for person field
-        $("#autocomplete_member").autocomplete({
-            source: function(request, response) {
-                $.ajax({
-                    url: "index.php?action=autocomplete_member&tree_id="+treeId,
-                    dataType: "json",
-                    data: {
-                        term: request.term
-                    },
-                    success: function(data) {
-                        response($.map(data, function(item) {
-                            return {
-                                label: item.label,
-                                value: item.id
-                            };
-                        }));
-                    }
+        //new add relationship
+    // Show/hide sections based on radio button selection
+    $('input[name="member_type"]').change(function() {
+        if ($(this).val() === 'existing') {
+            $('#existing-member-section').show();
+            $('#new-member-section').hide();
+        } else {
+            $('#existing-member-section').hide();
+            $('#new-member-section').show();
+        }
+    });
+
+    // Autocomplete setup for selecting existing person
+    $('#autocomplete_member').on('input', function() {
+        var input = $(this).val();
+        $.ajax({
+            url: 'index.php?action=autocomplete_member&tree_id=' + treeId,
+            method: 'GET',
+            data: { term: input },
+            dataType: 'json',
+            success: function(data) {
+                $('#autocomplete-options').empty();  // Clear previous options
+                data.forEach(function(item) {
+                    $('#autocomplete-options').append(`<option value="${item.label}" data-person-id="${item.id}">`);
                 });
             },
-            minLength: 2,
-            select: function(event, ui) {
-                console.log(ui.item)
-                $('#autocomplete_member').val(ui.item.label); // Set selected member's name
-                $('#member_id').val(ui.item.value); // Store selected member's ID
-                return false;
+            error: function(xhr, status, error) {
+                console.error('Error fetching autocomplete data:', status, error);
             }
         });
+    });
 
+    // Handle selection from datalist options for existing member
+    $('#autocomplete_member').on('change', function() {
+        var selectedOption = $('datalist option[value="' + $(this).val() + '"]');
+        if (selectedOption.length > 0) {
+            $('#person_id2').val(selectedOption.data('person-id')); // Set person_id2
+        } else {
+            $('#person_id2').val(''); // Clear person_id2 if not selected from autocomplete
+        }
+    });
+
+    // Load relationship types for the select dropdown (existing member)
+    $.ajax({
+        url: "index.php?action=get_relationship_types",
+        dataType: "json",
+        success: function(data) {
+            var optionsHtml = '';
+            $.each(data, function(index, relationshipType) {
+                optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
+            });
+            $('#relationship_type_select').html(optionsHtml);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching relationship types:', status, error);
+        }
+    });
+
+    // Load relationship types for the select dropdown (new member)
+    $.ajax({
+        url: "index.php?action=get_relationship_types",
+        dataType: "json",
+        success: function(data) {
+            var optionsHtml = '';
+            $.each(data, function(index, relationshipType) {
+                optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
+            });
+            $('#relationship_type_new').html(optionsHtml);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching relationship types:', status, error);
+        }
+    });
+
+    // Handle click event for add relationship button
+    $('#add-relationship-btn').click(function() {
+        var formData = $('#add-relationship-form').serialize();
+
+        // Determine which relationship type to use based on member_type selection
+        var relationshipType = '';
+        if ($('input[name="member_type"]:checked').val() === 'existing') {
+            relationshipType = $('#relationship_type_select').val();
+        } else {
+            relationshipType = $('#relationship_type_new').val();
+            formData += '&new_first_name=' + $('#new_first_name').val(); // Include new member details
+            formData += '&new_last_name=' + $('#new_last_name').val();
+        }
+
+        formData += '&relationship_type=' + relationshipType;
+
+        // Example: AJAX submission (adjust URL and data as needed)
+        $.post('index.php?action=add_relationship', formData, function(response) {
+            if (response.success) {
+                loadRelationships(memberId); // Reload relationships after addition
+
+                // Handle success
+            } else {
+                // Handle failure
+            }
+        }, 'json');
+    });
+
+
+
+
+
+        //end new func
         // Load relationship types for the select dropdown
         $.ajax({
             url: "index.php?action=get_relationship_types",
@@ -42,17 +126,17 @@ function initializeRelationships(memberId) {
         });
 
         // Handle click event for add relationship button
-        $('#add-relationship-btn').click(function() {
-            var formData = $('#add-relationship-form').serialize();
-            $.post('index.php?action=add_relationship', formData, function(response) {
-                if (response.success) {
-                    $('#add-relationship-form')[0].reset(); // Clear form
-                    loadRelationships(memberId); // Reload relationships after addition
-                } else {
-                    alert('Failed to add relationship.');
-                }
-            }, 'json');
-        });
+        // $('#add-relationship-btn').click(function() {
+        //     var formData = $('#add-relationship-form').serialize();
+        //     $.post('index.php?action=add_relationship', formData, function(response) {
+        //         if (response.success) {
+        //             $('#add-relationship-form')[0].reset(); // Clear form
+        //             loadRelationships(memberId); // Reload relationships after addition
+        //         } else {
+        //             alert('Failed to add relationship.');
+        //         }
+        //     }, 'json');
+        // });
 
         // Function to load relationships dynamically using AJAX
         function loadRelationships(memberId) {

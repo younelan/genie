@@ -68,7 +68,17 @@ class MemberController {
             $dateOfBirth = $_POST['date_of_birth'];
             $placeOfBirth = $_POST['place_of_birth'];
             $genderId = $_POST['gender_id'];
-            $success = $this->member->addMember($treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId);
+            $new_member = [
+                'treeId' => $treeId,
+                'firstName' => $firstName,
+                'lastName' => $lastName,
+                'dateOfBirth' => $dateOfBirth,
+                'placeOfBirth' => $placeOfBirth,
+                'genderId' => $genderId,
+                'dateOfDeath' => null,
+            ];
+            //$treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId
+            $success = $this->member->addMember($new_member);
             if ($success) {
                 header("Location: index.php?action=list_members&tree_id=$treeId");
                 exit();
@@ -93,38 +103,65 @@ class MemberController {
         $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships
         echo json_encode($relationships); // Output relationships as JSON (for AJAX handling)
     }
-    // public function addRelationship($memberId) {
+    // public function addRelationship() {
+    //     // Fetch relationship types
+    //     $relationshipTypes = $this->member->getRelationshipTypes();
+    
     //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $personId2 = $_POST['person_id2'];
-    //         $relationshipTypeId = $_POST['relationship_type_id'];
-    //         $success = $this->member->addRelationship($memberId, $personId2, $relationshipTypeId);
+    //         $person1Id = $_POST['member_id']; // Assuming IDs are passed directly
+    //         $person2Id = $_POST['member2_id'];
+    //         $treeId = $_POST['family_tree_id'];
+    //         $relationshipType = $_POST['relationship_type'];
+    
+    //         $success = $this->member->addRelationship($person1Id, $person2Id, $relationshipType,$treeId);
     //         if ($success) {
     //             echo json_encode(['success' => true]);
     //         } else {
-    //             echo json_encode(['success' => false, 'error' => 'Failed to add relationship.']);
+    //             echo json_encode(['success' => false]);
     //         }
-    //         exit();
+    //     } else {
+    //         include 'add_relationship_form.php'; // Assuming you have a separate form file
     //     }
     // }
     public function addRelationship() {
-        // Fetch relationship types
-        $relationshipTypes = $this->member->getRelationshipTypes();
-    
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $person1Id = $_POST['member_id']; // Assuming IDs are passed directly
-            $person2Id = $_POST['member2_id'];
-            $treeId = $_POST['family_tree_id'];
-            $relationshipType = $_POST['relationship_type'];
-    
-            $success = $this->member->addRelationship($person1Id, $person2Id, $relationshipType,$treeId);
-            if ($success) {
-                echo json_encode(['success' => true]);
-            } else {
-                echo json_encode(['success' => false]);
-            }
+        $memberId = $_POST['member_id'] ?? null;
+        $familyTreeId = $_POST['family_tree_id'] ?? null;
+        $memberType = $_POST['member_type'] ?? 'existing';
+        if ($memberType === 'existing') {
+            $personId1 = $_POST['person_id1'];
+            $personId2 = $_POST['person_id2'];
+            $relationshipType = $_POST['relationship_type_select'];
         } else {
-            include 'add_relationship_form.php'; // Assuming you have a separate form file
+            $firstName = $_POST['new_first_name'];
+            $lastName = $_POST['new_last_name'];
+            $personId1 = $_POST['person_id1'];
+            $relationshipType = $_POST['relationship_type_new'];
+            $new_member = [
+                'treeId' => $familyTreeId,
+                'firstName' => $firstName,
+                'lastName' => $lastName,
+                'dateOfBirth' => null,
+                'placeOfBirth' => null,
+                'genderId' => null,
+                'dateOfDeath' => null,
+            ];
+            // Add new member
+            //$firstName, $lastName, $familyTreeId
+            $personId2 = $this->member->addMember($new_member);
         }
+        apachelog( "--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
+
+        if ($personId2) {
+             $success = $this->member->addRelationship($personId1, $personId2, $relationshipType,$familyTreeId);
+
+            //$this->member->addRelationship($personId1, $personId2, $relationshipType);
+            $response = ['success' => true, 'message' => 'Relationship added successfully.'];
+        } else {
+            $response = ['success' => false, 'message' => 'Failed to add relationship.'];
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
     public function updateRelationship($postData) {
         // Example: Assuming $_POST contains 'relationship_id', 'member_id', 'member2_id', 'family_tree_id', and 'relationship_type'
@@ -137,7 +174,6 @@ class MemberController {
         if (!$relationshipId || !$personId1 || !$relationshipType) {
             return json_encode(['success' => false, 'message' => 'Missing required parameters']);
         }
-        print_r($_POST);
 
         $this->member->updateMemberRelationship($relationshipId, $personId1, $relationshipType);
 
@@ -167,36 +203,5 @@ class MemberController {
         exit();
     }
 
-    public function oldgetRelationships($memberId) {
-        $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships from database
-
-        ob_start();
-        ?>
-        <table border="1">
-            <tr>
-                <th>Person 1</th>
-                <th>Person 2</th>
-                <th>Relationship Type</th>
-                <th>Actions</th>
-            </tr>
-            <?php foreach ($relationships as $relationship): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($relationship['person1_first_name'] . ' ' . $relationship['person1_last_name']); ?></td>
-                <td><?php echo htmlspecialchars($relationship['person2_first_name'] . ' ' . $relationship['person2_last_name']); ?></td>
-                <td><?php echo htmlspecialchars($relationship['relationship_description']); ?></td>
-                <td>
-                    <form class="delete-relationship-form" method="post" style="display:inline;">
-                        <input type="hidden" name="relationship_id" value="<?php echo $relationship['id']; ?>">
-                        <button type="submit">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </table>
-        <?php
-        $output = ob_get_clean();
-
-        echo $output;
-    }
 }
 ?>

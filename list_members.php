@@ -10,7 +10,11 @@
 </head>
 <body>
     <h1>Members of Family Tree</h1>
-
+<style>
+    .edit-member-form, .delete-member-form {
+        display: inline-block;
+    }
+    </style>
     <input type="text" id="search" placeholder="Search members by name...">
     <table id="members-list">
         <?php foreach ($members as $member): ?>
@@ -20,9 +24,15 @@
                     <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
                 </a>
         </td><td>
+                <form method="get" class='edit-member-form' action="index.php?action=edit_member&member_id="<?php echo $member['id']; ?>>
+                <input type='hidden' name='action' value='edit_member'>   
+                <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+                    <button type="submit">Edit</button>
+                </form>
                 <form method="post" class='delete-member-form' action="index.php?action=delete_member">
                     <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
                     <button type="submit">Delete</button>
+                </form>
         </td>
         </tr>
         <?php endforeach; ?>
