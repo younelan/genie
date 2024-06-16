@@ -7,12 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css"> 
 </head>
+<style>
+    li {list-style-type: none}
+    .tree-list {font-size: 1.5em;padding:20px;text-align: center;}
+</style>
 <body>
     <h1>List of Your Family Trees</h1>
-    <ul>
+    <ul class=tree-list>
         <?php foreach ($trees as $tree): ?>
             <li>
+                <a href=?action=edit_tree&tree_id=<?php echo htmlspecialchars($tree['id']); ?>>
                 <?php echo htmlspecialchars($tree['name']); ?>
+                </a>
+                <!--
                 <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
                 <input type="hidden" name="action" value="delete_tree">
                 <input type="hidden" name="tree_id" value="<?php echo $tree['id']; ?>">
@@ -23,11 +30,11 @@
                 <input type="hidden" name="tree_id" value="<?php echo $tree['id']; ?>">
                     <button type="submit">Edit</button>
                 </form>
-                <form action="?action=view_tree" method="get" style="display: inline;">
+                <form action="?action=view_tree&tree_id=<?php echo $tree['id']; ?>" method="get" style="display: inline;">
                 <input type="hidden" name="action" value="view_tree">
                 <input type="hidden" name="tree_id" value="<?php echo $tree['id']; ?>">
-                    <button type="submit">View<?php</button>
-                </form>
+                    <button type="submit">View</button>
+                </form> -->
 
             </li>
         <?php endforeach; ?>

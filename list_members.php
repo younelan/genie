@@ -9,13 +9,27 @@
 
 </head>
 <body>
-    <h1>Members of Family Tree</h1>
+    <h1>Family Members</h1>
 <style>
     .edit-member-form, .delete-member-form {
         display: inline-block;
     }
+    h1 { margin-bottom: 3px}
+    .neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
+    .nav ul {list-style-type: none; margin: 0; display:block; padding: 0; overflow: hidden; background-color: #c1d0d5;margin-bottom:5px}
+    .nav li {display:inline-block}
+    .nav a {display: inline-block; padding: 4px;  color: #333; text-decoration: none; margin-right: 5px;}
+    .nav a:hover {background-color: #f2f2f2;color: red;}
     </style>
-    <input type="text" id="search" placeholder="Search members by name...">
+<div class='nav'>
+<ul class='nav-ul'>
+<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>
+<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualize</a></li>
+<li><a href="index.php?action=list_trees">Tree List</a></li>
+</ul>
+<input type="text" id="search" placeholder="Search members by name...">
+
+</div>
     <table id="members-list">
         <?php foreach ($members as $member): ?>
             <tr>
@@ -53,7 +67,16 @@
             </ul>
         </nav>
     <?php endif; ?>
-    <script>
+    <?php if($treeId) : ?>
+    <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
+                <input type="hidden" name="action" value="delete_tree">
+                <input type="hidden" name="tree_id" value="<?php echo $treeId; ?>">
+                    <button type="submit">Delete</button>
+        </form>
+
+    <?php endif; ?>
+
+<script>
         $(document).ready(function() {
             // Handle delete tree form submission with confirmation
             $('.delete-member-form').submit(function(event) {
@@ -63,10 +86,6 @@
             });
         });
     </script>
-    <br>
-    <a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Add New Member</a>
-    <br>
-    <a href="index.php?action=list_trees">Back to List</a>
 
     <script>
         $(document).ready(function() {
@@ -92,6 +111,16 @@
                         });
                     }
                 });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Handle delete tree form submission with confirmation
+            $('.delete-tree-form').submit(function(event) {
+                if (!confirm('Are you sure you want to delete this tree?')) {
+                    event.preventDefault();
+                }
             });
         });
     </script>

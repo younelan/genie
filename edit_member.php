@@ -12,8 +12,28 @@
 </head>
 <body>
     <h1>Edit Member</h1>
-    <a href='?action=edit_tree&tree_id=<?php echo htmlspecialchars($member['family_tree_id']) ?>'>Back to tree</a>
-    <?php if (isset($error)): ?>
+<style>
+    h1 { margin-bottom: 3px}
+    .neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
+    .nav ul {list-style-type: none; margin: 0; display:block; padding: 0; overflow: hidden; background-color: #c1d0d5;margin-bottom:5px}
+    .nav li {display:inline-block}
+    .nav a {display: inline-block; padding: 4px;  color: #333; text-decoration: none; margin-right: 5px;}
+    .nav a:hover {background-color: #f2f2f2;color: red;}
+    </style>
+
+<?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
+<div class='nav'>
+<ul class='nav-ul'>
+<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>
+<li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Edit Tree</a></li>
+<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">View Tree</a></li>
+<li><a href="index.php?action=list_trees">Tree List</a></li>
+</ul>
+
+</div>
+
+
+<?php if (isset($error)): ?>
         <p style="color: red;"><?php echo $error; ?></p>
     <?php endif; ?>
 
