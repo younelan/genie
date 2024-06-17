@@ -25,7 +25,7 @@ class Member {
             'place_of_birth' => $placeOfBirth ? $placeOfBirth : null,
             'gender_id' => $genderId
         ]);
-        apachelog("Inserted member " . $this->db->lastInsertId());
+        //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
     }
     // Fetch relationship types from the database
@@ -92,7 +92,7 @@ class Member {
     public function getMemberRelationships($memberId) {
         $query = "SELECT pr.id, p1.first_name AS person1_first_name, p1.last_name AS person1_last_name, 
                          p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
-                         p1.id as person1_id, p2.id as person2_id,
+                         p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
                          rt.description AS relationship_description
                   FROM person_relationship pr
                   INNER JOIN person p1 ON pr.person_id1 = p1.id
@@ -104,18 +104,53 @@ class Member {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function updateMemberRelationship($relationshipId, $personId1, $relationshipTypeId) {
-        $query = "UPDATE person_relationship SET person_id1 = :person_id1, 
+    public function updateMemberRelationship($relationship) {
+        $relationshipId=$relationship['relationshipId']??null;
+        //$personId1= $relationship['relationsType'];
+        $relationshipTypeId = $relationship['relationshipTypeId']??null;
+        $relationStart = $relationship['relationStart']??null;
+        $relationEnd = $relationship['relationEnd'];
+        if(!$relationStart) $relationStart=null;
+        if(!$relationEnd) $relationEnd=null;
+        
+        $query = "UPDATE person_relationship 
+                  SET relation_start = :relation_start, 
+                  relation_end = :relation_end,
                   relationship_type_id = :relationship_type_id WHERE id = :id";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':person_id1', $personId1);
+        $stmt->bindParam(':relation_start', $relationStart);
+        $stmt->bindParam(':relation_end', $relationEnd);
         $stmt->bindParam(':relationship_type_id', $relationshipTypeId);
         $stmt->bindParam(':id', $relationshipId);
         return $stmt->execute();
     }
 
-    public function updateMember($memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId) {
-        $query = "UPDATE person SET first_name = :first_name, last_name = :last_name, date_of_birth = :date_of_birth,
+    public function updateMember($member) {
+        //$memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId
+        $memberId= $member['memberId']??"";
+        $firstName= $member['firstName']??"";
+        $middleName = $member['middleName']??"";
+        $lastName = $member ['lastName'];
+        $alias1 = $member['alias1'];
+        $alias2 = $member['alias2'];
+        $alias3 = $member['alias3'];
+        foreach($member as $key=>$value) {
+            if(!$value) {
+                $member[$key]=null;
+            }
+        }
+        $dateOfBirth = $member['dateOfBirth'];
+        $placeOfBirth= $member['placeOfBirth'];
+        $dateOfDeath = $member['dateOfDeath'];
+        $placeOfDeath= $member['placeOfDeath'];
+        $memberId = $member['memberId'];
+        $genderId = $member['genderId'];
+        $body = $member['body'];
+        $title= $member['title'];
+
+        $query = "UPDATE person SET first_name = :first_name, last_name = :last_name, 
+                    middle_name = :middle_name, date_of_birth = :date_of_birth,
+                  alias1 = :alias1, alias2 = :alias2, alias3 = :alias3, title = :title, body = :body,
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
                   gender_id = :gender_id WHERE id = :id";
         if(!$dateOfDeath) $dateOfDeath=null;
@@ -123,12 +158,18 @@ class Member {
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':first_name', $firstName);
         $stmt->bindParam(':last_name', $lastName);
+        $stmt->bindParam(':middle_name', $middleName);
         $stmt->bindParam(':date_of_birth', $dateOfBirth);
         $stmt->bindParam(':place_of_birth', $placeOfBirth);
         $stmt->bindParam(':date_of_death', $dateOfDeath);
         $stmt->bindParam(':place_of_death', $placeOfDeath);
         $stmt->bindParam(':gender_id', $genderId);
         $stmt->bindParam(':id', $memberId);
+        $stmt->bindParam(':alias1', $alias1);
+        $stmt->bindParam(':alias2', $alias2);
+        $stmt->bindParam(':alias3', $alias3);
+        $stmt->bindParam(':body', $body);
+        $stmt->bindParam(':title', $title);
         return $stmt->execute();
     }
 

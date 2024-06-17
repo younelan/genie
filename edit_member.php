@@ -6,12 +6,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css?Version=1"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
 <body>
     <h1>Edit Member</h1>
+
 <style>
     h1 { margin-bottom: 3px}
     .neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
@@ -48,6 +49,9 @@
         <label for="first_name">First Name:</label>
         <input type="text" name="first_name" id="first_name" value="<?php echo htmlspecialchars($member['first_name']); ?>" required><br>
 
+        <label for="middle_name">Middle Name:</label>
+        <input type="text" name="middle_name" id="middle_name" value="<?php echo htmlspecialchars($member['middle_name']); ?>" ><br>
+
         <label for="last_name">Last Name:</label>
         <input type="text" name="last_name" id="last_name" value="<?php echo htmlspecialchars($member['last_name']); ?>"><br>
 
@@ -57,20 +61,38 @@
         <label for="place_of_birth">Place of Birth:</label>
         <input type="text" name="place_of_birth" id="place_of_birth" value="<?php echo htmlspecialchars($member['place_of_birth']); ?>"><br>
 
-        <label for="date_of_death">Date of Death:</label>
-        <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
-
-        <label for="place_of_death">Place of Death:</label>
-        <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
 
         <label for="gender_id">Gender:</label>
         <select name="gender_id" id="gender_id">
             <option value="1" <?php if ($member['gender_id'] == 1) echo 'selected'; ?>>Male</option>
             <option value="2" <?php if ($member['gender_id'] == 2) echo 'selected'; ?>>Female</option>
             <!-- Add more options as needed -->
-        </select><br><br>
+        </select><br>
 
-        <button type="submit">Update Member</button>
+       
+
+        <div id="additional-fields" style="display: none;">
+        <label for="alias1">Title:</label>
+        <input type="text" name="title" id="alias1" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
+        <label for="alias1">Alias1:</label>
+        <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
+        <label for="alias2">Alias2:</label>
+        <input type="text" name="alias2" id="alias2" value="<?php echo htmlspecialchars($member['alias2']); ?>"><br>
+        <label for="alias3">Alias3:</label>
+        <input type="text" name="alias3" id="alias3" value="<?php echo htmlspecialchars($member['alias3']); ?>"><br>
+        <label for="body">Details</label>
+        <textarea id="body" name=body cols=50 rows=10><?php echo htmlspecialchars($member['body']); ?></textarea>
+        <br/>
+        <label for="date_of_death">Date of Death:</label>
+        <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
+
+        <label for="place_of_death">Place of Death:</label>
+        <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
+
+        </div>
+        <br/>
+
+        <button type="submit">Update Member</button> <button type="button" id="toggle-fields-btn">More</button>
     </form>
 
     <!-- Display Relationships -->
@@ -80,7 +102,9 @@
             <tr>
                 <th>Person 1</th>
                 <th>Person 2</th>
-                <th>Relationship Type</th>
+                <th>Type</th>
+                <th>Start</th>
+                <th>End</th>
                 <th>Actions</th>
             </tr>
             <tbody id="relationships-table-body">
@@ -151,7 +175,9 @@
             
             <label for="edit_relationship_person2">Person 2:</label>
             <input type="text" id="edit_relationship_person2" name="person2" readonly><br>
-            
+            <input type="date" id="edit_relation_start" name="relation_start"><br>
+            <input type="date" id="edit_relation_end" name="relation_end"><br>
+          
             <label for="edit_relationship_type">Relationship Type:</label>
             <select name="relationship_type" id="edit_relationship_type">
                 <!-- Options will be dynamically filled via AJAX -->
@@ -191,6 +217,17 @@
                 }
             });
         });
+
+        document.getElementById('toggle-fields-btn').addEventListener('click', function() {
+                var additionalFields = document.getElementById('additional-fields');
+                if (additionalFields.style.display === 'none') {
+                    additionalFields.style.display = 'block';
+                    this.textContent = 'Less Fields';
+                } else {
+                    additionalFields.style.display = 'none';
+                    this.textContent = 'More Fields';
+                }
+            });
     </script>
 </body>
 </html>

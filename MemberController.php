@@ -8,24 +8,34 @@ class MemberController {
         $this->member = new Member($db);
     }
 
-    public function oldEeditMember($memberId) {
-        $member = $this->member->getMemberById($memberId);
-        $relationships = $this->member->getRelationships($memberId);
-        $relationshipTypes = $this->member->getRelationshipTypes(); // Fetch relationship types
+    // public function oldEeditMember($memberId) {
+    //     $member = $this->member->getMemberById($memberId);
+    //     $relationships = $this->member->getRelationships($memberId);
+    //     $relationshipTypes = $this->member->getRelationshipTypes(); // Fetch relationship types
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Handle member update logic
-            $success = $this->member->updateMember($memberId, $_POST['first_name'], $_POST['last_name'], $_POST['date_of_birth'], $_POST['place_of_birth'], $_POST['date_of_death'], $_POST['place_of_death'], $_POST['gender_id']);
-            if ($success) {
-                header("Location: index.php?action=view_member&member_id=$memberId");
-                exit();
-            } else {
-                $error = "Failed to update member.";
-            }
-        }
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         // Handle member update logic
+    //         $updatedMember = [
+    //             'memberId' => $memberId, 
+    //             'firstName' => $_POST['first_name'], 
+    //             'lastName' => $_POST['last_name'], 
+    //             'dateOfBirth' => $_POST['date_of_birth'], 
+    //             'placeOfBirth' => $_POST['place_of_birth'], 
+    //             'dateOfDeath' => $_POST['date_of_death'], 
+    //             'placeOfDeath' => $_POST['place_of_death'], 
+    //             'genderId' => $_POST['gender_id']
+    //         ];
+    //         $success = $this->member->updateMember($updatedMember);
+    //         if ($success) {
+    //             header("Location: index.php?action=view_member&member_id=$memberId");
+    //             exit();
+    //         } else {
+    //             $error = "Failed to update member.";
+    //         }
+    //     }
 
-        include 'edit_member.php';
-    }
+    //     include 'edit_member.php';
+    // }
     public function getMemberById($memberId) {
         $member = $this->member->getMemberById($memberId);
         return $member;
@@ -39,18 +49,41 @@ class MemberController {
         // Fetch member relationships
         $relationships = $this->member->getMemberRelationships($memberId);
         $relationship_types = $this->member->getRelationshipTypes();
+
+        apachelog("++++++++++++++++" . $_SERVER['REQUEST_METHOD']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            apachelog("--------------");
+            $updatedMember = [
+                'memberId' => $memberId, 
+                'firstName' => $_POST['first_name'], 
+                'middleName' => $_POST['middle_name'], 
+                'lastName' => $_POST['last_name'], 
+                'dateOfBirth' => $_POST['date_of_birth'], 
+                'placeOfBirth' => $_POST['place_of_birth'], 
+                'dateOfDeath' => $_POST['date_of_death'], 
+                'placeOfDeath' => $_POST['place_of_death'], 
+                'genderId' => $_POST['gender_id'],
+                'alias1' => $_POST['alias1'], 
+                'alias2' => $_POST['alias2'], 
+                'alias3' => $_POST['alias3'], 
+                'body' => $_POST['body'], 
+                'title' => $_POST['title'], 
+            ];
+            apachelog("++++++++++++++++");
+            apachelog($updatedMember);
             // Handle member update logic
-            $success = $this->member->updateMember(
-                $memberId,
-                $_POST['first_name'],
-                $_POST['last_name'],
-                $_POST['date_of_birth'],
-                $_POST['place_of_birth'],
-                $_POST['date_of_death'],
-                $_POST['place_of_death'],
-                $_POST['gender_id']
-            );
+            $success = $this->member->updateMember($updatedMember);
+
+            // $success = $this->member->updateMember(
+            //     $memberId,
+            //     $_POST['first_name'],
+            //     $_POST['last_name'],
+            //     $_POST['date_of_birth'],
+            //     $_POST['place_of_birth'],
+            //     $_POST['date_of_death'],
+            //     $_POST['place_of_death'],
+            //     $_POST['gender_id']
+            // );
             if ($success) {
                 header("Location: index.php?action=edit_member&member_id=$memberId");
                 exit();
@@ -103,26 +136,6 @@ class MemberController {
         $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships
         echo json_encode($relationships); // Output relationships as JSON (for AJAX handling)
     }
-    // public function addRelationship() {
-    //     // Fetch relationship types
-    //     $relationshipTypes = $this->member->getRelationshipTypes();
-    
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $person1Id = $_POST['member_id']; // Assuming IDs are passed directly
-    //         $person2Id = $_POST['member2_id'];
-    //         $treeId = $_POST['family_tree_id'];
-    //         $relationshipType = $_POST['relationship_type'];
-    
-    //         $success = $this->member->addRelationship($person1Id, $person2Id, $relationshipType,$treeId);
-    //         if ($success) {
-    //             echo json_encode(['success' => true]);
-    //         } else {
-    //             echo json_encode(['success' => false]);
-    //         }
-    //     } else {
-    //         include 'add_relationship_form.php'; // Assuming you have a separate form file
-    //     }
-    // }
     public function addRelationship() {
         $memberId = $_POST['member_id'] ?? null;
         $familyTreeId = $_POST['family_tree_id'] ?? null;
@@ -169,13 +182,24 @@ class MemberController {
         $personId1 = isset($postData['member_id']) ? $postData['member_id'] : null;
         $personId2 = isset($postData['member2_id']) ? $postData['member2_id'] : null;
         $familyTreeId = isset($postData['family_tree_id']) ? $postData['family_tree_id'] : null;
+        $relationStart = isset($postData['relation_start']) ? $postData['relation_start'] : null;
+        $relationEnd = isset($postData['relation_start']) ? $postData['relation_end'] : null;
         $relationshipType = isset($postData['relationship_type']) ? $postData['relationship_type'] : null;
         apachelog ("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
         if (!$relationshipId || !$personId1 || !$relationshipType) {
             return json_encode(['success' => false, 'message' => 'Missing required parameters']);
         }
 
-        $this->member->updateMemberRelationship($relationshipId, $personId1, $relationshipType);
+        $relation = [
+            'relationshipId' => $relationshipId,
+            'personId1'=> $personId1,
+            'personId2'=> $personId2,
+            'relationStart'=>$relationStart,
+            'relationEnd'=>$relationEnd,
+            'relationshipTypeId'=>$relationshipType,
+        ];
+        //$relationshipId, $personId1, $relationshipType
+        $this->member->updateMemberRelationship($relation);
 
         // Example: Update relationship in database or storage
         // Example: Replace with actual implementation
