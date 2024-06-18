@@ -32,17 +32,6 @@
     <h1>Interactive Hierarchical Tree</h1>
     <?php $treeId = htmlspecialchars($_GET['family_tree_id']??$_GET['tree_id']) ?>
 
-    <style>
-    .edit-member-form, .delete-member-form {
-        display: inline-block;
-    }
-    h1 { margin-bottom: 3px}
-    .neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
-    .nav ul {list-style-type: none; margin: 0; display:block; padding: 0; overflow: hidden; background-color: #c1d0d5;margin-bottom:5px}
-    .nav li {display:inline-block}
-    .nav a {display: inline-block; padding: 4px;  color: #333; text-decoration: none; margin-right: 5px;}
-    .nav a:hover {background-color: #f2f2f2;color: red;}
-    </style>
 <div class='nav'>
 <ul class='nav-ul'>
 <li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>

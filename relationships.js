@@ -143,16 +143,25 @@ function initializeRelationships(memberId) {
             $.get('index.php?action=get_relationships&member_id=' + memberId, function(data) {
                 var relationshipsHtml = '';
                 $.each(data, function(index, relationship) {
+                    //console.log(relationship)
                     relationshipsHtml += '<tr>';
                     relationshipsHtml += '<td><a href="index.php?action=view_member&member_id=' + relationship.person1_id + '">' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '</a></td>';
                     relationshipsHtml += '<td><a href="index.php?action=view_member&member_id=' + relationship.person2_id + '">' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '</a></td>';
                     relationshipsHtml += '<td>' + relationship.relationship_description + '</td>';
+                    relationshipsHtml += '<td>' + formatBrowserDate(relationship.relation_start) + '</td>';
+                    relationshipsHtml += '<td>' + formatBrowserDate(relationship.relation_end) + '</td>';
+
                     relationshipsHtml += '<td>';
                     relationshipsHtml += '<form class="delete-relationship-form" method="post">';
                     relationshipsHtml += '<input type="hidden" name="relationship_id" value="' + relationship.id + '">';
                     relationshipsHtml += '<button type="submit">Delete</button>';
                     relationshipsHtml += '</form>';
-                    relationshipsHtml += '<button type="button" class="edit-relationship-btn" data-relationship-id="' + relationship.id + '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">Edit</button>';
+                    relationshipsHtml += '<button type="button" class="edit-relationship-btn" data-relationship-id="' + relationship.id + 
+                                         '" data-relation-start="' + relationship.relation_start + 
+                                         '" data-relation-end="' + relationship.relation_end + 
+                                         '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name +     
+                                         '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + 
+                                         '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">Edit</button>';
                     relationshipsHtml += '<form class="swap-relationship-form" method="post">';
                     relationshipsHtml += '<input type="hidden" id="swap_relationship_id" name="relationship_id" value="' + relationship.id + '">';
                     relationshipsHtml += '<button type="button" class="swap-relationship-btn" data-relationship-id="' + relationship.id + '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">⇄</button>';
@@ -168,11 +177,15 @@ function initializeRelationships(memberId) {
                     var person1 = $(this).data('person1');
                     var person2 = $(this).data('person2');
                     var relationshipType = $(this).data('relationship-type');
+                    var relationStart = formatRelationDate($(this).data('relation-start')); // Format the date here
+                    var relationEnd = formatRelationDate($(this).data('relation-end')); // Format the date here
 
                     $('#edit_relationship_id').val(relationshipId);
                     $('#edit_relationship_person1').val(person1);
                     $('#edit_relationship_person2').val(person2);
                     $('#edit_relationship_type').val(relationshipType);
+                    $('#edit_relation_start').val(relationStart); // Set the formatted date here
+                    $('#edit_relation_end').val(relationEnd); // Set the formatted date here
 
                     $('#edit-relationship-modal').show();
                 });
@@ -213,6 +226,7 @@ function initializeRelationships(memberId) {
 
         // Handle click event for update relationship button
         $('#update-relationship-btn').click(function() {
+            
             var formData = $('#edit-relationship-form').serialize();
             $.post('index.php?action=update_relationship', formData, function(response) {
                 if (response.success) {
@@ -223,7 +237,34 @@ function initializeRelationships(memberId) {
                 }
             }, 'json');
         });
-
+        function formatRelationDate(relationStart) {
+            if (relationStart && relationStart !== '-') {
+                // Parse the date
+                var date = new Date(relationStart);
+                if (!isNaN(date.getTime())) {
+                    // Format the date (YYYY-MM-DD)
+                    var year = date.getFullYear();
+                    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                    var day = ('0' + date.getDate()).slice(-2);
+                    return year + '-' + month + '-' + day;
+                }
+            }
+            // Return an empty string if relation_start is invalid or a minus sign
+            return '';
+        }
+        function formatBrowserDate(relationStart) {
+            if (relationStart && relationStart !== '-') {
+                var date = new Date(relationStart);
+                if (!isNaN(date.getTime())) {
+                    // Format the date to a readable format (e.g., "MMMM D, YYYY")
+                    var options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString(undefined, options);
+                }
+            }
+            // Return an empty string if relation_start is invalid or a minus sign
+            return '';
+        }
+                
         // Initial load of relationships
         loadRelationships(memberId);
     });

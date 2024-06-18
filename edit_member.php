@@ -13,20 +13,6 @@
 <body>
     <h1>Edit Member</h1>
 
-<style>
-    h1 { margin-bottom: 3px}
-    .neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
-    .nav ul {list-style-type: none; margin: 0; display:block; padding: 0; overflow: hidden; background-color: #c1d0d5;margin-bottom:5px}
-    .nav li {display:inline-block}
-    .nav a {display: inline-block; padding: 4px;  color: #333; text-decoration: none; margin-right: 5px;}
-    .nav a:hover {background-color: #f2f2f2;color: red;}
-    .relationship-table button {
-        display: inline-block
-    }
-    .relationship-table form {
-        display: inline-block;
-    }
-</style>
 <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
 <div class='nav'>
 <ul class='nav-ul'>
