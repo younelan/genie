@@ -5,7 +5,7 @@
     <title>List Family Trees</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="res/style.css"> 
 </head>
 <style>
     li {list-style-type: none}

@@ -1,13 +1,14 @@
 <?php
-require_once 'Tree.php';
+// require_once 'Tree.php';
 
 class TreeController {
     private $tree;
     private $userId;
-
+    private $templatedir=".";
     public function __construct($db, $userId) {
-        $this->tree = new Tree($db);
+        $this->tree = new TreeModel($db);
         $this->userId = $userId;
+        $this->basedir = dirname(__DIR__);
     }
     public function getRelationshipTypes() {
         $relationshipTypes = $this->memberModel->getRelationshipTypes();
@@ -17,7 +18,7 @@ class TreeController {
     
     public function listTrees() {
         $trees = $this->tree->getAllTreesByOwner($this->userId);
-        include 'list_trees.php';
+        include $this->basedir . "/templates/list_trees.php";
     }
     public function searchMembers() {
         $treeId = $_GET['tree_id'];
@@ -37,11 +38,11 @@ class TreeController {
                 $error = "Failed to add tree.";
             }
         }
-        include 'add_tree.php';
+        include $this->basedir . "/templates/add_tree.php";
     }
     public function viewTree() {
         $familyTreeId = $_GET['tree_id']??$_GET['family_tree_id']; // Get family_tree_id from the request
-        include 'view_tree.php';
+        include $this->basedir . "/templates/view_tree.php";
     }
 
     public function getTreeData() {
@@ -70,7 +71,7 @@ class TreeController {
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
         $totalMembers = $this->tree->countMembersByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
-        include 'list_members.php';
+        include $this->basedir . "/templates/list_members.php";
     }
 }
 ?>

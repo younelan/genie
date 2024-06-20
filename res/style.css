@@ -21,7 +21,7 @@ input,select {
 #search {
     padding: 10px;
     padding-left: 40px;
-    padding-riht: 40px;
+    padding-right: 40px;
 }
 ::placeholder {
     color: rgb(155, 8, 39);

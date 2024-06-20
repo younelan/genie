@@ -1,5 +1,5 @@
 <?php
-class Tree {
+class TreeModel {
     private $db;
 
     public function __construct($db) {

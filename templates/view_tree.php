@@ -6,7 +6,7 @@
     <title>View Tree</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="res/style.css"> 
 
     <style>
         .node circle {
@@ -45,6 +45,6 @@
     <script>
         const familyTreeId = <?php echo htmlspecialchars($_GET['family_tree_id']??$_GET['tree_id']); ?>;
     </script>
-    <script src="tree.js"></script>
+    <script src="res/tree.js"></script>
 </body>
 </html>

@@ -1,19 +1,21 @@
 <?php
 session_start();
 
+$basedir = __DIR__;
 
-require_once 'db.php';
-require_once 'User.php';
-require_once 'TreeController.php';
-require_once 'MemberController.php';
+require_once "$basedir/config/db.php";
+require_once "$basedir/models/UserModel.php";
+require_once "$basedir/models/TreeModel.php";
+require_once "$basedir/models/MemberModel.php";
+require_once "$basedir/controllers/TreeController.php";
+require_once "$basedir/controllers/MemberController.php";
+
 function apachelog($foo) {
     file_put_contents('php://stderr', print_r($foo, TRUE)) ;
 }
 $action = $_GET['action'] ?? $_POST['action']??'';
-// print_r($_POST);
-// print_r($_GET);
-// exit;
-$user = new User($db);
+
+$user = new UserModel($db);
 $userId = $user->getCurrentUserId();
 
 if (!$userId) {
@@ -77,9 +79,7 @@ switch ($action) {
                 header("Location: index.php?action=list_members&tree_id=$treeId");
             } else {
                 header("Location: index.php?action=list_trees");
-
             }
-    
         }
         $treeController->listMembers($treeId??1);
         // Redirect or display appropriate message after deletion
@@ -126,4 +126,3 @@ switch ($action) {
         header("Location: index.php?action=list_trees");
         exit();
 }
-?>

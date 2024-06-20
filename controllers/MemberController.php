@@ -1,41 +1,13 @@
 <?php
-require_once 'Member.php';
+// require_once 'Member.php';
 
 class MemberController {
     private $member;
 
     public function __construct($db) {
-        $this->member = new Member($db);
+        $this->member = new MemberModel($db);
+        $this->basedir = dirname(__DIR__);
     }
-
-    // public function oldEeditMember($memberId) {
-    //     $member = $this->member->getMemberById($memberId);
-    //     $relationships = $this->member->getRelationships($memberId);
-    //     $relationshipTypes = $this->member->getRelationshipTypes(); // Fetch relationship types
-
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         // Handle member update logic
-    //         $updatedMember = [
-    //             'memberId' => $memberId, 
-    //             'firstName' => $_POST['first_name'], 
-    //             'lastName' => $_POST['last_name'], 
-    //             'dateOfBirth' => $_POST['date_of_birth'], 
-    //             'placeOfBirth' => $_POST['place_of_birth'], 
-    //             'dateOfDeath' => $_POST['date_of_death'], 
-    //             'placeOfDeath' => $_POST['place_of_death'], 
-    //             'genderId' => $_POST['gender_id']
-    //         ];
-    //         $success = $this->member->updateMember($updatedMember);
-    //         if ($success) {
-    //             header("Location: index.php?action=view_member&member_id=$memberId");
-    //             exit();
-    //         } else {
-    //             $error = "Failed to update member.";
-    //         }
-    //     }
-
-    //     include 'edit_member.php';
-    // }
     public function getMemberById($memberId) {
         $member = $this->member->getMemberById($memberId);
         return $member;
@@ -92,7 +64,7 @@ class MemberController {
             }
         }
 
-        include 'edit_member.php';
+        include $this->basedir . "/templates/edit_member.php";
     }
     public function addMember($treeId) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -119,7 +91,7 @@ class MemberController {
                 $error = "Failed to add member.";
             }
         }
-        include 'add_member.php';
+        include $this->basedir . "/templates/add_member.php";
     }
     public function getRelationshipTypes($treeId) {
         $results = $this->member->getRelationshipTypes( $treeId);

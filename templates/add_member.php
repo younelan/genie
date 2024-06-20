@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>Add New Member</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-
+    <link rel="stylesheet" href="res/style.css"> 
+<style>
+  .error {color: red}
+</style>
 </head>
 <body>
     <h1>Add New Member</h1>
     <?php if (isset($error)): ?>
-        <p style="color: red;"><?php echo $error; ?></p>
+        <p class='error'><?php echo $error; ?></p>
     <?php endif; ?>
     <form method="post" action="">
         <label for="first_name">First Name:</label>

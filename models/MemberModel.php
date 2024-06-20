@@ -1,5 +1,5 @@
 <?php
-class Member {
+class MemberModel {
     private $db;
 
     public function __construct($db) {
