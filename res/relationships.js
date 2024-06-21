@@ -81,7 +81,6 @@ function initializeRelationships(memberId) {
 
     // Handle click event for add relationship button
     $('#add-relationship-btn').click(function() {
-        alert("hi")
         var formData = $('#add-relationship-form').serialize();
 
         // Determine which relationship type to use based on member_type selection
