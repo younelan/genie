@@ -1,0 +1,26 @@
+{
+    "name": "opensitez/genie",
+    "description": "Opensitez Genealogy",
+    "type": "project",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/younelan/Simplicity"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+        }
+    },
+    "authors": [
+        {
+            "name": "Youness El Andaloussi",
+            "email": "youness@elandaloussi.net"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "opensitez/simplicity": "dev-master"
+    }
+}
