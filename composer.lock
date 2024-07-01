@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/younelan/Simplicity.git",
-                "reference": "6749254f65709090d1c4ef7618e7ff4b810facb8"
+                "reference": "df2d345d471118775389b6bf831d414a2606bb4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/younelan/Simplicity/zipball/6749254f65709090d1c4ef7618e7ff4b810facb8",
-                "reference": "6749254f65709090d1c4ef7618e7ff4b810facb8",
+                "url": "https://api.github.com/repos/younelan/Simplicity/zipball/df2d345d471118775389b6bf831d414a2606bb4b",
+                "reference": "df2d345d471118775389b6bf831d414a2606bb4b",
                 "shasum": ""
             },
             "default-branch": true,
@@ -41,7 +41,7 @@
                 "source": "https://github.com/younelan/Simplicity/tree/master",
                 "issues": "https://github.com/younelan/Simplicity/issues"
             },
-            "time": "2024-06-27T08:15:18+00:00"
+            "time": "2024-06-30T09:07:27+00:00"
         }
     ],
     "packages-dev": [],
