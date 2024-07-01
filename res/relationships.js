@@ -154,14 +154,14 @@ function initializeRelationships(memberId) {
                     relationshipsHtml += '<td>';
                     relationshipsHtml += '<form class="delete-relationship-form" method="post">';
                     relationshipsHtml += '<input type="hidden" name="relationship_id" value="' + relationship.id + '">';
-                    relationshipsHtml += '<button type="submit">Delete</button>';
+                    relationshipsHtml += '<button type="submit">🗑️ Effacer</button>';
                     relationshipsHtml += '</form>';
                     relationshipsHtml += '<button type="button" class="edit-relationship-btn" data-relationship-id="' + relationship.id + 
                                          '" data-relation-start="' + relationship.relation_start + 
                                          '" data-relation-end="' + relationship.relation_end + 
                                          '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name +     
                                          '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + 
-                                         '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">Edit</button>';
+                                         '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">✏️ Edit</button>';
                     relationshipsHtml += '<form class="swap-relationship-form" method="post">';
                     relationshipsHtml += '<input type="hidden" id="swap_relationship_id" name="relationship_id" value="' + relationship.id + '">';
                     relationshipsHtml += '<button type="button" class="swap-relationship-btn" data-relationship-id="' + relationship.id + '" data-person1="' + relationship.person1_first_name + ' ' + relationship.person1_last_name + '" data-person2="' + relationship.person2_first_name + ' ' + relationship.person2_last_name + '" data-relationship-type="' + relationship.relationship_type + '">⇄</button>';

@@ -1,4 +1,18 @@
 <?php
+function getGenderSymbol($gender) {
+    switch ($gender) {
+        case 'M':
+        case 1:
+            return '♂️'; // Male sign
+        case 'F':
+        case 2:
+            return '♀️'; // Female sign
+        case 'U':
+            return '⚲'; // Neuter (unspecified) sign
+        default:
+            return '⁉️'; // Unknown or fallback symbol
+    }
+}
 class TreeModel {
     private $db;
     private $tree_table = 'family_tree';

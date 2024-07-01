@@ -9,15 +9,15 @@
 
 </head>
 <body>
-    <h1>Edit Member</h1>
+    <h1>Modifier Membre</h1>
 
 <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
 <div class='nav'>
 <ul class='nav-ul'>
-<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>
-<li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Edit Tree</a></li>
-<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">View Tree</a></li>
-<li><a href="index.php?action=list_trees">Tree List</a></li>
+<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
+<li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Modifie Arbre</a></li>
+<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Voir Arbre</a></li>
+<li><a href="index.php?action=list_trees">Arbres</a></li>
 </ul>
 
 </div>
@@ -175,7 +175,7 @@
     Warning, this can not be undone
     <form method="post" class='delete-member-form' action="index.php?action=delete_member">
                     <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                    <button type="submit">Delete</button>
+                    <button type="submit">🗑️ Delete</button>
     </form>
 
     <!-- External JavaScript file -->

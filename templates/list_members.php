@@ -43,17 +43,18 @@
             <tr>
                 <td>
                 <a href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
+                <?php echo getGenderSymbol($member['gender_id']) ?>
                     <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
                 </a>
         </td><td>
                 <form method="get" class='edit-member-form' action="index.php?action=edit_member&member_id="<?php echo $member['id']; ?>>
                 <input type='hidden' name='action' value='edit_member'>   
                 <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                    <button type="submit">Edit</button>
+                    <button type="submit">✏️ Edit</button>
                 </form>
                 <form method="post" class='delete-member-form' action="index.php?action=delete_member">
                     <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                    <button type="submit">Delete</button>
+                    <button type="submit">🗑️ Delete</button>
                 </form>
         </td>
         </tr>
@@ -79,7 +80,7 @@
     <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
                 <input type="hidden" name="action" value="delete_tree">
                 <input type="hidden" name="tree_id" value="<?php echo $treeId; ?>">
-                    <button type="submit">Delete</button>
+                    <button type="submit">🗑️ Delete</button>
         </form>
 
     <?php endif; ?>
