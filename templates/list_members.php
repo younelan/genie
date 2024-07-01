@@ -16,6 +16,7 @@
 <li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualize</a></li>
 <li><a href="index.php?action=list_trees">Tree List</a></li>
 </ul>
+<div class='treecount'>Members: <?php echo $totalMembers ?> Relationships: <?php echo $totalRelationships ?></div>
 <input type="text" id="search" placeholder="Search members by name...">
 
 </div>

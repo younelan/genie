@@ -3,6 +3,8 @@ class TreeModel {
     private $db;
     private $tree_table = 'family_tree';
     private $person_table = 'person';
+    private $relation_table = 'person_relationship';
+
     public function __construct($db) {
         $this->db = $db;
     }
@@ -82,4 +84,17 @@ class TreeModel {
         $stmt->execute(['tree_id' => $treeId]);
         return $stmt->fetchColumn();
     }
+    // public function getPersonCount($treeId) {
+    //     $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
+    //     $result = $con->prepare($sql); 
+    //     $result->execute([$treeId]); 
+    //     return $result->fetchColumn();           
+    // }
+    public function countRelationshipsByTreeId($treeId) {
+        $sql = "SELECT count(*) FROM `$this->relation_table` WHERE family_tree_id = ?"; 
+        $result = $this->db->prepare($sql); 
+        $result->execute([$treeId]); 
+        return $result->fetchColumn();           
+    }
+
 }

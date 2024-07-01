@@ -32,18 +32,7 @@ class MemberModel {
         //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
     }
-    public function getPersonCount($treeId) {
-        $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
-        $result = $con->prepare($sql); 
-        $result->execute([$treeId]); 
-        return $result->fetchColumn();           
-    }
-    public function getRelationsCount($treeId) {
-        $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
-        $result = $con->prepare($sql); 
-        $result->execute([$treeId]); 
-        return $result->fetchColumn();           
-    }
+
     // Fetch relationship types from the database
     public function getRelationshipTypes($tree_id=1) {
         $query = "SELECT id, description FROM $this->relation_type_table ";

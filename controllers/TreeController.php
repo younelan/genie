@@ -5,6 +5,7 @@ class TreeController {
     private $tree;
     private $userId;
     private $templatedir=".";
+    private $translations = [];
     public function __construct($db, $userId) {
         $this->tree = new TreeModel($db);
         $this->userId = $userId;
@@ -70,6 +71,7 @@ class TreeController {
         $offset = ($page - 1) * $limit;
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
         $totalMembers = $this->tree->countMembersByTreeId($treeId);
+        $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
         include $this->basedir . "/templates/list_members.php";
     }
