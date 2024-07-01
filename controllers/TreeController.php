@@ -70,7 +70,8 @@ class TreeController {
         $limit = 70; // Number of members per page
         $offset = ($page - 1) * $limit;
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
-        $totalMembers = $this->tree->countMembersByTreeId($treeId);
+        $totalMembers = $this->tree->getPersonCount($treeId);
+        $countByGender = $this->tree->countMembersByTreeId($treeId);
         $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
         include $this->basedir . "/templates/list_members.php";

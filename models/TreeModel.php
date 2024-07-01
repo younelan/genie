@@ -15,7 +15,7 @@ class TreeModel {
         $stmt->execute(['owner_id' => $ownerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     public function addTree($ownerId, $name, $description) {
         $query = "INSERT INTO $this->tree_table  (owner_id, name, description) VALUES (:owner_id, :name, :description)";
         $stmt = $this->db->prepare($query);
@@ -80,16 +80,37 @@ class TreeModel {
     }
     public function countMembersByTreeId($treeId) {
         $query = "SELECT COUNT(*) FROM $this->person_table  WHERE family_tree_id = :tree_id";
+        $query = "SELECT gender_id, count(*) as total FROM `person` 
+        WHERE family_tree_id = :tree_id
+        GROUP BY gender_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tree_id' => $treeId]);
-        return $stmt->fetchColumn();
+        $vals=[];
+        $counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach($counts as $idx=>$row) {
+            switch($row['gender_id']) {
+                case 1:
+                    $vals['H'] = $row['total'];
+                    break;
+                case 2:
+                    $vals['F']= $row['total'];
+                    break;
+                case null:
+                default:
+                    $vals['?']= $row['total'];
+            }
+        }
+        //print_r($vals);exit;
+        return $vals;
+        //return $stmt->fetchColumn();
     }
-    // public function getPersonCount($treeId) {
-    //     $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
-    //     $result = $con->prepare($sql); 
-    //     $result->execute([$treeId]); 
-    //     return $result->fetchColumn();           
-    // }
+
+    public function getPersonCount($treeId) {
+        $sql = "SELECT count(*) FROM `$this->person_table` WHERE family_tree_id = ?"; 
+        $result = $this->db->prepare($sql); 
+        $result->execute([$treeId]); 
+        return $result->fetchColumn();           
+    }
     public function countRelationshipsByTreeId($treeId) {
         $sql = "SELECT count(*) FROM `$this->relation_table` WHERE family_tree_id = ?"; 
         $result = $this->db->prepare($sql); 

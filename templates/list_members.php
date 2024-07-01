@@ -2,24 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>List Family Tree Members</title>
+    <title>Membres Famille</title>
     <script src="res/jquery-3.6.0.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="res/style.css"> 
 
 </head>
 <body>
-    <h1>Family Members</h1>
+    <h1>Membres Famille</h1>
 <div class='nav'>
 <ul class='nav-ul'>
-<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>
-<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualize</a></li>
-<li><a href="index.php?action=list_trees">Tree List</a></li>
+<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
+<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualiser</a></li>
+<li><a href="index.php?action=list_trees">Arbres</a></li>
 </ul>
-<div class='treecount'>Members: <?php echo $totalMembers ?> Relationships: <?php echo $totalRelationships ?></div>
-<input type="text" id="search" placeholder="Search members by name...">
+<?php if ($totalPages > 1): ?>
+        <style>
+            .pagination li {
+                display: inline-block;
+            }
+        </style>
+        <nav>
+            <ul class='pagination'>
+                Pages <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                </li>
+                <?php endfor; ?>
+            </ul>
+        </nav>
+    <?php endif; ?>
+<div class='treecount'>Stats: <?php //echo $totalMembers ?> 
+(<?php foreach($countByGender as $idx=>$val) echo "$idx: $val "; ?> ) 
+<div>Relations: <?php echo $totalRelationships ?><div></div>
+<input type="text" id="search" placeholder="Chercher par nom...">
 
 </div>
+
     <table id="members-list">
         <?php foreach ($members as $member): ?>
             <tr>
