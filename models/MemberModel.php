@@ -1,6 +1,10 @@
 <?php
 class MemberModel {
     private $db;
+    private $person_table = 'person';
+    private $relation_table = 'person_relationship';
+    private $relation_type_table = 'relationship_type';
+    private $tree_table = 'family_tree';
 
     public function __construct($db) {
         $this->db = $db;
@@ -15,7 +19,7 @@ class MemberModel {
         $placeOfBirth = $new_member['placeOfBirth']??null;
         $genderId = $new_member['genderId']??null;
 
-        $query = "INSERT INTO person (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
+        $query = "INSERT INTO $this->person_table  (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([
             'family_tree_id' => $treeId,
@@ -28,23 +32,35 @@ class MemberModel {
         //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
     }
+    public function getPersonCount($treeId) {
+        $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
+        $result = $con->prepare($sql); 
+        $result->execute([$treeId]); 
+        return $result->fetchColumn();           
+    }
+    public function getRelationsCount($treeId) {
+        $sql = "SELECT count(*) FROM `$this->person_table` WHERE tree_id = ?"; 
+        $result = $con->prepare($sql); 
+        $result->execute([$treeId]); 
+        return $result->fetchColumn();           
+    }
     // Fetch relationship types from the database
     public function getRelationshipTypes($tree_id=1) {
-        $query = "SELECT id, description FROM relationship_type";
+        $query = "SELECT id, description FROM $this->relation_type_table ";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getMemberById($memberId) {
-        $query = "SELECT * FROM person WHERE id = :member_id";
+        $query = "SELECT * FROM $this->person_table  WHERE id = :member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     public function autocompleteMember($term, $memberId, $tree_id=1) {
-        $query = "SELECT id, first_name, last_name FROM person WHERE 
+        $query = "SELECT id, first_name, last_name FROM $this->person_table  WHERE 
         (first_name LIKE :term1 OR last_name like :term2) and id != :member_id";
         $query2 = str_replace(":tree_id", $tree_id, $query);
         $query2 = str_replace(":term1", '%' . $term . '%', $query2);
@@ -85,7 +101,7 @@ class MemberModel {
     // }
 
     public function deleteMember($memberId) {
-        $query = "DELETE FROM person WHERE id = :id";
+        $query = "DELETE FROM $this->person_table  WHERE id = :id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $memberId]);
     }
@@ -94,10 +110,10 @@ class MemberModel {
                          p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
                          p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
                          rt.description AS relationship_description
-                  FROM person_relationship pr
+                  FROM $this->relation_table  pr
                   INNER JOIN person p1 ON pr.person_id1 = p1.id
                   INNER JOIN person p2 ON pr.person_id2 = p2.id
-                  INNER JOIN relationship_type rt ON pr.relationship_type_id = rt.id
+                  INNER JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
                   WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':memberId', $memberId);
@@ -113,7 +129,7 @@ class MemberModel {
         if(!$relationStart) $relationStart=null;
         if(!$relationEnd) $relationEnd=null;
         
-        $query = "UPDATE person_relationship 
+        $query = "UPDATE $this->relation_table  
                   SET relation_start = :relation_start, 
                   relation_end = :relation_end,
                   relationship_type_id = :relationship_type_id WHERE id = :id";
@@ -148,7 +164,7 @@ class MemberModel {
         $body = $member['body'];
         $title= $member['title'];
 
-        $query = "UPDATE person SET first_name = :first_name, last_name = :last_name, 
+        $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
                     middle_name = :middle_name, date_of_birth = :date_of_birth,
                   alias1 = :alias1, alias2 = :alias2, alias3 = :alias3, title = :title, body = :body,
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
@@ -176,10 +192,10 @@ class MemberModel {
     public function getRelationships($memberId) {
         $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
                          p1.id as person1_id, p2.id as person2_id
-                  FROM person_relationship pr
-                  JOIN person p1 ON pr.person_id1 = p1.id
-                  JOIN person p2 ON pr.person_id2 = p2.id
-                  JOIN relationship_type rt ON pr.relationship_type_id = rt.id
+                  FROM $this->relation_table  pr
+                  JOIN $this->person_table  p1 ON pr.person_id1 = p1.id
+                  JOIN $this->person_table  p2 ON pr.person_id2 = p2.id
+                  JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
                   WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['memberId' => $memberId]);
@@ -187,7 +203,7 @@ class MemberModel {
     }
 
     public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId) {
-        $query = "INSERT INTO person_relationship (person_id1, person_id2, relationship_type_id,family_tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:family_tree_id)";
+        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,family_tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:family_tree_id)";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'person_id1' => $personId1,
@@ -202,7 +218,7 @@ class MemberModel {
 
         try {
             // Fetch the current relationship
-            $sql = "SELECT person_id1, person_id2 FROM person_relationship WHERE id = :relationship_id";
+            $sql = "SELECT person_id1, person_id2 FROM $this->relation_table  WHERE id = :relationship_id";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':relationship_id', $relationshipId, PDO::PARAM_INT);
             $stmt->execute();
@@ -214,7 +230,7 @@ class MemberModel {
                 $personId2 = $relationship['person_id2'];
 
                 // Update the relationship with swapped IDs
-                $updateSql = "UPDATE person_relationship SET person_id1 = :person_id2, person_id2 = :person_id1 WHERE id = :relationship_id";
+                $updateSql = "UPDATE $this->relation_table  SET person_id1 = :person_id2, person_id2 = :person_id1 WHERE id = :relationship_id";
                 $updateStmt = $this->db->prepare($updateSql);
                 $updateStmt->bindParam(':person_id1', $personId1, PDO::PARAM_INT);
                 $updateStmt->bindParam(':person_id2', $personId2, PDO::PARAM_INT);
@@ -237,7 +253,7 @@ class MemberModel {
         }
     }   
     public function deleteRelationship($relationshipId) {
-        $query = "DELETE FROM person_relationship WHERE id = :id";
+        $query = "DELETE FROM $this->relation_table  WHERE id = :id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $relationshipId]);
     }

@@ -1,39 +1,40 @@
 <?php
 class TreeModel {
     private $db;
-
+    private $tree_table = 'family_tree';
+    private $person_table = 'person';
     public function __construct($db) {
         $this->db = $db;
     }
 
     public function getAllTreesByOwner($ownerId) {
-        $query = "SELECT * FROM family_tree WHERE owner_id = :owner_id";
+        $query = "SELECT * FROM $this->tree_table WHERE owner_id = :owner_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['owner_id' => $ownerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function addTree($ownerId, $name, $description) {
-        $query = "INSERT INTO family_tree (owner_id, name, description) VALUES (:owner_id, :name, :description)";
+        $query = "INSERT INTO $this->tree_table  (owner_id, name, description) VALUES (:owner_id, :name, :description)";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['owner_id' => $ownerId, 'name' => $name, 'description' => $description]);
     }
     public function searchMembers($treeId, $query) {
         $query = "%$query%";
-        $sql = "SELECT * FROM person WHERE family_tree_id = :tree_id AND (first_name LIKE :query OR last_name LIKE :query)";
+        $sql = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id AND (first_name LIKE :query OR last_name LIKE :query)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['tree_id' => $treeId, 'query' => $query]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function deleteTree($treeId, $ownerId) {
-        $query = "DELETE FROM family_tree WHERE id = :tree_id AND owner_id = :owner_id";
+        $query = "DELETE FROM $this->tree_table  WHERE id = :tree_id AND owner_id = :owner_id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['tree_id' => $treeId, 'owner_id' => $ownerId]);
     }
 
     public function getMembersByTreeId($treeId, $offset, $limit) {
-        $query = "SELECT * FROM person WHERE family_tree_id = :tree_id LIMIT :offset, :limit";
+        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id LIMIT :offset, :limit";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -44,7 +45,7 @@ class TreeModel {
 
     public function getTreeData($familyTreeId) {
         // Fetching nodes
-        $nodesSql = "SELECT id, first_name, last_name FROM person WHERE family_tree_id = :tree_id";
+        $nodesSql = "SELECT id, first_name, last_name FROM $this->person_table  WHERE family_tree_id = :tree_id";
         $nodesStmt = $this->db->prepare($nodesSql);
         $nodesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
         $nodesStmt->execute();
@@ -76,7 +77,7 @@ class TreeModel {
         return $branch;
     }
     public function countMembersByTreeId($treeId) {
-        $query = "SELECT COUNT(*) FROM person WHERE family_tree_id = :tree_id";
+        $query = "SELECT COUNT(*) FROM $this->person_table  WHERE family_tree_id = :tree_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tree_id' => $treeId]);
         return $stmt->fetchColumn();
