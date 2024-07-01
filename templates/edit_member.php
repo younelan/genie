@@ -48,8 +48,8 @@
 
         <label for="gender_id">Gender:</label>
         <select name="gender_id" id="gender_id">
-            <option value="1" <?php if ($member['gender_id'] == 1) echo 'selected'; ?>>Male</option>
-            <option value="2" <?php if ($member['gender_id'] == 2) echo 'selected'; ?>>Female</option>
+            <option value="1" <?php if ($member['gender_id'] == 1) echo 'selected'; ?>>Homme</option>
+            <option value="2" <?php if ($member['gender_id'] == 2) echo 'selected'; ?>>Femme</option>
             <!-- Add more options as needed -->
         </select><br>
 
