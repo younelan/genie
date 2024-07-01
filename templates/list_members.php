@@ -31,7 +31,7 @@
             </ul>
         </nav>
     <?php endif; ?>
-<div class='treecount'>Stats: <?php //echo $totalMembers ?> 
+<div class='treecount'>Membres: <?php echo $totalMembers ?> 
 (<?php foreach($countByGender as $idx=>$val) echo "$idx: $val "; ?> ) 
 <div>Relations: <?php echo $totalRelationships ?><div></div>
 <input type="text" id="search" placeholder="Chercher par nom...">
