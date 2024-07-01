@@ -100,7 +100,6 @@ class TreeModel {
                     $vals['?']= $row['total'];
             }
         }
-        print_r($counts);exit;
         return $vals;
         //return $stmt->fetchColumn();
     }
