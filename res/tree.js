@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("class", "node");
 
         node.append("circle")
-            .attr("r", 8);
+            .attr("r", 4);
 
         node.append("text")
             .attr("dy", -10)
