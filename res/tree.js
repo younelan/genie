@@ -1,6 +1,6 @@
 // public/tree.js
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetch(`index.php?action=get_tree_data&family_tree_id=${familyTreeId}`)
         .then(response => response.json())
         .then(data => {
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayTree(data) {
         const width = 1960;
-        const height = 2200;
+        const height = 3200;
 
         const svg = d3.select("svg")
             .attr("width", width)
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .append("g")
             .attr("transform", "translate(40,0)");
 
-            const simulation = d3.forceSimulation(data.nodes)
+        const simulation = d3.forceSimulation(data.nodes)
             .force("link", d3.forceLink(data.links).id(d => d.id).distance(30))
             .force("charge", d3.forceManyBody().strength(-50))
             .force("center", d3.forceCenter(width / 2, height / 2));

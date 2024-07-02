@@ -5,39 +5,79 @@ h1 {
     color: #f9f2e2;
     text-align: center;
     border-radius: 3px;
-} 
+}
+
 h2 {
     color: #150c57;
     background-color: #fcfeea;
     text-align: center;
     box-shadow: 1px 1px #7f8ea3;
-}   
-input,select {
+}
+
+input,
+select {
     color: #21232d;
     padding-left: 6px;
     padding-right: 5px;
     background-color: #ecf5ff;
 }
+
 #search {
     padding: 10px;
     padding-left: 40px;
     padding-right: 40px;
 }
+
 ::placeholder {
     color: rgb(155, 8, 39);
 }
-.edit-member-form, .delete-member-form {
+
+.edit-member-form,
+.delete-member-form {
     display: inline-block;
 }
-h1 { margin-bottom: 3px}
+
+h1 {
+    margin-bottom: 3px
+}
+
 .relationship-table form {
     display: inline-block;
 }
-.neav {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px}
-.nav ul {list-style-type: none; margin: 0; display:block; padding: 0; overflow: hidden; background-color: #d5f4ff;margin-bottom:5px}
-.nav li {display:inline-block}
-.nav a {display: inline-block; padding: 4px;  color: #14117a; text-decoration: none; margin-right: 5px;}
-.nav a:hover {background-color: #f2f2f2;color: rgb(184, 6, 6);}
+
+.neav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px
+}
+
+.nav ul {
+    list-style-type: none;
+    margin: 0;
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    background-color: #d5f4ff;
+    margin-bottom: 5px
+}
+
+.nav li {
+    display: inline-block
+}
+
+.nav a {
+    display: inline-block;
+    padding: 4px;
+    color: #14117a;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.nav a:hover {
+    background-color: #f2f2f2;
+    color: rgb(184, 6, 6);
+}
 
 th {
     background-color: #306183;
@@ -45,29 +85,34 @@ th {
     padding: 5px;
     text-shadow: 1px 1px 5px #643d25;
 }
+
 table {
-    margin-top:10px;
+    margin-top: 10px;
     margin-bottom: 10px;
     border: 1px solid #c5c3bf;
     background-color: #fbfaf5;
     color: #a72121;
 }
+
 table a {
     color: navy;
 }
+
 label {
-    color: #3c0404;;
+    color: #3c0404;
+    ;
     background-color: #8bc8ff;
     padding: 1px;
     padding-right: 10px;
     padding-left: 10px;
     margin-bottom: 5px;
 }
+
 a {
     color: #cb5323;
     padding: 1px;
     display: block;
-    width:100%;
+    width: 100%;
     text-decoration: none;
 }
 
@@ -85,7 +130,8 @@ button {
     margin: 1px;
     border-radius: 5px;
 }
+
 body {
-    background-color: #78c7f3;    
+    background-color: #78c7f3;
     color: #5e94a1;
 }

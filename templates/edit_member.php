@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Edit Member</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="res/style.css?Version=1"> 
+    <link rel="stylesheet" href="res/style.css?Version=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
+
 <body>
     <h1>Modifier Membre</h1>
 
-<?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
-<div class='nav'>
-<ul class='nav-ul'>
-<li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
-<li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Modifie Arbre</a></li>
-<li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Voir Arbre</a></li>
-<li><a href="index.php?action=list_trees">Arbres</a></li>
-</ul>
+    <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
+    <div class='nav'>
+        <ul class='nav-ul'>
+            <li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
+            <li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Modifie Arbre</a></li>
+            <li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Voir Arbre</a></li>
+            <li><a href="index.php?action=list_trees">Arbres</a></li>
+        </ul>
 
-</div>
+    </div>
 
 
-<?php if (isset($error)): ?>
+    <?php if (isset($error)) : ?>
         <p style="color: red;"><?php echo $error; ?></p>
     <?php endif; ?>
 
@@ -34,7 +36,7 @@
         <input type="text" name="first_name" id="first_name" value="<?php echo htmlspecialchars($member['first_name']); ?>" required><br>
 
         <label for="middle_name">Middle Name:</label>
-        <input type="text" name="middle_name" id="middle_name" value="<?php echo htmlspecialchars($member['middle_name']); ?>" ><br>
+        <input type="text" name="middle_name" id="middle_name" value="<?php echo htmlspecialchars($member['middle_name']); ?>"><br>
 
         <label for="last_name">Last Name:</label>
         <input type="text" name="last_name" id="last_name" value="<?php echo htmlspecialchars($member['last_name']); ?>"><br>
@@ -53,28 +55,28 @@
             <!-- Add more options as needed -->
         </select><br>
 
-       
+
 
         <div id="additional-fields" style="display: none;">
-        <label for="alias1">Title:</label>
-        <input type="text" name="title" id="alias1" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
-        <label for="alias1">Alias1:</label>
-        <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
-        <label for="alias2">Alias2:</label>
-        <input type="text" name="alias2" id="alias2" value="<?php echo htmlspecialchars($member['alias2']); ?>"><br>
-        <label for="alias3">Alias3:</label>
-        <input type="text" name="alias3" id="alias3" value="<?php echo htmlspecialchars($member['alias3']); ?>"><br>
-        <label for="body">Details</label>
-        <textarea id="body" name=body cols=50 rows=10><?php echo htmlspecialchars($member['body']); ?></textarea>
-        <br/>
-        <label for="date_of_death">Date of Death:</label>
-        <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
+            <label for="alias1">Title:</label>
+            <input type="text" name="title" id="alias1" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
+            <label for="alias1">Alias1:</label>
+            <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
+            <label for="alias2">Alias2:</label>
+            <input type="text" name="alias2" id="alias2" value="<?php echo htmlspecialchars($member['alias2']); ?>"><br>
+            <label for="alias3">Alias3:</label>
+            <input type="text" name="alias3" id="alias3" value="<?php echo htmlspecialchars($member['alias3']); ?>"><br>
+            <label for="body">Details</label>
+            <textarea id="body" name=body cols=50 rows=10><?php echo htmlspecialchars($member['body']); ?></textarea>
+            <br />
+            <label for="date_of_death">Date of Death:</label>
+            <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
 
-        <label for="place_of_death">Place of Death:</label>
-        <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
+            <label for="place_of_death">Place of Death:</label>
+            <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
 
         </div>
-        <br/>
+        <br />
 
         <button type="submit">Update Member</button> <button type="button" id="toggle-fields-btn">More</button>
     </form>
@@ -98,7 +100,7 @@
     </div>
 
 
-    
+
     <h2>Add Relationship</h2>
     <form id="add-relationship-form">
         <input type="hidden" id="member_id" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
@@ -153,15 +155,15 @@
             <input type="hidden" id="edit_member_id" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
             <input type="hidden" name="edit_member2_id" value="<?php echo htmlspecialchars($member['id']); ?>">
             <input type="hidden" name="edit_family_tree_id" value="<?php echo htmlspecialchars($member['family_tree_id']); ?>">
-            
+
             <label for="edit_relationship_person1">Person 1:</label>
             <input type="text" id="edit_relationship_person1" name="person1" readonly><br>
-            
+
             <label for="edit_relationship_person2">Person 2:</label>
             <input type="text" id="edit_relationship_person2" name="person2" readonly><br>
             <input type="date" id="edit_relation_start" name="relation_start"><br>
             <input type="date" id="edit_relation_end" name="relation_end"><br>
-          
+
             <label for="edit_relationship_type">Relationship Type:</label>
             <select name="relationship_type" id="edit_relationship_type">
                 <!-- Options will be dynamically filled via AJAX -->
@@ -174,19 +176,19 @@
     <h2>Delete Member</h2>
     Warning, this can not be undone
     <form method="post" class='delete-member-form' action="index.php?action=delete_member">
-                    <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                    <button type="submit">🗑️ Delete</button>
+        <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
+        <button type="submit">🗑️ Delete</button>
     </form>
 
     <!-- External JavaScript file -->
     <script>
         var memberId = <?php echo json_encode($member['id']); ?>; // Pass member ID to JavaScript
         const treeId = <?php echo json_encode($member['family_tree_id']); ?>; // Pass member ID to JavaScript
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             var script = document.createElement('script');
             script.src = 'res/relationships.js';
- 
+
             script.onload = function() {
                 // Initialize relationships.js with member ID
                 initializeRelationships(memberId);
@@ -204,15 +206,16 @@
         });
 
         document.getElementById('toggle-fields-btn').addEventListener('click', function() {
-                var additionalFields = document.getElementById('additional-fields');
-                if (additionalFields.style.display === 'none') {
-                    additionalFields.style.display = 'block';
-                    this.textContent = 'Less Fields';
-                } else {
-                    additionalFields.style.display = 'none';
-                    this.textContent = 'More Fields';
-                }
-            });
+            var additionalFields = document.getElementById('additional-fields');
+            if (additionalFields.style.display === 'none') {
+                additionalFields.style.display = 'block';
+                this.textContent = 'Less Fields';
+            } else {
+                additionalFields.style.display = 'none';
+                this.textContent = 'More Fields';
+            }
+        });
     </script>
 </body>
+
 </html>

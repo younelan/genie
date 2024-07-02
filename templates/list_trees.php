@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>List Family Trees</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="res/style.css"> 
+    <link rel="stylesheet" href="res/style.css">
 </head>
 <style>
-    li {list-style-type: none}
-    .tree-list {font-size: 1.5em;padding:20px;text-align: center;}
+    li {
+        list-style-type: none
+    }
+
+    .tree-list {
+        font-size: 1.5em;
+        padding: 20px;
+        text-align: center;
+    }
 </style>
+
 <body>
     <h1>Family Trees</h1>
     <ul class=tree-list>
-        <?php foreach ($trees as $tree): ?>
+        <?php foreach ($trees as $tree) : ?>
             <li>
                 <a href=?action=edit_tree&tree_id=<?php echo htmlspecialchars($tree['id']); ?>>
-                <?php echo htmlspecialchars($tree['name']); ?>
+                    <?php echo htmlspecialchars($tree['name']); ?>
                 </a>
                 <!--
                 <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
@@ -40,7 +49,7 @@
         <?php endforeach; ?>
     </ul>
     <form action="index.php?action=add_tree" method="get">
-    <input type="hidden" name="action" value="add_tree">
+        <input type="hidden" name="action" value="add_tree">
         <button type="submit">Add New Tree</button>
     </form>
 
@@ -55,4 +64,5 @@
         });
     </script>
 </body>
+
 </html>

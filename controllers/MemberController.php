@@ -1,18 +1,22 @@
 <?php
 // require_once 'Member.php';
 
-class MemberController {
+class MemberController
+{
     private $member;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->member = new MemberModel($db);
         $this->basedir = dirname(__DIR__);
     }
-    public function getMemberById($memberId) {
+    public function getMemberById($memberId)
+    {
         $member = $this->member->getMemberById($memberId);
         return $member;
     }
-    public function editMember($memberId) {
+    public function editMember($memberId)
+    {
         $member = $this->member->getMemberById($memberId);
         if (!$member) {
             exit('Member not found.');
@@ -26,20 +30,20 @@ class MemberController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             apachelog("--------------");
             $updatedMember = [
-                'memberId' => $memberId, 
-                'firstName' => $_POST['first_name'], 
-                'middleName' => $_POST['middle_name'], 
-                'lastName' => $_POST['last_name'], 
-                'dateOfBirth' => $_POST['date_of_birth'], 
-                'placeOfBirth' => $_POST['place_of_birth'], 
-                'dateOfDeath' => $_POST['date_of_death'], 
-                'placeOfDeath' => $_POST['place_of_death'], 
+                'memberId' => $memberId,
+                'firstName' => $_POST['first_name'],
+                'middleName' => $_POST['middle_name'],
+                'lastName' => $_POST['last_name'],
+                'dateOfBirth' => $_POST['date_of_birth'],
+                'placeOfBirth' => $_POST['place_of_birth'],
+                'dateOfDeath' => $_POST['date_of_death'],
+                'placeOfDeath' => $_POST['place_of_death'],
                 'genderId' => $_POST['gender_id'],
-                'alias1' => $_POST['alias1'], 
-                'alias2' => $_POST['alias2'], 
-                'alias3' => $_POST['alias3'], 
-                'body' => $_POST['body'], 
-                'title' => $_POST['title'], 
+                'alias1' => $_POST['alias1'],
+                'alias2' => $_POST['alias2'],
+                'alias3' => $_POST['alias3'],
+                'body' => $_POST['body'],
+                'title' => $_POST['title'],
             ];
             apachelog("++++++++++++++++");
             apachelog($updatedMember);
@@ -66,7 +70,8 @@ class MemberController {
 
         include $this->basedir . "/templates/edit_member.php";
     }
-    public function addMember($treeId) {
+    public function addMember($treeId)
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = $_POST['first_name'];
             $lastName = $_POST['last_name'];
@@ -93,22 +98,24 @@ class MemberController {
         }
         include $this->basedir . "/templates/add_member.php";
     }
-    public function getRelationshipTypes($treeId) {
-        $results = $this->member->getRelationshipTypes( $treeId);
+    public function getRelationshipTypes($treeId)
+    {
+        $results = $this->member->getRelationshipTypes($treeId);
         echo json_encode($results);
-
     }
 
-    public function autocompleteMember($termId,$memberId,$treeId) {
+    public function autocompleteMember($termId, $memberId, $treeId)
+    {
         $results = $this->member->autocompleteMember($termId, $treeId);
         echo json_encode($results);
-
     }
-    public function getRelationships($memberId) {
+    public function getRelationships($memberId)
+    {
         $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships
         echo json_encode($relationships); // Output relationships as JSON (for AJAX handling)
     }
-    public function addRelationship() {
+    public function addRelationship()
+    {
         $memberId = $_POST['member_id'] ?? null;
         $familyTreeId = $_POST['family_tree_id'] ?? null;
         $memberType = $_POST['member_type'] ?? 'existing';
@@ -134,10 +141,10 @@ class MemberController {
             //$firstName, $lastName, $familyTreeId
             $personId2 = $this->member->addMember($new_member);
         }
-        apachelog( "--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
+        apachelog("--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
 
         if ($personId2) {
-             $success = $this->member->addRelationship($personId1, $personId2, $relationshipType,$familyTreeId);
+            $success = $this->member->addRelationship($personId1, $personId2, $relationshipType, $familyTreeId);
 
             //$this->member->addRelationship($personId1, $personId2, $relationshipType);
             $response = ['success' => true, 'message' => 'Relationship added successfully.'];
@@ -148,7 +155,8 @@ class MemberController {
         header('Content-Type: application/json');
         echo json_encode($response);
     }
-    public function updateRelationship($postData) {
+    public function updateRelationship($postData)
+    {
         // Example: Assuming $_POST contains 'relationship_id', 'member_id', 'member2_id', 'family_tree_id', and 'relationship_type'
         $relationshipId = isset($postData['relationship_id']) ? $postData['relationship_id'] : null;
         $personId1 = isset($postData['member_id']) ? $postData['member_id'] : null;
@@ -157,18 +165,18 @@ class MemberController {
         $relationStart = isset($postData['relation_start']) ? $postData['relation_start'] : null;
         $relationEnd = isset($postData['relation_start']) ? $postData['relation_end'] : null;
         $relationshipType = isset($postData['relationship_type']) ? $postData['relationship_type'] : null;
-        apachelog ("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
+        apachelog("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
         if (!$relationshipId || !$personId1 || !$relationshipType) {
             return json_encode(['success' => false, 'message' => 'Missing required parameters']);
         }
 
         $relation = [
             'relationshipId' => $relationshipId,
-            'personId1'=> $personId1,
-            'personId2'=> $personId2,
-            'relationStart'=>$relationStart,
-            'relationEnd'=>$relationEnd,
-            'relationshipTypeId'=>$relationshipType,
+            'personId1' => $personId1,
+            'personId2' => $personId2,
+            'relationStart' => $relationStart,
+            'relationEnd' => $relationEnd,
+            'relationshipTypeId' => $relationshipType,
         ];
         //$relationshipId, $personId1, $relationshipType
         $this->member->updateMemberRelationship($relation);
@@ -182,7 +190,8 @@ class MemberController {
         // Return JSON response
         return json_encode($response);
     }
-    public function swapRelationshipAction() {
+    public function swapRelationshipAction()
+    {
         $relationshipId = $_POST['relationship_id']; // Or get it from the request in another way
 
         try {
@@ -196,14 +205,16 @@ class MemberController {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
-    public function deleteMember($memberId) {
+    public function deleteMember($memberId)
+    {
         // Implement logic to delete a member from the database or data source
         // Example:
 
         $success = $this->member->deleteMember($memberId);
         return $success;
-    }    
-    public function deleteRelationship($relationshipId) {
+    }
+    public function deleteRelationship($relationshipId)
+    {
         $success = $this->member->deleteRelationship($relationshipId);
         if ($success) {
             echo json_encode(['success' => true]);
@@ -212,6 +223,4 @@ class MemberController {
         }
         exit();
     }
-
 }
-?>

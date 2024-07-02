@@ -1,23 +1,26 @@
 <?php
-class MemberModel {
+class MemberModel
+{
     private $db;
     private $person_table = 'person';
     private $relation_table = 'person_relationship';
     private $relation_type_table = 'relationship_type';
     private $tree_table = 'family_tree';
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
     }
 
-    public function addMember($new_member) {
+    public function addMember($new_member)
+    {
         //$treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId
-        $treeId = $new_member['treeId']??null;
-        $firstName = $new_member['firstName']??null;
-        $lastName = $new_member['lastName']??null;
-        $dateOfBirth = $new_member['dateOfBirth']??null;
-        $placeOfBirth = $new_member['placeOfBirth']??null;
-        $genderId = $new_member['genderId']??null;
+        $treeId = $new_member['treeId'] ?? null;
+        $firstName = $new_member['firstName'] ?? null;
+        $lastName = $new_member['lastName'] ?? null;
+        $dateOfBirth = $new_member['dateOfBirth'] ?? null;
+        $placeOfBirth = $new_member['placeOfBirth'] ?? null;
+        $genderId = $new_member['genderId'] ?? null;
 
         $query = "INSERT INTO $this->person_table  (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
         $stmt = $this->db->prepare($query);
@@ -34,26 +37,29 @@ class MemberModel {
     }
 
     // Fetch relationship types from the database
-    public function getRelationshipTypes($tree_id=1) {
+    public function getRelationshipTypes($tree_id = 1)
+    {
         $query = "SELECT id, description FROM $this->relation_type_table ";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getMemberById($memberId) {
+    public function getMemberById($memberId)
+    {
         $query = "SELECT * FROM $this->person_table  WHERE id = :member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    public function autocompleteMember($term, $memberId, $tree_id=1) {
+    public function autocompleteMember($term, $memberId, $tree_id = 1)
+    {
         $query = "SELECT id, first_name, last_name FROM $this->person_table  WHERE 
         (first_name LIKE :term1 OR last_name like :term2) and id != :member_id";
         $query2 = str_replace(":tree_id", $tree_id, $query);
         $query2 = str_replace(":term1", '%' . $term . '%', $query2);
-        $query2 = str_replace(":term2", '%'. $term . '%', $query2);
+        $query2 = str_replace(":term2", '%' . $term . '%', $query2);
         $query2 = str_replace(":member_id", $memberId, $query2);
         //print($query2);
         $stmt = $this->db->prepare($query);
@@ -65,17 +71,14 @@ class MemberModel {
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //apachelog($results);
         $labels = [];
-        foreach($results as $result) {
-            $labels[] = [   
-                    'label' => $result['first_name'] . ' ' . $result['last_name'],
-                    'id' => $result['id']
+        foreach ($results as $result) {
+            $labels[] = [
+                'label' => $result['first_name'] . ' ' . $result['last_name'],
+                'id' => $result['id']
             ];
-
         }
 
         return $labels;
-
-
     }
     // public function deleteMember($memberId) {
     //     $query = "DELETE FROM person WHERE id = :member_id";
@@ -89,12 +92,14 @@ class MemberModel {
     //     }
     // }
 
-    public function deleteMember($memberId) {
+    public function deleteMember($memberId)
+    {
         $query = "DELETE FROM $this->person_table  WHERE id = :id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $memberId]);
     }
-    public function getMemberRelationships($memberId) {
+    public function getMemberRelationships($memberId)
+    {
         $query = "SELECT pr.id, p1.first_name AS person1_first_name, p1.last_name AS person1_last_name, 
                          p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
                          p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
@@ -109,15 +114,16 @@ class MemberModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function updateMemberRelationship($relationship) {
-        $relationshipId=$relationship['relationshipId']??null;
+    public function updateMemberRelationship($relationship)
+    {
+        $relationshipId = $relationship['relationshipId'] ?? null;
         //$personId1= $relationship['relationsType'];
-        $relationshipTypeId = $relationship['relationshipTypeId']??null;
-        $relationStart = $relationship['relationStart']??null;
+        $relationshipTypeId = $relationship['relationshipTypeId'] ?? null;
+        $relationStart = $relationship['relationStart'] ?? null;
         $relationEnd = $relationship['relationEnd'];
-        if(!$relationStart) $relationStart=null;
-        if(!$relationEnd) $relationEnd=null;
-        
+        if (!$relationStart) $relationStart = null;
+        if (!$relationEnd) $relationEnd = null;
+
         $query = "UPDATE $this->relation_table  
                   SET relation_start = :relation_start, 
                   relation_end = :relation_end,
@@ -130,36 +136,37 @@ class MemberModel {
         return $stmt->execute();
     }
 
-    public function updateMember($member) {
+    public function updateMember($member)
+    {
         //$memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId
-        $memberId= $member['memberId']??"";
-        $firstName= $member['firstName']??"";
-        $middleName = $member['middleName']??"";
-        $lastName = $member ['lastName'];
+        $memberId = $member['memberId'] ?? "";
+        $firstName = $member['firstName'] ?? "";
+        $middleName = $member['middleName'] ?? "";
+        $lastName = $member['lastName'];
         $alias1 = $member['alias1'];
         $alias2 = $member['alias2'];
         $alias3 = $member['alias3'];
-        foreach($member as $key=>$value) {
-            if(!$value) {
-                $member[$key]=null;
+        foreach ($member as $key => $value) {
+            if (!$value) {
+                $member[$key] = null;
             }
         }
         $dateOfBirth = $member['dateOfBirth'];
-        $placeOfBirth= $member['placeOfBirth'];
+        $placeOfBirth = $member['placeOfBirth'];
         $dateOfDeath = $member['dateOfDeath'];
-        $placeOfDeath= $member['placeOfDeath'];
+        $placeOfDeath = $member['placeOfDeath'];
         $memberId = $member['memberId'];
         $genderId = $member['genderId'];
         $body = $member['body'];
-        $title= $member['title'];
+        $title = $member['title'];
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
                     middle_name = :middle_name, date_of_birth = :date_of_birth,
                   alias1 = :alias1, alias2 = :alias2, alias3 = :alias3, title = :title, body = :body,
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
                   gender_id = :gender_id WHERE id = :id";
-        if(!$dateOfDeath) $dateOfDeath=null;
-        if(!$dateOfBirth) $dateOfBirth=null;
+        if (!$dateOfDeath) $dateOfDeath = null;
+        if (!$dateOfBirth) $dateOfBirth = null;
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':first_name', $firstName);
         $stmt->bindParam(':last_name', $lastName);
@@ -178,7 +185,8 @@ class MemberModel {
         return $stmt->execute();
     }
 
-    public function getRelationships($memberId) {
+    public function getRelationships($memberId)
+    {
         $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
                          p1.id as person1_id, p2.id as person2_id
                   FROM $this->relation_table  pr
@@ -191,17 +199,19 @@ class MemberModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId) {
+    public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId)
+    {
         $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,family_tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:family_tree_id)";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'person_id1' => $personId1,
             'person_id2' => $personId2,
             'relationship_type_id' => $relationshipTypeId,
-            'family_tree_id'=>$treeId
+            'family_tree_id' => $treeId
         ]);
     }
-    public function swapRelationship($relationshipId) {
+    public function swapRelationship($relationshipId)
+    {
         // Start transaction
         $this->db->beginTransaction();
 
@@ -240,11 +250,11 @@ class MemberModel {
             $this->db->rollBack();
             throw $e; // Re-throw exception
         }
-    }   
-    public function deleteRelationship($relationshipId) {
+    }
+    public function deleteRelationship($relationshipId)
+    {
         $query = "DELETE FROM $this->relation_table  WHERE id = :id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $relationshipId]);
     }
 }
-?>

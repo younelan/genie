@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Add New Member</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="res/style.css"> 
-<style>
-  .error {color: red}
-</style>
+    <link rel="stylesheet" href="res/style.css">
+    <style>
+        .error {
+            color: red
+        }
+    </style>
 </head>
+
 <body>
     <h1>Add New Member</h1>
-    <?php if (isset($error)): ?>
+    <?php if (isset($error)) : ?>
         <p class='error'><?php echo $error; ?></p>
     <?php endif; ?>
     <form method="post" action="">
@@ -39,4 +43,5 @@
     <br>
     <a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>">Back to List</a>
 </body>
+
 </html>
