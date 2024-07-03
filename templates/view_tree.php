@@ -6,8 +6,13 @@
     <meta charset="UTF-8">
     <title>View Tree</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="themes/bootstrap/js/jquery-3.7.0.min.js"></script>
+    <script src="themes/bootstrap/js/popper.min.js"></script>
+    <script src="themes/bootstrap/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="res/style.css">
+    <link rel="stylesheet" href="res/style.css?Version=1">
+    <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
 
     <style>
         .node circle {
@@ -31,17 +36,25 @@
 </head>
 
 <body>
-    <h1>Interactive Hierarchical Tree</h1>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top">
+    <img src="res/genie.png" height="40" width="auto" alt="Genie"/> &nbsp;
+    <a class="navbar-brand" href="?">Genie: Edition Membre</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
     <?php $treeId = htmlspecialchars($_GET['family_tree_id'] ?? $_GET['tree_id']) ?>
 
-    <div class='nav'>
-        <ul class='nav-ul'>
-            <li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">New Member</a></li>
-            <li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Edit Tree</a></li>
-            <li><a href="index.php?action=list_trees">Tree List</a></li>
-        </ul>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
+            <li><a class="nav-link" href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Liste</a></li>
+            <li><a class="nav-link" href="index.php?action=list_trees">Arbres</a></li>
 
+        </ul>
     </div>
+</nav>
+
+
     <a href="index.php?action=edit_tree&tree_id=<?php echo htmlspecialchars($_GET['family_tree_id'] ?? $_GET['tree_id']); ?>">Back to Home</a>
     <svg width="2960" height="2600"></svg>
     <script>

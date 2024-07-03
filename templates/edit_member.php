@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Edition Membre</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!--<link rel="stylesheet" href="res/style.css?Version=1">-->
-    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="themes/bootstrap/js/jquery-3.7.0.min.js"></script>
+    <script src="themes/bootstrap/js/popper.min.js"></script>
+    <script src="themes/bootstrap/js/bootstrap.min.js"></script>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="res/style.css?Version=1">
+    <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Genie: Membres Famille</title>
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Custom CSS -->
     <style>
         /* Add custom styles here */
@@ -71,7 +70,8 @@
 
 <!-- Navigation menu -->
 <nav class="navbar navbar-expand-md navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Genie: Edition Membre</a>
+    <img src="res/genie.png" height="40" width="auto" alt="Genie"/> &nbsp;
+    <a class="navbar-brand" href="?">Genie: Edition Membre</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
