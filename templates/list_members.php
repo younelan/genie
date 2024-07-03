@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genie: Membres Famille</title>
     <!-- Bootstrap CSS -->
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Custom CSS -->
     <style>
@@ -62,14 +63,6 @@
                     <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
                     <li><a class="nav-link" href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualiser</a></li>
                     <li><a class="nav-link" href="index.php?action=list_trees">Arbres</a></li>
-<!--
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Statistics</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Settings</a>
-                    </li>
-    -->
                 </ul>
             </div>
         </nav>
@@ -81,7 +74,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header">
-                        People in the Tree
+                        Membres de la Famille
                     </div>
                     <div class="card-body">
 
@@ -101,7 +94,7 @@
                         </nav>
                     <?php endif; ?>
                     <input type="text" id="search" placeholder="Chercher par nom...">
-                        <div class="list-group">
+                        <div class="list-group" id="memberslist">
                             <?php foreach ($members as $member) : ?>
                                 <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
                                     <?php echo getGenderSymbol($member['gender_id']) ?>
@@ -110,7 +103,31 @@
                             <?php endforeach; ?>
 
                         </div>
+                        
                     </div>
+                    <?php if ($totalPages > 1) : ?>
+                <style>
+                    .pagination li {
+                        display: inline-block;
+                    }
+                </style>
+                <nav>
+                <ul class='pagination'>
+                                <b>Pages: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                                    <li><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>&nbsp;
+                                    </li>
+                                <?php endfor; ?>
+                            </ul>
+                </nav>
+            <?php endif; ?>
+            <?php if ($treeId) : ?>
+                <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
+                    <input type="hidden" name="action" value="delete_tree">
+                    <input type="hidden" name="tree_id" value="<?php echo $treeId; ?>">
+                    <button type="submit">🗑️ Delete</button>
+                </form>
+            <?php endif; ?>
+                    
                 </div>
             </div>
 
@@ -179,9 +196,110 @@
     </div>
 
     <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+    <!--<script src="res/jquery-3.6.0.min.js"></script>-->
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+    <script>
+                $(document).ready(function() {
+                    // Handle delete tree form submission with confirmation
+                    $('.delete-member-form').submit(function(event) {
+                        if (!confirm('Are you sure you want to delete this tree?')) {
+                            event.preventDefault();
+                        }
+                    });
+                });
+            </script>
+                                <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
+                                    <?php echo getGenderSymbol($member['gender_id']) ?>
+                                    <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
+                                </a>
+            <!-- <script>
+                $(document).ready(function() {
+                    $('#search').on('input', function() {
+                        var query = $(this).val();
+                        var treeId = <?php echo $treeId; ?>;
+                        $.ajax({
+                            url: 'index.php?action=search_members',
+                            type: 'GET',
+                            data: {
+                                tree_id: treeId,
+                                query: query
+                            },
+                            success: function(response) {
+                                var members = JSON.parse(response);
+                                var membersList = $('#memberslist');
+                                membersList.empty();
+                                members.forEach(function(member) {
+                                    var listItem = $('<li></li>');
+                                    var link = $('<a></a>').attr('href', 'index.php?action=edit_member&member_id=' + member.id).text(member.first_name + ' ' + member.last_name);
+                                    //link.attr('class') = 'list-group-item list-group-item-action';
+                                    listItem.append(link);
+                                    membersList.append(listItem);
+                                    //membersList.append(link);
+                                });
+                            }
+                        });
+                    });
+                });
+            </script> -->
+            <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('search');
+    function getGenderSymbol(genderId) {
+        switch (genderId) {
+            case 1:
+                return '♂️';
+            case 2:
+                return '♀️';
+            default:
+                return '';
+        }
+    }
+    searchInput.addEventListener('input', function() {
+        var query = this.value;
+        var treeId = <?php echo $treeId; ?>;
+        
+        fetch(`index.php?action=search_members&tree_id=${treeId}&query=${encodeURIComponent(query)}`, {
+            method: 'GET',
+        })
+        .then(function(response) {
+            return response.json(); // Parse the JSON from the response
+        })
+        .then(function(members) {
+            var membersList = document.getElementById('memberslist');
+            membersList.innerHTML = ''; // Clear existing content
+            
+            members.forEach(function(member) {
+                genderSymbol = getGenderSymbol(member.gender_id);
+                var listItem = document.createElement('div');
+                listItem.innerHTML = `
+                    <a href="index.php?action=edit_member&member_id=${member.id}" class="list-group-item list-group-item-action">
+                       ${genderSymbol} ${member.first_name} ${member.last_name}
+                    </a>
+                `;
+                membersList.appendChild(listItem);
+            });
+        })
+        .catch(function(error) {
+            console.error('Error fetching members:', error);
+        });
+    });
+});
+
+
+            </script>
+            <script>
+                $(document).ready(function() {
+                    // Handle delete tree form submission with confirmation
+                    $('.delete-tree-form').submit(function(event) {
+                        if (!confirm('Are you sure you want to delete this tree?')) {
+                            event.preventDefault();
+                        }
+                    });
+                });
+            </script>
 </body>
 </html>
