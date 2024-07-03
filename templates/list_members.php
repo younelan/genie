@@ -212,39 +212,6 @@
                     });
                 });
             </script>
-                                <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
-                                    <?php echo getGenderSymbol($member['gender_id']) ?>
-                                    <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
-                                </a>
-            <!-- <script>
-                $(document).ready(function() {
-                    $('#search').on('input', function() {
-                        var query = $(this).val();
-                        var treeId = <?php echo $treeId; ?>;
-                        $.ajax({
-                            url: 'index.php?action=search_members',
-                            type: 'GET',
-                            data: {
-                                tree_id: treeId,
-                                query: query
-                            },
-                            success: function(response) {
-                                var members = JSON.parse(response);
-                                var membersList = $('#memberslist');
-                                membersList.empty();
-                                members.forEach(function(member) {
-                                    var listItem = $('<li></li>');
-                                    var link = $('<a></a>').attr('href', 'index.php?action=edit_member&member_id=' + member.id).text(member.first_name + ' ' + member.last_name);
-                                    //link.attr('class') = 'list-group-item list-group-item-action';
-                                    listItem.append(link);
-                                    membersList.append(listItem);
-                                    //membersList.append(link);
-                                });
-                            }
-                        });
-                    });
-                });
-            </script> -->
             <script>
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('search');
@@ -274,11 +241,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             members.forEach(function(member) {
                 genderSymbol = getGenderSymbol(member.gender_id);
-                var listItem = document.createElement('div');
-                listItem.innerHTML = `
-                    <a href="index.php?action=edit_member&member_id=${member.id}" class="list-group-item list-group-item-action">
-                       ${genderSymbol} ${member.first_name} ${member.last_name}
-                    </a>
+                var listItem = document.createElement('span');
+                listItem.innerHTML = ` <a href="index.php?action=edit_member&member_id=${member.id}" class="list-group-item list-group-item-action">
+                ${genderSymbol} ${member.first_name} ${member.last_name}</a>
                 `;
                 membersList.appendChild(listItem);
             });
