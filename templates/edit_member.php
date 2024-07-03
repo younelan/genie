@@ -1,29 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Edit Member</title>
+    <title>Edition Membre</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <link rel="stylesheet" href="res/style.css?Version=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <!--<link rel="stylesheet" href="res/style.css?Version=1">-->
+    <title>Genie: Membres Famille</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <style>
+        /* Add custom styles here */
+        body {
+            background-color: #dfc9a7;
+        }
+        .navbar {
+            background-color: #62313c !important;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #f0e2d8;
+            color: black;
+        }
+        .card a  {
+            color: #240c0c;
+        }
+        .card-header {
+            background-color: #e5d7d3;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: bold;
+            color: #6d1818;
+            }
+        .list-group-item {
+            background-color: #fff3f3;
+            border: 1px solid rgba(234, 186, 186, 0.56);
+        }
+        .relation-button {
+            width: 23px;
+            border: 1px solid #cbb;  
+            padding: 0px;
+            display: inline-block;
+            height: 30px;
+        }
+        .relationship-table form {
+            display: inline-block;
+        }
+        .badge-primary {
+            color: #b3ccf5;
+            background-color: #06158e;
+        }
+        #search {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Modifier Membre</h1>
+<div class="container-fluid py-4">
 
+<!-- Navigation menu -->
+<nav class="navbar navbar-expand-md navbar-dark fixed-top">
+    <a class="navbar-brand" href="#">Genie: Edition Membre</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
     <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
-    <div class='nav'>
-        <ul class='nav-ul'>
-            <li><a href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
-            <li><a href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Modifie Arbre</a></li>
-            <li><a href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Voir Arbre</a></li>
-            <li><a href="index.php?action=list_trees">Arbres</a></li>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
+            <li><a class="nav-link" href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>">Liste</a></li>
+            <li><a class="nav-link" href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualiser</a></li>
+            <li><a class="nav-link" href="index.php?action=list_trees">Arbres</a></li>
+
         </ul>
-
     </div>
+</nav>
 
+<!-- Main content -->
+<div class="row mt-5">
+<div class="col-lg-4 mb-4">
+    <div class="card">
+        <div class="card-header">
+            Détails Membre
+        </div>
+    <div class="card-body">
 
     <?php if (isset($error)) : ?>
         <p style="color: red;"><?php echo $error; ?></p>
@@ -80,26 +145,41 @@
 
         <button type="submit">Update Member</button> <button type="button" id="toggle-fields-btn">More</button>
     </form>
-
-    <!-- Display Relationships -->
-    <h2>Relationships</h2>
-    <div id="relationships">
-        <table class="relationship-table">
-            <tr>
-                <th>Person 1</th>
-                <th>Person 2</th>
-                <th>Type</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Actions</th>
-            </tr>
-            <tbody id="relationships-table-body">
-                <!-- Relationships will be dynamically filled via JavaScript -->
-            </tbody>
-        </table>
     </div>
 
+</div>
+</div>
+<div class="col-lg-4 mb-4">
+    <div class="card">
+        <div class="card-header">
+            Relations Existantes
+        </div>
+        <div class="card-body">
 
+        <div id="relationships">
+            <table class="relationship-table">
+                <tr>
+                    <th>Person 1</th>
+                    <th>Person 2</th>
+                    <th>Type</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Actions</th>
+                </tr>
+                <tbody id="relationships-table-body">
+                    <!-- Relationships will be dynamically filled via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+<div class="col-lg-4 mb-4">
+    <div class="card">
+        <div class="card-header">
+            Changements
+        </div>
+        <div class="card-body">
 
     <h2>Add Relationship</h2>
     <form id="add-relationship-form">
@@ -143,7 +223,7 @@
 
         <button type="button" id="add-relationship-btn">Add Relationship</button>
     </form>
-
+        
 
 
 
@@ -179,7 +259,9 @@
         <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
         <button type="submit">🗑️ Delete</button>
     </form>
-
+    </div>
+    </div>
+</div>
     <!-- External JavaScript file -->
     <script>
         var memberId = <?php echo json_encode($member['id']); ?>; // Pass member ID to JavaScript
@@ -187,7 +269,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             var script = document.createElement('script');
-            script.src = 'res/relationships.js';
+            script.src = 'res/relationships.js?ver=1';
 
             script.onload = function() {
                 // Initialize relationships.js with member ID
