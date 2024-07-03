@@ -82,8 +82,21 @@ class TreeController
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
         $totalMembers = $this->tree->getPersonCount($treeId);
         $countByGender = $this->tree->countMembersByTreeId($treeId);
+        $countByGender['Total']=$totalMembers;
+        $countByLastname = $this->tree->countTreeMembersByField($treeId,'last_name');
+        $countByFirstname = $this->tree->countTreeMembersByField($treeId,'first_name');
         $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
+        $stats=[
+            'Par Sexe'=> $countByGender,
+            'Relations'=> [
+                'Total'=>$totalRelationships,
+            ],
+            'Par Prénom'=>$countByFirstname,
+            'Par Nom de famille'=>$countByLastname,
+        ];
+        $events = [];
+        $activities = [];
         include $this->basedir . "/templates/list_members.php";
     }
 }
