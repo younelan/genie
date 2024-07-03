@@ -115,10 +115,10 @@ class TreeModel
         foreach ($counts as $idx => $row) {
             switch ($row['gender_id']) {
                 case 1:
-                    $vals['H'] = $row['total'];
+                    $vals['Hommes'] = $row['total'];
                     break;
                 case 2:
-                    $vals['F'] = $row['total'];
+                    $vals['Femmes'] = $row['total'];
                     break;
                 case null:
                 default:
@@ -128,7 +128,23 @@ class TreeModel
         return $vals;
         //return $stmt->fetchColumn();
     }
-
+    public function countTreeMembersByField($treeId, $field,$limit=15)
+    {
+        $query = "SELECT $field, count(*) as total FROM `$this->person_table` 
+                    WHERE family_tree_id = ? 
+                    GROUP BY $field
+                    ORDER BY total desc
+                    LIMIT $limit
+                    ";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$treeId]);
+        $counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $vals = [];
+        foreach ($counts as $idx => $row) {
+            $vals[$row[$field]] = $row['total'];
+        }
+        return $vals;
+    }
     public function getPersonCount($treeId)
     {
         $sql = "SELECT count(*) FROM `$this->person_table` WHERE family_tree_id = ?";
