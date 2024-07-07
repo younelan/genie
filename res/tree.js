@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => console.error('Error fetching tree data:', error));
 
     function displayTree(data) {
-        const width = 1960;
-        const height = 3200;
+        const width = 3960;
+        const height = 5200;
 
         const svg = d3.select("svg")
             .attr("width", width)
