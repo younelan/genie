@@ -21,6 +21,8 @@ CREATE TABLE `person` (
   `alias1` VARCHAR(100) DEFAULT NULL,
   `alias2` VARCHAR(100) DEFAULT NULL,
   `alias3` VARCHAR(100) DEFAULT NULL,
+  `preferred_name` varchar(100) DEFAULT NULL,
+  `native_name` varchar(100) DEFAULT NULL,
   `date_of_birth` DATE DEFAULT NULL,
   `body` VARCHAR(4000) DEFAULT NULL,
   `place_of_birth` VARCHAR(255) DEFAULT NULL,
@@ -29,6 +31,10 @@ CREATE TABLE `person` (
   `gender_id` int DEFAULT NULL,
   `spouse_id` int DEFAULT NULL,
   `optional_fields` json DEFAULT NULL
+  `body` text CHARACTER DEfAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `passed` tinyint(1) DEFAULT NULL
 ); 
 
 CREATE TABLE `person_relationship` (
