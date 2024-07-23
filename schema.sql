@@ -12,6 +12,13 @@ CREATE TABLE `gender` (
   `description` VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE `synonyms` (
+  `syn_id` int NOT NULL,
+  `tree_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `synonym` varchar(100) NOT NULL
+);
+
 CREATE TABLE `person` (
   `id` int NOT NULL,
   `family_tree_id` int NOT NULL,
