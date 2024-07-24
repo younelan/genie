@@ -83,8 +83,9 @@ class TreeController
         $totalMembers = $this->tree->getPersonCount($treeId);
         $countByGender = $this->tree->countMembersByTreeId($treeId);
         $countByGender['Total']=$totalMembers;
-        $countByLastname = $this->tree->countTreeMembersByField($treeId,'last_name');
-        $countByFirstname = $this->tree->countTreeMembersByField($treeId,'first_name');
+        $synonyms = $this->tree->getSynonymsByTreeId($treeId);
+        $countByLastname = $this->tree->countTreeMembersByField($treeId,'last_name', $synonyms);
+        $countByFirstname = $this->tree->countTreeMembersByField($treeId,'first_name', $synonyms);
         $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
         $stats=[

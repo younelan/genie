@@ -20,7 +20,7 @@ class TreeModel
     private $tree_table = 'family_tree';
     private $person_table = 'person';
     private $relation_table = 'person_relationship';
-
+    private $synonym_table = 'synonyms';
     public function __construct($db)
     {
         $this->db = $db;
@@ -128,7 +128,7 @@ class TreeModel
         return $vals;
         //return $stmt->fetchColumn();
     }
-    public function countTreeMembersByField($treeId, $field,$limit=15)
+    public function countTreeMembersByField($treeId, $field,$synonyms=null,$limit=15)
     {
         $query = "SELECT $field, count(*) as total FROM `$this->person_table` 
                     WHERE family_tree_id = ? 
@@ -141,7 +141,25 @@ class TreeModel
         $counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $vals = [];
         foreach ($counts as $idx => $row) {
-            $vals[$row[$field]] = $row['total'];
+            $row_key = $row[$field];
+            if ($synonyms && isset( $synonyms[strtolower($row_key)] )) {
+                $row_key = $synonyms[strtolower($row_key)];
+            }
+            if(!isset($vals[$row_key])) {
+                $vals[$row_key] = 0;
+            }
+
+            $vals[$row_key] += $row['total'];
+        }
+        return $vals;
+    }
+    public function getSynonymsByTreeId($treeId) {
+        $sql = "SELECT * from $this->synonym_table where family_tree_id = ? ";
+        $result = $this->db->prepare($sql);
+        $result->execute([$treeId]);
+        $vals = [];
+        foreach ($result->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $vals[strtolower($row['key'])] = $row['value'];
         }
         return $vals;
     }
