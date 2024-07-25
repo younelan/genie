@@ -134,7 +134,6 @@ class TreeModel
                     WHERE family_tree_id = ? 
                     GROUP BY $field
                     ORDER BY total desc
-                    LIMIT $limit
                     ";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$treeId]);
@@ -150,6 +149,11 @@ class TreeModel
             }
 
             $vals[$row_key] += $row['total'];
+        }
+        arsort($vals);
+        if($limit>0) {
+            $vals = array_slice($vals, 0, $limit, true);
+
         }
         return $vals;
     }
