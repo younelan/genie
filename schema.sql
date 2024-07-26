@@ -37,10 +37,10 @@ CREATE TABLE `person` (
   `place_of_death` VARCHAR(255) DEFAULT NULL,
   `gender_id` int DEFAULT NULL,
   `spouse_id` int DEFAULT NULL,
-  `optional_fields` json DEFAULT NULL
+  `optional_fields` json DEFAULT NULL,
   `body` text CHARACTER DEfAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `passed` tinyint(1) DEFAULT NULL
 ); 
 
@@ -52,7 +52,9 @@ CREATE TABLE `person_relationship` (
   `relationship_start` DATE DEFAULT NULL,
   `relationship_end` DATE DEFAULT NULL,
   `optional_fields` json DEFAULT NULL,
-  `relationship_type_id` int NOT NULL
+  `relationship_type_id` int NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ); 
 
 CREATE TABLE `relationship_type` (
