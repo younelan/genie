@@ -62,11 +62,11 @@
     </nav>
 
     <a href="index.php?action=edit_tree&tree_id=<?php echo htmlspecialchars($_GET['family_tree_id'] ?? $_GET['tree_id']); ?>">Back to Home</a>
-    <svg width="3960" height="3600"></svg>
+    <svg width="3960" height="3000"></svg>
     <script>
         const familyTreeId = <?php echo htmlspecialchars($_GET['family_tree_id'] ?? $_GET['tree_id']); ?>;
     </script>
-    <script src="res/tree.js"></script>
+    <script src="res/tree.js?version=1.1"></script>
 </body>
 
 </html>
