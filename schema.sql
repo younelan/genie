@@ -75,6 +75,13 @@ INSERT INTO `relationship_type` (`id`, `family_tree_id`, `description`) VALUES
 (8, 1, 'Cousin'),
 (9, 1, 'Step-Parent');
 
+CREATE TABLE taxonomy_terms (
+    term_id INT AUTO_INCREMENT PRIMARY KEY,
+    family_tree_id int NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    category_id INT
+);
+
 CREATE TABLE `users` (
   `id` int NOT NULL,
   `name` VARCHAR(100) NOT NULL,
