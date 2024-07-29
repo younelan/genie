@@ -108,7 +108,9 @@ class MemberModel
         if(!$tree_id || !$member_id || !$tag) {
             return false;
         };
-        $query = 'DELETE from $this->people_tag_table where (tag,family_tree_id,member_id) VALUES (:tag_name,:tree_id,:member_id)';
+        //$query = 'DELETE from $this->people_tag_table where (tag,family_tree_id,member_id) VALUES (:tag_name,:tree_id,:member_id)';
+        //$query = "DELETE FROM $this->people_tag_table (tag,family_tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
+        $query = "DELETE FROM $this->people_tag_table where tag=:tag_name and family_tree_id=:tree_id and person_id=:member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':member_id', $member_id);
