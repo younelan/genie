@@ -11,6 +11,9 @@ require_once "$basedir/controllers/TreeController.php";
 require_once "$basedir/controllers/MemberController.php";
 
 function apachelog($foo) {
+    if(is_array($foo)) {
+        $foo = print_r($foo,true);
+    }
     file_put_contents('php://stderr', print_r($foo, TRUE)) ;
 }
 $action = $_GET['action'] ?? $_POST['action']??'';
@@ -25,7 +28,20 @@ if (!$userId) {
 
 $treeController = new TreeController($db, $userId);
 $memberController = new MemberController($db);
-
+// if($action) {
+//     switch($action) {
+//         //case 'add_tag':
+//         //case 'delete_tag':
+//         case 'reload_tags':
+//         case 'add':
+//         case 'delete':
+//         apachelog("************************* Action $action *****");
+//         apachelog($action);
+//         apachelog($_POST);
+//         break;
+    
+//     }
+// }
 switch ($action) {
     case 'list_trees':
         $treeController->listTrees();
@@ -55,7 +71,40 @@ switch ($action) {
         $treeId = $_GET['tree_id'];
         $memberController->addMember($treeId);
         break;
+    case 'add_tag':
 
+        $response =  $memberController->addTag();
+        apachelog($response);
+        echo $response;
+        exit;
+        // Add tag to database or storage
+        // Example response
+        // apachelog("action add tag");
+        // if($memberController->addTag()) {
+        //     echo json_encode(['status' => 'success']);
+        // } else {
+        //     echo json_encode(['status' => 'error']);
+        // }
+        break;
+
+    case 'delete_tag':
+        // Remove tag from database or storage
+        // Example response
+        apachelog("action delete tag");
+
+        if($memberController->deleteTag()) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
+        break;
+
+    case 'reload_tags':
+        // Fetch tags from database or storage
+        // Example response with hardcoded tags for demonstration
+
+        $tags = $memberController->listTags();
+        break;
     case 'view_member':
     case 'edit_member':
         $memberId = $_GET['member_id'];

@@ -7,7 +7,7 @@
     <script src="themes/bootstrap/js/popper.min.js"></script>
     <script src="themes/bootstrap/js/bootstrap.min.js"></script>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="res/style.css?Version=1">
+    <link rel="stylesheet" href="res/style.css?Version=1.0.1">
     <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,6 +63,38 @@
             border: 1px solid #ccc;
             padding: 5px;
         }
+
+
+/*tags*/
+.tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #ccc;
+    padding: 5px;
+    width: 300px;
+    margin-bottom: 10px;
+}
+.tag {
+    display: flex;
+    align-items: center;
+    background-color: #ffffbd;
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin: 2px;
+}
+.tag span {
+    margin-right: 5px;
+}
+.tag .close-btn {
+    cursor: pointer;
+    font-size: 12px;
+}
+.tag-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    min-width: 50px;
+}
     </style>
 </head>
 <body>
@@ -126,8 +158,11 @@
             <option value="2" <?php if ($member['gender_id'] == 2) echo 'selected'; ?>>Femme</option>
             <!-- Add more options as needed -->
         </select><br>
+        <div id="taxonomy-tags">
+        <div class="tag-input-container" data-tags="<?php echo $tagString ?>" data-endpoint="?"></div>
+        <button id="copyTagsButton1">Copy Tags from Box 1</button>
 
-
+        </div>
 
         <div id="additional-fields" style="display: none;">
             <label for="alias1">Title:</label>
@@ -306,5 +341,204 @@
         });
     </script>
 </body>
+
+
+
+
+<script>
+class TagInput {
+    constructor(container) {
+        this.container = container;
+        this.tagInput = document.createElement('div');
+        this.hiddenInput = document.createElement('input');
+        this.tags = [];
+        this.endpoint = this.container.getAttribute('data-endpoint');
+        // this.memberId = this.container.getAttribute('data-member-id');
+        // this.treeId = this.container.getAttribute('data-tree-id');
+        this.memberId = memberId
+        this.treeId = treeId
+        this.tagInput.classList.add('tag-input');
+        this.tagInput.contentEditable = true;
+        this.hiddenInput.type = 'hidden';
+        this.hiddenInput.name = 'tags';
+        this.container.appendChild(this.tagInput);
+        this.container.appendChild(this.hiddenInput);
+
+        this.init();
+    }
+
+    async init() {
+        const initialTags = this.container.getAttribute('data-tags');
+        if (initialTags) {
+            this.tags = initialTags.split(',').map(tag => tag.trim());
+            this.tags.forEach(tag => this.renderTag(tag));
+        }
+
+        this.tagInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.tagInput.addEventListener('paste', (e) => this.handlePaste(e));
+        this.container.addEventListener('click', () => this.tagInput.focus());
+    }
+
+    async handleKeyDown(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const tagText = this.tagInput.innerText.trim().replace(/,$/, '');
+            if (tagText && !this.tags.includes(tagText)) {
+                await this.addTagToServer(tagText);
+            }
+            this.tagInput.innerText = '';
+        } else if (e.key === 'Backspace' && this.tagInput.innerText === '') {
+            const removedTag = this.tags.pop();
+            if (removedTag) {
+                await this.removeTagFromServer(removedTag);
+            }
+        }
+    }
+
+    async handlePaste(e) {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const pastedTags = paste.split(',').map(tag => tag.trim()).filter(tag => tag && !this.tags.includes(tag));
+        for (const tag of pastedTags) {
+            await this.addTagToServer(tag);
+        }
+    }
+
+    async addTagToServer(tag) {
+        const formData = new FormData();
+        formData.append('action', 'add_tag');
+        formData.append('tag', tag);
+        formData.append('member_id', this.memberId);
+        formData.append('tree_id', this.treeId);
+
+        const response = await fetch(this.endpoint, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                this.addTag(tag);
+            } else {
+                console.error('Failed to add tag to server', data.message);
+            }
+        } else {
+            console.error('Failed to add tag to server');
+        }
+    }
+
+    async removeTagFromServer(tag) {
+        const formData = new FormData();
+        formData.append('action', 'delete_tag');
+        formData.append('tag', tag);
+        formData.append('member_id', this.memberId);
+        formData.append('tree_id', this.treeId);
+
+        const response = await fetch(this.endpoint, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                this.removeTag(tag);
+            } else {
+                console.error('Failed to remove tag from server', data.message);
+            }
+        } else {
+            console.error('Failed to remove tag from server');
+        }
+    }
+
+    async reloadTagsFromServer() {
+        const formData = new FormData();
+        formData.append('action', 'reload_tag');
+        formData.append('member_id', this.memberId);
+        formData.append('tree_id', this.treeId);
+
+        const response = await fetch(this.endpoint, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 'success') {
+                this.tags = data.tags;
+                this.updateTagsDisplay();
+            } else {
+                console.error('Failed to reload tags from server', data.message);
+            }
+        } else {
+            console.error('Failed to reload tags from server');
+        }
+    }
+
+    renderTag(text) {
+        const tagHtml = `
+            <div class="tag">
+                <span class="tag-text">${text}</span>
+                <span class="close-btn">x</span>
+            </div>`;
+        const template = document.createElement('template');
+        template.innerHTML = tagHtml.trim();
+        const tagElement = template.content.firstChild;
+        tagElement.querySelector('.close-btn').addEventListener('click', async () => {
+            await this.removeTagFromServer(text);
+        });
+        this.container.insertBefore(tagElement, this.tagInput);
+        this.tags.push(text);
+        this.updateHiddenInput();
+    }
+
+    addTag(text) {
+        this.renderTag(text);
+    }
+
+    removeTag(text) {
+        const tagElement = Array.from(this.container.querySelectorAll('.tag')).find(el => el.querySelector('.tag-text').innerText === text);
+        if (tagElement) {
+            this.container.removeChild(tagElement);
+        }
+
+        this.tags = this.tags.filter(t => t !== text);
+        this.updateHiddenInput();
+    }
+
+    updateTagsDisplay() {
+        this.container.querySelectorAll('.tag').forEach(tagElement => this.container.removeChild(tagElement));
+        this.tags.forEach(tag => this.renderTag(tag));
+    }
+
+    updateHiddenInput() {
+        this.hiddenInput.value = this.tags.join(',');
+    }
+
+    copyTagsToClipboard() {
+        const tagsString = this.tags.join(',');
+        navigator.clipboard.writeText(tagsString).then(() => {
+            alert('Tags copied to clipboard');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tagInputContainers = document.querySelectorAll('.tag-input-container');
+    const tagInputs = Array.from(tagInputContainers).map(container => new TagInput(container));
+
+    document.getElementById('copyTagsButton1').addEventListener('click', () => {
+        tagInputs[0].copyTagsToClipboard();
+    });
+
+
+});
+
+
+</script>
+
 
 </html>

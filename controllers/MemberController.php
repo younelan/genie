@@ -18,6 +18,7 @@ class MemberController
     public function editMember($memberId)
     {
         $member = $this->member->getMemberById($memberId);
+        $tagString = $this->member->getTagString($memberId);
         if (!$member) {
             exit('Member not found.');
         }
@@ -26,9 +27,9 @@ class MemberController
         $relationships = $this->member->getMemberRelationships($memberId);
         $relationship_types = $this->member->getRelationshipTypes();
 
-        apachelog("++++++++++++++++" . $_SERVER['REQUEST_METHOD']);
+        //apachelog("++++++++++++++++" . $_SERVER['REQUEST_METHOD']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            apachelog("--------------");
+            //apachelog("--------------");
             $updatedMember = [
                 'memberId' => $memberId,
                 'firstName' => $_POST['first_name'],
@@ -45,8 +46,8 @@ class MemberController
                 'body' => $_POST['body'],
                 'title' => $_POST['title'],
             ];
-            apachelog("++++++++++++++++");
-            apachelog($updatedMember);
+            ///apachelog("++++++++++++++++");
+            //apachelog($updatedMember);
             // Handle member update logic
             $success = $this->member->updateMember($updatedMember);
 
@@ -114,6 +115,40 @@ class MemberController
         $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships
         echo json_encode($relationships); // Output relationships as JSON (for AJAX handling)
     }
+    public function listTags() {
+        $treeId = $_POST['tree_id'];
+        $memberId = $_POST['member_id'];
+        $tagList = $this->member->listTags($treeId, $memberId);
+
+        echo json_encode(['success'=>true,'tags'=>$tagList]);
+    }
+    public function addTag() {
+        $newTag = [
+            'tree_id'=>$_POST['tree_id'],
+            'member_id'=> $_POST['member_id'],
+            'tag'=> $_POST['tag']
+        ];
+        $success = $this->member->addTag($newTag);
+        if ($success) {
+            return json_encode(['success' => true]);
+        } else {
+            return json_encode(['success' => false]);
+        }
+    }
+    public function deleteTag() {
+        $delTag = [
+            'tree_id'=>$_POST['tree_id'],
+            'member_id'=> $_POST['member_id'],
+            'tag'=> $_POST['tag']
+        ];
+        $success = $this->member->deleteTag($delTag);
+        if ($success) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+        exit;
+    }
     public function addRelationship()
     {
         $memberId = $_POST['member_id'] ?? null;
@@ -141,7 +176,7 @@ class MemberController
             //$firstName, $lastName, $familyTreeId
             $personId2 = $this->member->addMember($new_member);
         }
-        apachelog("--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
+        //apachelog("--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
 
         if ($personId2) {
             $success = $this->member->addRelationship($personId1, $personId2, $relationshipType, $familyTreeId);
@@ -165,7 +200,7 @@ class MemberController
         $relationStart = isset($postData['relation_start']) ? $postData['relation_start'] : null;
         $relationEnd = isset($postData['relation_start']) ? $postData['relation_end'] : null;
         $relationshipType = isset($postData['relationship_type']) ? $postData['relationship_type'] : null;
-        apachelog("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
+        //apachelog("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
         if (!$relationshipId || !$personId1 || !$relationshipType) {
             return json_encode(['success' => false, 'message' => 'Missing required parameters']);
         }

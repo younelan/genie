@@ -5,6 +5,7 @@ class MemberModel
     private $person_table = 'person';
     private $relation_table = 'person_relationship';
     private $relation_type_table = 'relationship_type';
+    private $people_tag_table = 'people_tags';
     private $tree_table = 'family_tree';
 
     public function __construct($db)
@@ -35,6 +36,7 @@ class MemberModel
         //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
     }
+    
 
     // Fetch relationship types from the database
     public function getRelationshipTypes($tree_id = 1)
@@ -53,6 +55,72 @@ class MemberModel
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getTags($memberId)
+    {
+        $query = "SELECT * FROM $this->people_tag_table t
+        WHERE person_id = :member_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':member_id', $memberId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function listTags( $memberId)
+    {
+        $raw_tags = $this->getTags($memberId);
+        $tagList = [];
+        foreach ($raw_tags as $tag) {
+            if(!in_array($tag['tag'],$tagList)) {
+                $tagList[] = $tag['tag'];
+
+            }
+        }
+        return $tagList;
+    }
+    public function getTagString($memberId) {
+        $raw_concat_tags = $this->listTags( $memberId);
+        $concat_tags = implode(",", $raw_concat_tags);
+        return $concat_tags;
+    }
+    public function addTag($newTag) {
+        // apachelog($newTag);
+
+        $tree_id = intval($newTag['tree_id'])?? false;
+        $person_id = intval($newTag['member_id'])?? false;
+        $tag = $newTag['tag']?? false;
+        if(!$tree_id || !$person_id || !$tag) {
+            return false;
+        };
+        $query = "INSERT INTO $this->people_tag_table (tag,family_tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
+        // apachelog($query . "\n");
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':tag_name', $tag);
+        $stmt->bindParam(':person_id', $person_id);
+        $stmt->bindParam(':tree_id', $tree_id);
+        $result = $stmt->execute();        
+
+        return $this->db->lastInsertId();
+    }
+    public function deleteTag($delTag) {
+        $tree_id = intval($delTag['tree_id'])?? false;
+        $member_id = intval($delTag['member_id'])?? false;
+        $tag = $delTag['tag']?? false;
+        if(!$tree_id || !$member_id || !$tag) {
+            return false;
+        };
+        $query = 'DELETE from $this->people_tag_table where (tag,family_tree_id,member_id) VALUES (:tag_name,:tree_id,:member_id)';
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':tag_name', $tag);
+        $stmt->bindParam(':member_id', $member_id);
+        $stmt->bindParam(':tree_id', $tree_id);
+        $result = $stmt->execute();
+        if (!$stmt) {
+            apachelog("\nPDO::errorInfo():\n");
+            apachelog($this->db->errorInfo());
+        }
+        return $stmt->lastInsertId();
+    }
+
     public function autocompleteMember($term, $memberId, $tree_id = 1)
     {
         $query = "SELECT id, first_name, last_name FROM $this->person_table  WHERE 

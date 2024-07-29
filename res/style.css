@@ -43,3 +43,33 @@ button {
     border-radius: 5px;
 }
 
+/*tags*/
+.tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #ccc;
+    padding: 5px;
+    width: 300px;
+    margin-bottom: 10px;
+}
+.tag {
+    display: flex;
+    align-items: center;
+    background-color: #81cde4;
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin: 2px;
+}
+.tag span {
+    margin-right: 5px;
+}
+.tag .close-btn {
+    cursor: pointer;
+    font-size: 12px;
+}
+.tag-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    min-width: 50px;
+}
