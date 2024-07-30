@@ -169,6 +169,7 @@
                             <input type="text" name="place_of_birth" id="place_of_birth" value="<?php echo htmlspecialchars($member['place_of_birth']); ?>"><br>
 
 
+
                             <label for="gender_id">Gender:</label>
                             <select name="gender_id" id="gender_id">
                                 <option value="1" <?php if ($member['gender_id'] == 1) echo 'selected'; ?>>Homme</option>
@@ -179,6 +180,11 @@
                                 <div class="tag-label">Tags: <button style='float:right;margin-right:30px;' id="copyTagsButton1">Copy</button></div>
                                 <div class="tag-input-container" data-tags="<?php echo $tagString ?>" data-endpoint="?"></div>
                             </div>
+                            <label for="source">Source:</label>
+                            <input type="text" name="source" id="place_of_birth" value="<?php echo htmlspecialchars($member['source']); ?>"><br>
+                            <?php $aliveChecked = !empty($member['alive']) ? 'checked' : ''; ?>
+                            <label for="alive">Alive:</label>
+                            <input type="checkbox" name="alive" id="alive" value="1" <?php echo $aliveChecked; ?>><br>
 
                             <div id="additional-fields" style="display: none;">
                                 <label for="alias1">Title:</label>
