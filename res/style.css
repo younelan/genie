@@ -48,6 +48,7 @@ button {
     display: flex;
     flex-wrap: wrap;
     border: 1px solid #ccc;
+    background-color: white;
     padding: 5px;
     width: 300px;
     margin-bottom: 10px;
@@ -55,7 +56,8 @@ button {
 .tag {
     display: flex;
     align-items: center;
-    background-color: #81cde4;
+    background-color: #cb888c;
+    color: white;
     border-radius: 3px;
     padding: 3px 8px;
     margin: 2px;

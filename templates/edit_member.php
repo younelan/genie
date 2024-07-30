@@ -70,6 +70,7 @@
     display: flex;
     flex-wrap: wrap;
     border: 1px solid #ccc;
+    background-color: white;
     padding: 5px;
     width: 300px;
     margin-bottom: 10px;
@@ -77,7 +78,8 @@
 .tag {
     display: flex;
     align-items: center;
-    background-color: #ffffbd;
+    background-color: #cb888c;
+    color: white;
     border-radius: 3px;
     padding: 3px 8px;
     margin: 2px;
@@ -159,9 +161,8 @@
             <!-- Add more options as needed -->
         </select><br>
         <div id="taxonomy-tags">
+        <div class="tag-label">Tags:         <button style='float:right;margin-right:30px;' id="copyTagsButton1">Copy</button></div>
         <div class="tag-input-container" data-tags="<?php echo $tagString ?>" data-endpoint="?"></div>
-        <button id="copyTagsButton1">Copy Tags from Box 1</button>
-
         </div>
 
         <div id="additional-fields" style="display: none;">
