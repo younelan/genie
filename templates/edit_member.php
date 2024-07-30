@@ -181,14 +181,14 @@
                                 <div class="tag-input-container" data-tags="<?php echo $tagString ?>" data-endpoint="?"></div>
                             </div>
                             <label for="source">Source:</label>
-                            <input type="text" name="source" id="place_of_birth" value="<?php echo htmlspecialchars($member['source']); ?>"><br>
+                            <input type="text" name="source" id="source" value="<?php echo htmlspecialchars($member['source']); ?>"><br>
                             <?php $aliveChecked = !empty($member['alive']) ? 'checked' : ''; ?>
                             <label for="alive">Alive:</label>
                             <input type="checkbox" name="alive" id="alive" value="1" <?php echo $aliveChecked; ?>><br>
 
                             <div id="additional-fields" style="display: none;">
                                 <label for="alias1">Title:</label>
-                                <input type="text" name="title" id="alias1" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
+                                <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
                                 <label for="alias1">Alias1:</label>
                                 <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
                                 <label for="alias2">Alias2:</label>
