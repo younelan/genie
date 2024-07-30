@@ -439,7 +439,6 @@ class TagInput {
             method: 'POST',
             body: formData
         });
-
         if (response.ok) {
             const data = await response.json();
             if (data.status === 'success') {

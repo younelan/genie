@@ -28,20 +28,6 @@ if (!$userId) {
 
 $treeController = new TreeController($db, $userId);
 $memberController = new MemberController($db);
-// if($action) {
-//     switch($action) {
-//         //case 'add_tag':
-//         //case 'delete_tag':
-//         case 'reload_tags':
-//         case 'add':
-//         case 'delete':
-//         apachelog("************************* Action $action *****");
-//         apachelog($action);
-//         apachelog($_POST);
-//         break;
-    
-//     }
-// }
 switch ($action) {
     case 'list_trees':
         $treeController->listTrees();
@@ -50,11 +36,9 @@ switch ($action) {
         $treeController->addTree();
         break;
     case 'view_tree':
-        //$controller = new TreeController();
         $treeController->viewTree();
         break;
     case 'get_tree_data':
-        //$controller = new TreeController();
         $treeController->getTreeData();
         break;
     case 'delete_tree':
@@ -74,24 +58,11 @@ switch ($action) {
     case 'add_tag':
 
         $response =  $memberController->addTag();
-        apachelog($response);
         echo $response;
         exit;
-        // Add tag to database or storage
-        // Example response
-        // apachelog("action add tag");
-        // if($memberController->addTag()) {
-        //     echo json_encode(['status' => 'success']);
-        // } else {
-        //     echo json_encode(['status' => 'error']);
-        // }
         break;
 
     case 'delete_tag':
-        // Remove tag from database or storage
-        // Example response
-        apachelog("action delete tag");
-
         if($memberController->deleteTag()) {
             echo json_encode(['status' => 'success']);
         } else {
@@ -100,9 +71,6 @@ switch ($action) {
         break;
 
     case 'reload_tags':
-        // Fetch tags from database or storage
-        // Example response with hardcoded tags for demonstration
-
         $tags = $memberController->listTags();
         break;
     case 'view_member':

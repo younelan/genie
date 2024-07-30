@@ -83,8 +83,6 @@ class MemberModel
         return $concat_tags;
     }
     public function addTag($newTag) {
-        // apachelog($newTag);
-
         $tree_id = intval($newTag['tree_id'])?? false;
         $person_id = intval($newTag['member_id'])?? false;
         $tag = $newTag['tag']?? false;
@@ -92,7 +90,6 @@ class MemberModel
             return false;
         };
         $query = "INSERT INTO $this->people_tag_table (tag,family_tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
-        // apachelog($query . "\n");
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':person_id', $person_id);
@@ -108,19 +105,13 @@ class MemberModel
         if(!$tree_id || !$member_id || !$tag) {
             return false;
         };
-        //$query = 'DELETE from $this->people_tag_table where (tag,family_tree_id,member_id) VALUES (:tag_name,:tree_id,:member_id)';
-        //$query = "DELETE FROM $this->people_tag_table (tag,family_tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
         $query = "DELETE FROM $this->people_tag_table where tag=:tag_name and family_tree_id=:tree_id and person_id=:member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':member_id', $member_id);
         $stmt->bindParam(':tree_id', $tree_id);
         $result = $stmt->execute();
-        if (!$stmt) {
-            apachelog("\nPDO::errorInfo():\n");
-            apachelog($this->db->errorInfo());
-        }
-        return $stmt->lastInsertId();
+        return $result;
     }
 
     public function autocompleteMember($term, $memberId, $tree_id = 1)
