@@ -8,6 +8,8 @@ Written relatively quickly, needs serious refactor. As is, no warranties.
 
 Until I have vetted the app more carefully, I have removed auth.
 
+checkout [The history file](history.md) for changes
+
 ## Features:
 - multiple trees
 - Multiple people can have as many relationships as possible
@@ -34,3 +36,10 @@ Until I have vetted the app more carefully, I have removed auth.
         - note: do not use edit relationship, it is buggy right now. Instead, just delete the relationship and create another one
     - view - view a family graphically using D3
 Happy tracking
+
+## Screenshots
+
+- ![Family List](screenshot/family_list.jpg)
+- ![Relationships](screenshot/relationships.jpg)
+- ![List Trees](screenshot/list_trees.jpg)
+

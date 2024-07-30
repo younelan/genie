@@ -82,6 +82,16 @@ CREATE TABLE `relationship_type` (
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 );
+INSERT INTO `relationship_type` (`id`, `family_tree_id`, `description`) VALUES
+(1, 1, 'Fraternal'),
+(2, 1, 'Parent'),
+(3, 1, 'Friend'),
+(4, 1, 'Half Sibling'),
+(5, 1, 'Mariage'),
+(6, 1, 'Fiancailles'),
+(7, 1, 'Child'),
+(8, 1, 'Cousin'),
+(9, 1, 'Step-Parent');
 
 -- Table structure for table `synonyms`
 
