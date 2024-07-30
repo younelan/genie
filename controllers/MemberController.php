@@ -130,9 +130,9 @@ class MemberController
         ];
         $success = $this->member->addTag($newTag);
         if ($success) {
-            return json_encode(['success' => true]);
+            return json_encode(['status'=>'success']);
         } else {
-            return json_encode(['success' => false]);
+            return json_encode(['status'=>'fail']);
         }
     }
     public function deleteTag() {
@@ -143,9 +143,9 @@ class MemberController
         ];
         $success = $this->member->deleteTag($delTag);
         if ($success) {
-            echo json_encode(['success' => true]);
+            return json_encode(['status'=>'success']);
         } else {
-            echo json_encode(['success' => false]);
+            return json_encode(['status'=>'fail']);
         }
         exit;
     }
@@ -176,12 +176,10 @@ class MemberController
             //$firstName, $lastName, $familyTreeId
             $personId2 = $this->member->addMember($new_member);
         }
-        //apachelog("--- member $memberId tree $familyTreeId id1 $personId1 id2 $personId2\n");
 
         if ($personId2) {
             $success = $this->member->addRelationship($personId1, $personId2, $relationshipType, $familyTreeId);
 
-            //$this->member->addRelationship($personId1, $personId2, $relationshipType);
             $response = ['success' => true, 'message' => 'Relationship added successfully.'];
         } else {
             $response = ['success' => false, 'message' => 'Failed to add relationship.'];
