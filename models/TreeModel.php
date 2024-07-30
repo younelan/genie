@@ -56,9 +56,15 @@ class TreeModel
         return $stmt->execute(['tree_id' => $treeId, 'owner_id' => $ownerId]);
     }
 
-    public function getMembersByTreeId($treeId, $offset, $limit)
+    public function getMembersByTreeId($treeId, $offset, $limit, $orderby='')
     {
-        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id LIMIT :offset, :limit";
+        if($orderby) {
+            $orderby = "ORDER BY $orderby";
+        } else {
+            $orderby = '';
+        }
+
+        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id $orderby LIMIT :offset, :limit";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -67,6 +73,16 @@ class TreeModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getLastUpdatesByTreeId($treeId, $offset=0, $limit=15)
+    {
+        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id LIMIT :offset, :limit";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }    
     public function getTreeData($familyTreeId)
     {
         // Fetching nodes
@@ -174,6 +190,7 @@ class TreeModel
         $result->execute([$treeId]);
         return $result->fetchColumn();
     }
+    
     public function countRelationshipsByTreeId($treeId)
     {
         $sql = "SELECT count(*) FROM `$this->relation_table` WHERE family_tree_id = ?";

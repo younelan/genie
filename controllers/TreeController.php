@@ -80,6 +80,7 @@ class TreeController
         $limit = 70; // Number of members per page
         $offset = ($page - 1) * $limit;
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
+        $lastUpdates = $this->tree->getMembersByTreeId($treeId, 0, 10, $orderby='updated_at DESC');
         $totalMembers = $this->tree->getPersonCount($treeId);
         $countByGender = $this->tree->countMembersByTreeId($treeId);
         $countByGender['Total']=$totalMembers;

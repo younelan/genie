@@ -168,7 +168,7 @@
                     </div>
                     <div class="card-body">
                             <ul class="list-group">
-                            <?php foreach ($activities as $idx => $val): ?>
+                            <?php foreach ($eactivities??[] as $idx => $val): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <?php echo "$idx "; ?> 
                                 <span class="badge badge-primary badge-pill"><?php echo $val ?></span>
@@ -176,7 +176,12 @@
                             <?php endforeach; ?> 
                             </ul>
 
-
+                            <?php foreach ($lastUpdates as $member) : ?>
+                                <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
+                                    <?php echo getGenderSymbol($member['gender_id']) ?>
+                                    <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
+                                </a>
+                            <?php endforeach; ?>
                     </div>
                 </div>
                 <div class="card mt-4">
