@@ -1,128 +1,118 @@
-
+DROP TABLE IF EXISTS `family_tree`;
 CREATE TABLE `family_tree` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `owner_id` int NOT NULL,
-  `name` VARCHAR(100) NOT NULL,
-  `description` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE `gender` (
-  `id` int NOT NULL,
-  `description` VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE `synonyms` (
-  `syn_id` int NOT NULL,
-  `tree_id` int NOT NULL,
   `name` varchar(100) NOT NULL,
-  `synonym` varchar(100) NOT NULL
+  `description` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `person` (
-  `id` int NOT NULL,
+-- Table structure for table `gender`
+
+DROP TABLE IF EXISTS `gender`;
+CREATE TABLE `gender` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `description` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+-- Table structure for table `people_tags`
+
+DROP TABLE IF EXISTS `people_tags`;
+CREATE TABLE `people_tags` (
+  `tag_id` int NOT NULL AUTO_INCREMENT,
+  `tag` varchar(100) NOT NULL,
+  `person_id` int DEFAULT NULL,
   `family_tree_id` int NOT NULL,
-  `first_name` VARCHAR(100) NOT NULL,
-  `middle_name` VARCHAR(100) DEFAULT NULL,
-  `last_name` VARCHAR(100) DEFAULT NULL,
-  `alias1` VARCHAR(100) DEFAULT NULL,
-  `alias2` VARCHAR(100) DEFAULT NULL,
-  `alias3` VARCHAR(100) DEFAULT NULL,
+  PRIMARY KEY (`tag_id`)
+);
+
+-- Table structure for table `person`
+
+DROP TABLE IF EXISTS `person`;
+CREATE TABLE `person` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `family_tree_id` int NOT NULL,
+  `title` varchar(20) DEFAULT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `middle_name` varchar(150) DEFAULT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `alias1` varchar(150) DEFAULT NULL,
+  `alias2` varchar(150) DEFAULT NULL,
+  `alias3` varchar(150) DEFAULT NULL,
   `preferred_name` varchar(100) DEFAULT NULL,
   `native_name` varchar(100) DEFAULT NULL,
-  `date_of_birth` DATE DEFAULT NULL,
-  `body` VARCHAR(4000) DEFAULT NULL,
-  `place_of_birth` VARCHAR(255) DEFAULT NULL,
-  `date_of_death` DATE DEFAULT NULL,
-  `place_of_death` VARCHAR(255) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `place_of_birth` varchar(255) DEFAULT NULL,
+  `date_of_death` date DEFAULT NULL,
+  `place_of_death` varchar(255) DEFAULT NULL,
   `gender_id` int DEFAULT NULL,
-  `spouse_id` int DEFAULT NULL,
   `optional_fields` json DEFAULT NULL,
-  `body` text CHARACTER DEfAULT NULL,
+  `body` text ,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `passed` tinyint(1) DEFAULT NULL
-); 
+  `passed` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
 
+-- Table structure for table `person_relationship`
+
+DROP TABLE IF EXISTS `person_relationship`;
 CREATE TABLE `person_relationship` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `family_tree_id` int NOT NULL,
   `person_id1` int NOT NULL,
   `person_id2` int NOT NULL,
-  `relationship_start` DATE DEFAULT NULL,
-  `relationship_end` DATE DEFAULT NULL,
-  `optional_fields` json DEFAULT NULL,
   `relationship_type_id` int NOT NULL,
+  `relation_start` date DEFAULT NULL,
+  `relation_end` date DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-); 
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `optional_fields` json DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
 
+-- Table structure for table `relationship_type`
+
+DROP TABLE IF EXISTS `relationship_type`;
 CREATE TABLE `relationship_type` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `family_tree_id` int NOT NULL,
-  `description` VARCHAR(100) NOT NULL,
-  `optional_fields` json DEFAULT NULL
+  `description` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
 );
 
-INSERT INTO `relationship_type` (`id`, `family_tree_id`, `description`) VALUES
-(1, 1, 'Fraternal'),
-(2, 1, 'Parent'),
-(3, 1, 'Friend'),
-(4, 1, 'Half Sibling'),
-(5, 1, 'Mariage'),
-(6, 1, 'Fiancailles'),
-(7, 1, 'Child'),
-(8, 1, 'Cousin'),
-(9, 1, 'Step-Parent');
+-- Table structure for table `synonyms`
 
-CREATE TABLE taxonomy_terms (
-    term_id INT AUTO_INCREMENT PRIMARY KEY,
-    family_tree_id int NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    category_id INT
+DROP TABLE IF EXISTS `synonyms`;
+CREATE TABLE `synonyms` (
+  `syn_id` int NOT NULL AUTO_INCREMENT,
+  `family_tree_id` int NOT NULL,
+  `key` varchar(100) NOT NULL,
+  `value` varchar(100) NOT NULL,
+  PRIMARY KEY (`syn_id`)
 );
 
+-- Table structure for table `taxonomy_terms`
+
+DROP TABLE IF EXISTS `taxonomy_terms`;
+CREATE TABLE `taxonomy_terms` (
+  `term_id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `category_id` int DEFAULT NULL,
+  PRIMARY KEY (`term_id`)
+);
+
+-- Table structure for table `users`
+
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
-  `id` int NOT NULL,
-  `name` VARCHAR(100) NOT NULL,
-  `email` VARCHAR(100) NOT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
 );
-
-ALTER TABLE `family_tree`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `gender`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `person`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `person_relationship`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `relationship_type`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
-
-ALTER TABLE `family_tree`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-
-ALTER TABLE `gender`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `person`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-
-ALTER TABLE `person_relationship`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-
-ALTER TABLE `relationship_type`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
-
-ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
