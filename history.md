@@ -7,6 +7,7 @@ Check out [The README file](README.md) for more info
 	* Simplicity
 		* templates
 		* Auth
+		* Config
 	* Translation
 	* Use Simplicity for templates
 	* tags for relationships
