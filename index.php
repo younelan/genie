@@ -10,6 +10,11 @@ require_once "$basedir/models/MemberModel.php";
 require_once "$basedir/controllers/TreeController.php";
 require_once "$basedir/controllers/MemberController.php";
 
+//$i18n = new I18n();
+
+function get_translation($i18nstring) {
+    return $i18nstring;
+}
 function apachelog($foo) {
     if(is_array($foo)) {
         $foo = print_r($foo,true);

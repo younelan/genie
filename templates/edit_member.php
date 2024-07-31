@@ -188,7 +188,7 @@
 
                             <div id="additional-fields" style="display: none;">
                                 <label for="alias1">Title:</label>
-                                <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
+                                <input type="text" name="title" id="titlel" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
                                 <label for="alias1">Alias1:</label>
                                 <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
                                 <label for="alias2">Alias2:</label>
@@ -198,16 +198,16 @@
                                 <label for="body">Details</label>
                                 <textarea id="body" name=body cols=50 rows=10><?php echo htmlspecialchars($member['body']); ?></textarea>
                                 <br />
-                                <label for="date_of_death">Date of Death:</label>
+                                <label for="date_of_death"><?php echo get_translation('Date of Death')?>:</label>
                                 <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
 
-                                <label for="place_of_death">Place of Death:</label>
+                                <label for="place_of_death"><?php echo get_translation('Place of Death');?>:</label>
                                 <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
 
                             </div>
                             <br />
 
-                            <button type="submit">Update Member</button> <button type="button" id="toggle-fields-btn">More</button>
+                            <button type="submit"><?php echo get_translation('Update Member');?></button> <button type="button" id="toggle-fields-btn">More</button>
                         </form>
                     </div>
 

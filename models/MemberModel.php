@@ -258,6 +258,7 @@ class MemberModel
                   JOIN $this->person_table  p1 ON pr.person_id1 = p1.id
                   JOIN $this->person_table  p2 ON pr.person_id2 = p2.id
                   JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
+                  ORDER BY pr.relationship_type_id 
                   WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['memberId' => $memberId]);
