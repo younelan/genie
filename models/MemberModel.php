@@ -207,7 +207,7 @@ class MemberModel
         $alias1 = $member['alias1'];
         $alias2 = $member['alias2'];
         $alias3 = $member['alias3'];
-        $alias3 = $member['source'];
+        $source = $member['source'];
         $alive = intval($member['alive']);
         foreach ($member as $key => $value) {
             if (!$value) {
@@ -243,7 +243,7 @@ class MemberModel
         $stmt->bindParam(':alias1', $alias1);
         $stmt->bindParam(':alias2', $alias2);
         $stmt->bindParam(':alias3', $alias3);
-        $stmt->bindParam(':source', $alias3);
+        $stmt->bindParam(':source', $source);
         $stmt->bindParam(':body', $body);
         $stmt->bindParam(':alive', $alive);
         $stmt->bindParam(':title', $title);
