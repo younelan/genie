@@ -87,17 +87,22 @@
 
                     <?php if ($totalPages > 1) : ?>
                         <style>
-                            .pagination li {
+                            /* .pagination li {
                                 display: inline-block;
+                            } */
+                            .pagination {
+                                display: flex;
+                                flex-wrap: wrap;
                             }
+
                         </style>
                         <nav>
-                            <ul class='pagination'>
+                            <div class='pagination'>
                                 <b>Pages: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                                    <li><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>&nbsp;
-                                    </li>
+                                    <div><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a> &nbsp;
+                                </div>
                                 <?php endfor; ?>
-                            </ul>
+                            </div>
                         </nav>
                     <?php endif; ?>
                     <input type="text" id="search" placeholder="Chercher par nom...">
@@ -119,12 +124,12 @@
                     }
                 </style>
                 <nav>
-                <ul class='pagination'>
+                <div class='pagination'>
                                 <b>Pages: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
-                                    <li><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>&nbsp;
-                                    </li>
+                                    <div><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>&nbsp;
+                                    </div>
                                 <?php endfor; ?>
-                            </ul>
+                        </div>
                 </nav>
             <?php endif; ?>
             <?php if ($treeId) : ?>
