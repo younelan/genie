@@ -61,15 +61,15 @@
         <nav class="navbar navbar-expand-md navbar-dark fixed-top">
         <img src="res/genie.png" height="40" width="auto" alt="Genie"/> &nbsp;
 
-            <a class="navbar-brand" href="?">Genie: Membres Famille</a>
+            <a class="navbar-brand" href="?">Genie: <?php echo get_translation("Family Members")?></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>">Nouveau Membre</a></li>
-                    <li><a class="nav-link" href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>">Visualiser</a></li>
-                    <li><a class="nav-link" href="index.php?action=list_trees">Arbres</a></li>
+                    <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>"><?php echo get_translation("New Member")?></a></li>
+                    <li><a class="nav-link" href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>"><?php echo get_translation("Visualize")?></a></li>
+                    <li><a class="nav-link" href="index.php?action=list_trees"><?php echo get_translation("Trees");?></a></li>
                 </ul>
             </div>
         </nav>
@@ -81,7 +81,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header">
-                        Membres de la Famille
+                    <?php echo get_translation("Family Members"); ?>
                     </div>
                     <div class="card-body">
 
@@ -98,14 +98,14 @@
                         </style>
                         <nav>
                             <div class='pagination'>
-                                <b>Pages: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                                <b> <?php echo get_translation("Pages"); ?>: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
                                     <div><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a> &nbsp;
                                 </div>
                                 <?php endfor; ?>
                             </div>
                         </nav>
                     <?php endif; ?>
-                    <input type="text" id="search" placeholder="Chercher par nom...">
+                    <input type="text" id="search" placeholder="<?php echo get_translation("Search By Name"); ?>...">
                         <div class="list-group" id="memberslist">
                             <?php foreach ($members as $member) : ?>
                                 <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id=<?php echo $member['id']; ?>">
@@ -147,15 +147,15 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header">
-                        Statistiques
+                    <?php echo get_translation("Statistics"); ?>
                     </div>
                     <div class="card-body">
                         <?php foreach($stats as $blockname=>$statblock) : ?>
-                            <div><?php echo $blockname ?></div>
+                            <div><?php echo get_translation($blockname) ?></div>
                             <ul class="list-group">
                             <?php foreach ($statblock as $idx => $val): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <?php echo "$idx "; ?> 
+                                <?php echo get_translation($idx) . " "; ?> 
                                 <span class="badge badge-primary badge-pill"><?php echo $val ?></span>
                                 </li>
                             <?php endforeach; ?> 
@@ -169,13 +169,13 @@
             <div class="col-lg-4 mb-4">
                 <div class="card">
                     <div class="card-header">
-                        Activités Recentes
+                    <?php echo get_translation("Recent Activity"); ?>
                     </div>
                     <div class="card-body">
                             <ul class="list-group">
                             <?php foreach ($eactivities??[] as $idx => $val): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <?php echo "$idx "; ?> 
+                                <?php echo get_translation($idx) . " "; ?> 
                                 <span class="badge badge-primary badge-pill"><?php echo $val ?></span>
                                 </li>
                             <?php endforeach; ?> 
@@ -191,13 +191,13 @@
                 </div>
                 <div class="card mt-4">
                     <div class="card-header">
-                        Evenements
+                    <?php echo get_translation("Events"); ?>
                     </div>
                     <div class="card-body">
                     <ul class="list-group">
                             <?php foreach ($events as $idx => $val): ?>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <?php echo "$idx "; ?> 
+                                <?php echo get_translation($idx) . " "; ?> 
                                 <span class="badge badge-primary badge-pill"><?php echo $val ?></span>
                                 </li>
                             <?php endforeach; ?> 

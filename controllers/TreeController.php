@@ -90,12 +90,12 @@ class TreeController extends AppController
         $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
         $totalPages = ceil($totalMembers / $limit);
         $stats=[
-            'Par Sexe'=> $countByGender,
+            'By Gender'=> $countByGender,
             'Relations'=> [
                 'Total'=>$totalRelationships,
             ],
-            'Par Prénom'=>$countByFirstname,
-            'Par Nom de famille'=>$countByLastname,
+            'By First Name'=>$countByFirstname,
+            'By Last Name'=>$countByLastname,
         ];
         $events = [];
         $activities = [];
