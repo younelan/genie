@@ -1,7 +1,7 @@
 <?php
 // require_once 'Tree.php';
 
-class TreeController
+class TreeController extends AppController
 {
     private $tree;
     private $userId;

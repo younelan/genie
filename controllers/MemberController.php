@@ -1,7 +1,7 @@
 <?php
 // require_once 'Member.php';
 
-class MemberController
+class MemberController extends AppController
 {
     private $member;
 

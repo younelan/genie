@@ -1,6 +1,6 @@
 <?php
 #please put in auth before using it anywhere that's not localhost and locked down from the outside
-class UserModel
+class UserModel extends AppModel
 {
     public static function getCurrentUserId()
     {

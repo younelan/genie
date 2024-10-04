@@ -14,7 +14,7 @@ function getGenderSymbol($gender)
             return '⁉️'; // Unknown or fallback symbol
     }
 }
-class TreeModel
+class TreeModel extends AppModel
 {
     private $db;
     private $tree_table = 'family_tree';

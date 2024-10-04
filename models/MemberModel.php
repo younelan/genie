@@ -1,5 +1,5 @@
 <?php
-class MemberModel
+class MemberModel  extends AppModel
 {
     private $db;
     private $person_table = 'person';

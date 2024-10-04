@@ -4,6 +4,7 @@ session_start();
 $basedir = __DIR__;
 
 require_once "$basedir/config/db.php";
+require_once "$basedir/GenieBase.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
 require_once "$basedir/models/MemberModel.php";
