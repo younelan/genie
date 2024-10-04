@@ -4,6 +4,7 @@ session_start();
 $basedir = __DIR__;
 
 require_once "$basedir/config/db.php";
+require_once "$basedir/defaults.php";
 require_once "$basedir/AppBase.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
@@ -13,8 +14,22 @@ require_once "$basedir/controllers/MemberController.php";
 
 //$i18n = new I18n();
 
-function get_translation($i18nstring) {
-    return $i18nstring;
+function get_translation($i18nstring,$lang=null,$str_translations=null) {
+    global $config;
+
+    if(!$lang) {
+        $lang = $config['lang']??"en";
+    }
+    if(!$str_translations) {
+        $str_translations= $config['translations'][$lang];
+    }
+    
+    if(isset($str_translations[$i18nstring])) {
+        return $str_translations[$i18nstring];
+    } else {
+        return $i18nstring;
+
+    }
 }
 function apachelog($foo) {
     if(is_array($foo)) {
