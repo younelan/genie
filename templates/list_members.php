@@ -125,7 +125,7 @@
                 </style>
                 <nav>
                 <div class='pagination'>
-                                <b>Pages: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                                <b><?php echo get_translation("Pages"); ?>: &nbsp;</b> <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
                                     <div><a href="index.php?action=list_members&tree_id=<?php echo $treeId; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>&nbsp;
                                     </div>
                                 <?php endfor; ?>
@@ -136,7 +136,7 @@
                 <form action="?action=delete_tree" method="post" class="delete-tree-form" style="display: inline;">
                     <input type="hidden" name="action" value="delete_tree">
                     <input type="hidden" name="tree_id" value="<?php echo $treeId; ?>">
-                    <button type="submit">🗑️ Delete</button>
+                    <button type="submit">🗑️ <?php echo get_translation("Delete"); ?></button>
                 </form>
             <?php endif; ?>
                     

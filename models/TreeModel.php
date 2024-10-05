@@ -131,10 +131,10 @@ class TreeModel extends AppModel
         foreach ($counts as $idx => $row) {
             switch ($row['gender_id']) {
                 case 1:
-                    $vals['Hommes'] = $row['total'];
+                    $vals['Men'] = $row['total'];
                     break;
                 case 2:
-                    $vals['Femmes'] = $row['total'];
+                    $vals['Women'] = $row['total'];
                     break;
                 case null:
                 default:

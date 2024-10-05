@@ -18,7 +18,7 @@ function get_translation($i18nstring,$lang=null,$str_translations=null) {
     global $config;
 
     if(!$lang) {
-        $lang = $config['lang']??"en";
+        $lang = $config['lang']??"fr";
     }
     if(!$str_translations) {
         $str_translations= $config['translations'][$lang];
