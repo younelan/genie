@@ -14,10 +14,10 @@ checkout [The history file](history.md) for changes
 - multiple trees
 - Multiple people can have as many relationships as possible
 - optionally display the tree using D3
+- translation in french or english
 
 ## Todo:
 - Add auth
-- Buggy edit relationships
 - permissions to edit tree per user
 - check for input, this was meant to be run localhost
 - add custom fields to both the relationship and the people
