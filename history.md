@@ -8,7 +8,6 @@ Check out [The README file](README.md) for more info
 		* templates
 		* Auth
 		* Config
-	* Translation
 	* Use Simplicity for templates
 	* tags for relationships
 	* User registration 
@@ -16,6 +15,12 @@ Check out [The README file](README.md) for more info
 	* gedcom write/read
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
+
+## 20240905
+    - Classes inherit base class
+    - added translation function
+    - add_tree, edit_member, list_member, edit_member now use translation
+    - added translation for french, english
 
 ## 20240730
 	- Tag support for people
