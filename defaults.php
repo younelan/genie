@@ -94,6 +94,7 @@ $translations["fr"] = [
    "Friend"=>"Ami",
    "Cousin"=>"Cousin(e)",
    "Women"=>"Femmes",
+   "Back to Home"=>"Page D'accueuil",
    "Back to List"=> "Retour à La liste",
    "Add New Family Tree"=> "Ajouter Nouvel Arbre",
    "Add Tree"=>"Ajouter Arbre",
