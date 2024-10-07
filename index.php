@@ -41,14 +41,14 @@ $action = $_GET['action'] ?? $_POST['action']??'';
 
 $user = new UserModel($db);
 $userId = $user->getCurrentUserId();
-
+$config['current-user']=$userId;
 if (!$userId) {
     header("Location: login.php");
     exit();
 }
 
-$treeController = new TreeController($db, $userId);
-$memberController = new MemberController($db);
+$treeController = new TreeController($config);
+$memberController = new MemberController($config);
 switch ($action) {
     case 'list_trees':
         $treeController->listTrees();
@@ -141,7 +141,7 @@ switch ($action) {
         $memberId = $_POST['member_id'] ?? '';
         $personId2 = $_POST['member2_id'] ?? '';
         $relationshipTypeId = $_POST['relationship_type'] ?? '';
-        $controller = new MemberController($db);
+        $controller = new MemberController($config);
         //apachelog($_POST);
         $controller->addRelationship($memberId, $personId2, $relationshipTypeId);
         break;
@@ -156,7 +156,7 @@ switch ($action) {
 
     case 'delete_relationship':
         $relationshipId = $_POST['relationship_id'] ?? '';
-        $controller = new MemberController($db);
+        $controller = new MemberController($config);
         $controller->deleteRelationship($relationshipId);
         break;
 
