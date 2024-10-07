@@ -180,7 +180,7 @@ $config['paths'] = [
    'backend' => __DIR__,
    'plugins' => dirname(__FILE__) . "/plugins",
 ];
-$config_files = ["default_config.json", "data/config.json"];
+$config_files = ["data/default.json", "data/config.json"];
 foreach ($config_files as $fname) {
    if (file_exists(__DIR__ . "/$fname")) {
       $cfg = file_get_contents(__DIR__ . "/$fname");
