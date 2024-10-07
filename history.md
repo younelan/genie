@@ -21,6 +21,8 @@ Check out [The README file](README.md) for more info
     - added translation function
     - add_tree, edit_member, list_member, edit_member now use translation
     - added translation for french, english
+    - breaking change: configuration is moved from db.php to config.json so that additional params like lang can be added
+    - to create a config file, copy default.json to config.json and adjust accordingly
 
 ## 20240730
 	- Tag support for people

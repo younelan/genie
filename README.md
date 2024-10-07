@@ -27,6 +27,11 @@ checkout [The history file](history.md) for changes
 
 - enable php, pdo on your web folder
 - put in a web accessible folder
+- create a configuration file
+  - copy config/default.json to config.json
+  - modify config.json with correct db credentials
+  - choose a language (fr or en)
+
 - ```mysql -u youruser <schema.sql```
 - lock down your server before user, there is no auth
 - on the tree
