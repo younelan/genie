@@ -4,10 +4,13 @@
 class MemberController extends AppController
 {
     private $member;
+    private $config;
 
-    public function __construct($db)
+    public function __construct($config)
     {
-        $this->member = new MemberModel($db);
+        $db = $config['connection']??null;
+        $this->config = $config;
+        $this->member = new MemberModel($config);
         $this->basedir = dirname(__DIR__);
     }
     public function getMemberById($memberId)

@@ -5,12 +5,16 @@ class TreeController extends AppController
 {
     private $tree;
     private $userId;
+
+    private $config = [];
     private $templatedir = ".";
     private $translations = [];
-    public function __construct($db, $userId)
+    public function __construct($config)
     {
-        $this->tree = new TreeModel($db);
-        $this->userId = $userId;
+        $this->config = $config;
+        
+        $this->tree = new TreeModel($config);
+        $this->userId = $config['current-user'];
         $this->basedir = dirname(__DIR__);
     }
     public function getRelationshipTypes()
