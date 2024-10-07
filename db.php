@@ -1,8 +1,8 @@
 <?php
-$dbHost = 'localhost';
-$dbName = 'genealogy';
-$dbUser = 'root';
-$dbPass = ':';
+$dbHost = $config['db']['host'] ?? 'localhost';
+$dbName = $config['db']['name'] ?? 'genealogy';
+$dbUser = $config['db']['user'] ?? 'root';
+$dbPass = $config['db']['pass']??'';
 
 try {
     $db = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);

@@ -173,12 +173,13 @@ $keys = array_keys($translations['fr']);
 $translations['en'] = array_combine($keys, $keys);
 
 $config['translations'] = $translations;
+$root_dir = __DIR__;
 $config['paths'] = [
-   'frontend' => dirname(__DIR__) . "/frontend",
-   'base' => dirname(__DIR__),
-   'data' => __DIR__ . "/data",
-   'backend' => __DIR__,
-   'plugins' => dirname(__FILE__) . "/plugins",
+   'frontend' => $root_dir . "/frontend",
+   'base' => $root_dir ,
+   'data' => $root_dir . "/data",
+   'backend' => $root_dir ,
+
 ];
 $config_files = ["data/default.json", "data/config.json"];
 foreach ($config_files as $fname) {
@@ -193,3 +194,4 @@ foreach ($config_files as $fname) {
       }
    }
 }
+
