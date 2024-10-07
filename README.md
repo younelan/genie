@@ -28,7 +28,7 @@ checkout [The history file](history.md) for changes
 - enable php, pdo on your web folder
 - put in a web accessible folder
 - create a configuration file
-  - copy config/default.json to config.json
+  - copy data/default.json to data/config.json
   - modify config.json with correct db credentials
   - choose a language (fr or en)
 
