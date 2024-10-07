@@ -16,14 +16,20 @@ function getGenderSymbol($gender)
 }
 class TreeModel extends AppModel
 {
-    private $db;
+    private $db,$config;
     private $tree_table = 'family_tree';
     private $person_table = 'person';
     private $relation_table = 'person_relationship';
     private $synonym_table = 'synonyms';
-    public function __construct($db)
+    public function __construct($config)
     {
-        $this->db = $db;
+        $this->config = $config;
+        $this->db = $config['connection'];
+        $this->person_table = $config['tables']['person']??'person';
+        $this->tree_table = $config['tables']['tree']??'family_tree';
+        $this->relation_table = $config['tables']['relation']??'person_relationship';
+        $this->synonym_table = $config['tables']['synonyms']??'synonyms';
+        
     }
 
     public function getAllTreesByOwner($ownerId)

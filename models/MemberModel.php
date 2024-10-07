@@ -2,15 +2,24 @@
 class MemberModel  extends AppModel
 {
     private $db;
+    private $config;
+
     private $person_table = 'person';
     private $relation_table = 'person_relationship';
     private $relation_type_table = 'relationship_type';
     private $people_tag_table = 'people_tags';
     private $tree_table = 'family_tree';
+    private $synonym_table;
 
-    public function __construct($db)
+    public function __construct($config)
     {
-        $this->db = $db;
+        $this->config = $config;
+        $this->db = $config['connection'];
+        $this->person_table = $config['tables']['person']??'person';
+        $this->tree_table = $config['tables']['tree']??'family_tree';
+        $this->relation_table = $config['tables']['relation']??'person_relationship';
+        $this->synonym_table = $config['tables']['synonyms']??'synonyms';
+        
     }
 
     public function addMember($new_member)
