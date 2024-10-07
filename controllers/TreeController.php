@@ -12,7 +12,7 @@ class TreeController extends AppController
     public function __construct($config)
     {
         $this->config = $config;
-        
+
         $this->tree = new TreeModel($config);
         $this->userId = $config['current-user'];
         $this->basedir = dirname(__DIR__);
@@ -53,6 +53,7 @@ class TreeController extends AppController
     }
     public function viewTree()
     {
+        $graph = $this->config['graph'];
         $familyTreeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
         include $this->basedir . "/templates/view_tree.php";
     }
@@ -81,10 +82,12 @@ class TreeController extends AppController
 
     public function listMembers($treeId, $page)
     {
-        $limit = 70; // Number of members per page
+        $limit = $this->config['limits']['members']??70; // Number of members per page
+        $update_limit = $this->config['limits']['updates']??40; // Number of members per page
         $offset = ($page - 1) * $limit;
+
         $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
-        $lastUpdates = $this->tree->getMembersByTreeId($treeId, 0, 40, $orderby='updated_at DESC');
+        $lastUpdates = $this->tree->getMembersByTreeId($treeId, 0, $update_limit, $orderby='updated_at DESC');
         $totalMembers = $this->tree->getPersonCount($treeId);
         $countByGender = $this->tree->countMembersByTreeId($treeId);
         $countByGender['Total']=$totalMembers;

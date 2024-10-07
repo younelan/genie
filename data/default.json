@@ -5,5 +5,16 @@
         "user" : "root",
         "pass" : ""
     },
-    "lang": "en"
+    "lang": "en",
+    "limits" : {
+        "members": 100,
+        "updates": 100,
+        "first": 20,
+        "last": 20
+    },
+    "graph": {
+        "width": 4560,
+        "height": 4560
+    }
+
 }
