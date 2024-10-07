@@ -2,7 +2,7 @@
 $dbHost = 'localhost';
 $dbName = 'genealogy';
 $dbUser = 'root';
-$dbPass = '';
+$dbPass = ':';
 
 try {
     $db = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
@@ -10,4 +10,3 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-?>
