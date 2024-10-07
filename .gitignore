@@ -1,4 +1,5 @@
 *.swap
+config/config.json
 *.tmp
 temp
 
