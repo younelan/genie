@@ -1,0 +1,4 @@
+RedirectMatch 404 /data
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.gitmodules
+
