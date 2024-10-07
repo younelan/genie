@@ -39,6 +39,7 @@ $vars['sitepath'] = $sitepath;
 //navigationmenu
 $translations["fr"] = [
    "Family Members"=>"Membres de la Famille",
+   "New Tree"=>"Nouvel Arbre",
    "Search By Name"=>"Chercher Par Nom",
    "Pages"=>"Pages",
    "Last Name"=> "Nom",
@@ -55,6 +56,7 @@ $translations["fr"] = [
    "Less Fields"=>"Moins De Champs",
    "Alive"=>"En Vie",
    "Source"=>"Source",
+   "Family Trees"=> "Arbres Généalogiques",
    "Update Member"=>"Mise A Jour Membre",
    "More"=>"Plus",
    "Existing Relations"=>"Relations Existantes",

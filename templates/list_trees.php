@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="res/style.css?Version=1">
     <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
 
-    <title>Genie: Membres Famille</title>
+    <title>Genie: <?php echo get_translation("List Trees");?></title>
     <!-- Bootstrap CSS -->
     <!-- Custom CSS -->
     <style>
@@ -78,13 +78,13 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top">
         <img src="res/genie.png" height="40" width="auto" alt="Genie"/> &nbsp;
 
-            <a class="navbar-brand" href="?">Genie: Arbres Généalogiques</a>
+            <a class="navbar-brand" href="?">Genie: <?php echo get_translation("Family Trees")?></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
-                    <li><a class="nav-link" href="index.php?action=add_tree">Nouvel Arbre</a></li>
+                    <li><a class="nav-link" href="index.php?action=add_tree"><?php echo get_translation("New Tree")?></a></li>
                 </ul>
             </div>
         </nav>
