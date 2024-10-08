@@ -4,12 +4,6 @@ session_start();
 $basedir = __DIR__;
 
 require_once "$basedir/init.php";
-require_once "$basedir/AppBase.php";
-require_once "$basedir/models/UserModel.php";
-require_once "$basedir/models/TreeModel.php";
-require_once "$basedir/models/MemberModel.php";
-require_once "$basedir/controllers/TreeController.php";
-require_once "$basedir/controllers/MemberController.php";
 
 //$i18n = new I18n();
 
@@ -38,7 +32,7 @@ function apachelog($foo) {
 }
 $action = $_GET['action'] ?? $_POST['action']??'';
 
-$user = new UserModel($db);
+$user = new UserModel($config['connection']);
 $userId = $user->getCurrentUserId();
 $config['current-user']=$userId;
 if (!$userId) {

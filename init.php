@@ -1,4 +1,14 @@
 <?php
+
+$basedir = $basedir ?? __DIR__;
+
+require_once "$basedir/AppBase.php";
+require_once "$basedir/models/UserModel.php";
+require_once "$basedir/models/TreeModel.php";
+require_once "$basedir/models/MemberModel.php";
+require_once "$basedir/controllers/TreeController.php";
+require_once "$basedir/controllers/MemberController.php";
+
 $config = [];
 $vars = [
    "charset" => "utf-8",
@@ -197,3 +207,15 @@ foreach ($config_files as $fname) {
    }
 }
 
+$dbHost = $config['db']['host'] ?? 'localhost';
+$dbName = $config['db']['name'] ?? 'genealogy';
+$dbUser = $config['db']['user'] ?? 'root';
+$dbPass = $config['db']['pass']??'';
+
+try {
+    $connection = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
+    $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $config['connection'] = $connection;
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
