@@ -15,6 +15,15 @@
     "graph": {
         "width": 4560,
         "height": 4560
+    },
+    "tables": {
+        "person": "person",
+        "relation": "person_relationships",
+        "synonyms": "synonyms",
+        "tree": "family_tree",
+        "relation_type": "relationship_type",
+        "users": "users",
+        "tags": "people_tags"
     }
 
 }
