@@ -112,7 +112,7 @@ switch ($action) {
                 header("Location: index.php?action=list_trees");
             }
         }
-        $treeController->listMembers($treeId??1);
+        $treeController->listMembers($treeId??1,$page);
         // Redirect or display appropriate message after deletion
         break;
     case 'autocomplete_member':
