@@ -30,16 +30,12 @@ class GEDCOMImporter
         $people = [];
         
         foreach ($gedcom->getIndi() as $individual) {
-            // $i = $individual->get
             $names = $individual->getName();
             if (!empty($names)) {
                 $name = reset($names); // Get the first name object from the array
                 echo $individual->getId() . ': ' . $name->getSurn() . ', ' . $name->getGivn() . PHP_EOL;
                 $people[$individual->getId()] = $individual; 
             }
-
-            //$this->saveIndividual($individual, $familyTreeId);
-
         }
        
         $families = $gedcom->getFam();
@@ -102,7 +98,7 @@ class GEDCOMImporter
 $importer = new GEDCOMImporter($config);
 
 // Specify the path to the GEDCOM file
-$filePath = 'british.ged';
+$filePath = 'test.ged';
 
 // Specify the family tree ID you want to import into
 $familyTreeId = 1; // Example ID
