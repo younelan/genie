@@ -2,6 +2,7 @@
 
 $basedir = $basedir ?? __DIR__;
 
+require_once "$basedir/vendor/autoload.php";
 require_once "$basedir/AppBase.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
