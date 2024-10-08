@@ -3,8 +3,7 @@ session_start();
 
 $basedir = __DIR__;
 
-require_once "$basedir/defaults.php";
-require_once "$basedir/db.php";
+require_once "$basedir/init.php";
 require_once "$basedir/AppBase.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
