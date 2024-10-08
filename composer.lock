@@ -4,8 +4,59 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4dc90aa3f42a42eff9be1523da9cb320",
+    "content-hash": "c86674bca54bb3d1af8889c709a4fc7d",
     "packages": [
+        {
+            "name": "liberu-genealogy/php-gedcom",
+            "version": "v2.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/liberu-genealogy/php-gedcom.git",
+                "reference": "2acf76f45919fb2aa336eada65847b2f7a791eba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/liberu-genealogy/php-gedcom/zipball/2acf76f45919fb2aa336eada65847b2f7a791eba",
+                "reference": "2acf76f45919fb2aa336eada65847b2f7a791eba",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "require-dev": {
+                "driftingly/rector-laravel": "^0.25.0",
+                "phpunit/phpunit": "11.*",
+                "rector/rector": "*",
+                "squizlabs/php_codesniffer": "3.6.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gedcom\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A GEDCOM file parser (read + write) for PHP 8.0+",
+            "homepage": "http://github.com/familytree365/php-gedcom",
+            "keywords": [
+                "gedcom",
+                "parser"
+            ],
+            "support": {
+                "issues": "https://github.com/liberu-genealogy/php-gedcom/issues",
+                "source": "https://github.com/liberu-genealogy/php-gedcom/tree/v2.0.6"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/liberu-genealogy",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-08-25T12:34:40+00:00"
+        },
         {
             "name": "opensitez/simplicity",
             "version": "dev-master",
