@@ -16,13 +16,16 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
-## 20240905
+## 20240908
     - Classes inherit base class
     - added translation function
     - add_tree, edit_member, list_member, edit_member now use translation
     - added translation for french, english
     - breaking change: configuration is moved from db.php to config.json so that additional params like lang can be added
     - to create a config file, copy data/default.json to data/config.json and adjust accordingly
+    - merged defaults, db and includes into init.php
+    - table names are now in default.json to make allow using different table names
+    - add composer php-gedcom library to see if I can use it to import/export gedcom
 
 ## 20240730
 	- Tag support for people
