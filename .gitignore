@@ -1,5 +1,6 @@
 *.swap
 data/config.json
 *.tmp
+*.ged
 temp
 
