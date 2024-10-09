@@ -45,7 +45,7 @@ class GEDCOMImporter
         $families = $gedcom->getFam();
         //print_r(array_keys($people));
         foreach ($families as $family) {
-            echo "\n+++++ Family ID: " . $family->getId() . "\n";
+            echo "\n\n+++++\nFamily ID: " . $family->getId() . "\n";
             
             // Get spouses and children
             $husband = $family->getHusb();
@@ -93,8 +93,122 @@ class GEDCOMImporter
             }        
         }
 
+        // foreach ($gedcom->getFam() as $family) {
+        //     $events = $family->getAllEven();
+        //     if(!empty($events)) {
+        //         $name = reset($events); // Get the first name object from the array
+        //         echo $events->getId() . ': ' . $name->getSurn() . ', ' . $name->getGivn() . PHP_EOL;
+
+        //     } else {
+        //        var_dump($family);
+        //     }
+        //     //$this->saveFamilyRelationships($family, $familyTreeId);
+        // }
+
     }
 
+    private function saveIndividual($individual, $familyTreeId)
+    {
+        $id = $individual->getId();
+        $name = $individual->getName();
+        $birthEvent = $individual->getEvent('BIRT');
+        $deathEvent = $individual->getEvent('DEAT');
+        $placeOfBirth = $birthEvent ? $birthEvent->getPlace() : '';
+        $dateOfBirth = $birthEvent ? $birthEvent->getDate() : null;
+        $dateOfDeath = $deathEvent ? $deathEvent->getDate() : null;
+
+        // Prepare and execute the SQL statement
+        $stmt = $this->pdo->prepare("
+            INSERT INTO {$this->peopleTable} 
+            (id, family_tree_id, first_name, last_name, date_of_birth, place_of_birth, date_of_death, title, middle_name, body, created_at, updated_at, alive)
+            VALUES (:id, :family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :date_of_death, :title, :middle_name, :body, NOW(), NOW(), TRUE)
+            ON DUPLICATE KEY UPDATE 
+                first_name = VALUES(first_name),
+                last_name = VALUES(last_name),
+                date_of_birth = VALUES(date_of_birth),
+                place_of_birth = VALUES(place_of_birth),
+                date_of_death = VALUES(date_of_death),
+                title = VALUES(title),
+                middle_name = VALUES(middle_name),
+                body = VALUES(body)
+        ");
+
+        // Split the name into parts
+        $nameParts = explode(' ', trim($name));
+        $firstName = array_shift($nameParts);
+        $lastName = implode(' ', $nameParts);
+        $middleName = implode(' ', array_slice($nameParts, 1)); // Everything after the first name
+
+        $stmt->execute([
+            'id' => $id,
+            'family_tree_id' => $familyTreeId,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'date_of_birth' => $dateOfBirth,
+            'place_of_birth' => $placeOfBirth,
+            'date_of_death' => $dateOfDeath,
+            'title' => '', // You can add logic to extract title if needed
+            'middle_name' => $middleName,
+            'body' => $individual->getNotes() ? implode("\n", $individual->getNotes()) : '',
+        ]);
+
+        // Save tags associated with the individual
+        $this->saveTags($individual, $id);
+    }
+
+    private function saveTags($individual, $personId)
+    {
+        foreach ($individual->getTags() as $tag) {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO {$this->tagsTable} (tag, person_id, family_tree_id) 
+                VALUES (:tag, :person_id, :family_tree_id)
+            ");
+            $stmt->execute([
+                'tag' => $tag,
+                'person_id' => $personId,
+                'family_tree_id' => $individual->getFamilyTreeId(), // Assuming individual has a family tree ID
+            ]);
+        }
+    }
+
+    private function saveFamilyRelationships($family, $familyTreeId)
+    {
+        $husbandId = $family->getHusband() ? $family->getHusband()->getId() : null;
+        $wifeId = $family->getWife() ? $family->getWife()->getId() : null;
+        $children = $family->getChildren();
+
+        if ($husbandId && $wifeId) {
+            $this->saveRelationship($husbandId, $wifeId, $familyTreeId, 1); // 1 for 'married'
+        }
+
+        // Handle children relationships
+        foreach ($children as $child) {
+            $this->saveChildRelationship($husbandId, $wifeId, $child->getId(), $familyTreeId);
+        }
+    }
+
+    private function saveRelationship($personId1, $personId2, $familyTreeId, $relationshipTypeId)
+    {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO {$this->relationshipsTable} (family_tree_id, person_id1, person_id2, relationship_type_id)
+            VALUES (:family_tree_id, :person_id1, :person_id2, :relationship_type_id)
+            ON DUPLICATE KEY UPDATE person_id1 = VALUES(person_id1), person_id2 = VALUES(person_id2)
+        ");
+
+        $stmt->execute([
+            'family_tree_id' => $familyTreeId,
+            'person_id1' => $personId1,
+            'person_id2' => $personId2,
+            'relationship_type_id' => $relationshipTypeId,
+        ]);
+    }
+
+    private function saveChildRelationship($husbandId, $wifeId, $childId, $familyTreeId)
+    {
+        // Save parent-child relationships for both parents
+        $this->saveRelationship($husbandId, $childId, $familyTreeId, 2); // 2 for 'parent'
+        $this->saveRelationship($wifeId, $childId, $familyTreeId, 2); // 2 for 'parent'
+    }
 }
 
 
