@@ -22,6 +22,7 @@
     "minimum-stability": "stable",
     "require": {
         "opensitez/simplicity": "dev-master",
-        "liberu-genealogy/php-gedcom": "^2.0"
+        "liberu-genealogy/php-gedcom": "^2.0",
+        "twig/twig": "^3.14"
     }
 }
