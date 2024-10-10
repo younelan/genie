@@ -31,7 +31,7 @@ class TreeController extends AppController
         $content_file = $this->basedir . "/templates/tree_list.tpl";
         $data['content'] = $this->render_file($content_file, $data);
 
-        echo $this->render_file($master_file, $data);
+        return $this->render_file($master_file, $data);
 
     }
 
@@ -46,15 +46,9 @@ class TreeController extends AppController
             "link"=>"index.php?action=add_tree",
             "text"=>get_translation("New Tree")
         ];
-        // $master_data = [
-        //     "app_title"=> $this->config['app_name']??"Genie",
-        //     "section" => get_translation("Family Trees"),   
-        //     "content"=>$content
-        // ];
 
         echo $this->render_master($data);
 
-        //include $this->basedir . "/templates/list_trees.php";
     }
     public function searchMembers()
     {
