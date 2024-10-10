@@ -51,6 +51,13 @@
             border: 1px solid #ccc;
             padding: 5px;
         }
+    .tree-list {
+        font-size: 2.5em;
+        padding: 20px;
+        text-align: center;
+    
+    }
+
     </style>
 </head>
 <body>

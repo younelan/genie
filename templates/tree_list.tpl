@@ -1,6 +1,9 @@
 
 
-    <ul class=tree-list>
+        <!-- Main content -->
+        <div class="row mt-5">
+
+<ul class=tree-list>
         {% for tree in trees  %}
             <li>
                 <a href=?action=edit_tree&tree_id={{tree.id}}>
