@@ -23,28 +23,36 @@ class TreeController extends AppController
         echo json_encode($relationshipTypes);
         exit;
     }
+    public function render_master($data) {
+        $master_file = $this->basedir . "/templates/master.tpl";
+        $data["app_title"] = $this->config['app_name']??"Genie";
+        $data["section"] = $data["section"]??"";
+
+        $content_file = $this->basedir . "/templates/tree_list.tpl";
+        $data['content'] = $this->render_file($content_file, $data);
+
+        echo $this->render_file($master_file, $data);
+
+    }
 
     public function listTrees()
     {
         $data = [
-            "app_title"=> "Geniez",
             "trees" => $this->tree->getAllTreesByOwner($this->userId),
+            "template" => $this->basedir . "/templates/tree_list.tpl",
             "section" => get_translation("Family Trees")
         ];
-        $content_file = $this->basedir . "/templates/tree_list.tpl";
-        $content = $this->render_file($content_file, $data);
-        $master_data = [
-            "app_title" => "Genz",
-            "section" => get_translation("Family Trees"),   
-            "content"=>$content
-        ];
-        $master_file = $this->basedir . "/templates/master.tpl";
-        $master_data["menu"][] = [
+        $data["menu"][] = [
             "link"=>"index.php?action=add_tree",
             "text"=>get_translation("New Tree")
         ];
+        // $master_data = [
+        //     "app_title"=> $this->config['app_name']??"Genie",
+        //     "section" => get_translation("Family Trees"),   
+        //     "content"=>$content
+        // ];
 
-        echo $this->render_file($master_file, $master_data);
+        echo $this->render_master($data);
 
         //include $this->basedir . "/templates/list_trees.php";
     }
