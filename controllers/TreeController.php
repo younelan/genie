@@ -26,8 +26,27 @@ class TreeController extends AppController
 
     public function listTrees()
     {
-        $trees = $this->tree->getAllTreesByOwner($this->userId);
-        include $this->basedir . "/templates/list_trees.php";
+        $data = [
+            "app_title"=> "Geniez",
+            "trees" => $this->tree->getAllTreesByOwner($this->userId),
+            "section" => get_translation("Family Trees")
+        ];
+        $content_file = $this->basedir . "/templates/tree_list.tpl";
+        $content = $this->render_file($content_file, $data);
+        $master_data = [
+            "app_title" => "Genz",
+            "section" => get_translation("Family Trees"),   
+            "content"=>$content
+        ];
+        $master_file = $this->basedir . "/templates/master.tpl";
+        $master_data["menu"][] = [
+            "link"=>"index.php?action=add_tree",
+            "text"=>get_translation("New Tree")
+        ];
+
+        echo $this->render_file($master_file, $master_data);
+
+        //include $this->basedir . "/templates/list_trees.php";
     }
     public function searchMembers()
     {
@@ -49,7 +68,7 @@ class TreeController extends AppController
                 $error = "Failed to add tree.";
             }
         }
-        include $this->basedir . "/templates/add_tree.php";
+        //include $this->basedir . "/templates/add_tree.php";
     }
     public function viewTree()
     {
