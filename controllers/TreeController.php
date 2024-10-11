@@ -28,7 +28,7 @@ class TreeController extends AppController
         $data["app_title"] = $this->config['app_name']??"Genie";
         $data["section"] = $data["section"]??"";
 
-        $content_file = $this->basedir . "/templates/tree_list.tpl";
+        $content_file = $this->basedir . "/templates/" . $data["template"];
         $data['content'] = $this->render_file($content_file, $data);
 
         return $this->render_file($master_file, $data);
@@ -39,7 +39,7 @@ class TreeController extends AppController
     {
         $data = [
             "trees" => $this->tree->getAllTreesByOwner($this->userId),
-            "template" => $this->basedir . "/templates/tree_list.tpl",
+            "template" => "tree_list.tpl",
             "section" => get_translation("Family Trees")
         ];
         $data["menu"][] = [
@@ -59,6 +59,15 @@ class TreeController extends AppController
     }
     public function addTree()
     {
+        $data = [
+            "trees" => $this->tree->getAllTreesByOwner($this->userId),
+            "template" => "add_tree.tpl",
+            "section" => get_translation("Add New Family Tree"),
+            "tree_name" => get_translation("Tree Name"),
+            "tree_description" => get_translation("Description"),
+            "go_back" => get_translation("Back to List"),            
+            "error" => ""
+        ];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
@@ -67,9 +76,11 @@ class TreeController extends AppController
                 header("Location: index.php?action=list_trees");
                 exit();
             } else {
-                $error = "Failed to add tree.";
+                // $data['template']=$this->basedir . "/templates/error.tpl";
+                $data['error'] = "Failed to add tree.";
             }
         }
+        echo $this->render_master($data);
         //include $this->basedir . "/templates/add_tree.php";
     }
     public function viewTree()
