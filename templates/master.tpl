@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{app_title}}: {{section}}</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="themes/bootstrap/js/jquery-3.7.0.min.js"></script>
     <script src="themes/bootstrap/js/popper.min.js"></script>
     <script src="themes/bootstrap/js/bootstrap.min.js"></script>
@@ -11,7 +12,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="res/style.css?Version=1">
     <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
-        <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <!-- Custom CSS -->
     <style>
@@ -76,7 +76,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     {% for key,item in menu %}
-                    <li><a class="nav-link" href="{{item.link}}">{{item.text}}</a></li>
+                    <li><a class="nav-link" href="{{item.link|raw}}">{{item.text|raw}}</a></li>
                     {% endfor %}
                 </ul>
             </div>

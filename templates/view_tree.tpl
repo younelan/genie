@@ -1,4 +1,3 @@
-        <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <style>
         .node circle {
@@ -25,5 +24,8 @@
     <svg width="{{ graph['width'] }}" height="{{ graph['height'] }}"></svg>
     <script>
         const familyTreeId = {{tree_id}};
+        const graphWidth = {{ graph['width'] }};
+        const graphHeight = {{ graph['height'] }};
+
     </script>
-    <script src="res/tree.js?version=1.1"></script>
+    <script src="res/tree.js?version=1.2"></script>
