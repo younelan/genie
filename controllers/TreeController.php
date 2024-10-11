@@ -60,7 +60,6 @@ class TreeController extends AppController
     public function addTree()
     {
         $data = [
-            "trees" => $this->tree->getAllTreesByOwner($this->userId),
             "template" => "add_tree.tpl",
             "section" => get_translation("Add New Family Tree"),
             "tree_name" => get_translation("Tree Name"),
@@ -68,6 +67,7 @@ class TreeController extends AppController
             "go_back" => get_translation("Back to List"),            
             "error" => ""
         ];
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
@@ -85,9 +85,35 @@ class TreeController extends AppController
     }
     public function viewTree()
     {
-        $graph = $this->config['graph'];
-        $familyTreeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
-        include $this->basedir . "/templates/view_tree.php";
+        $data = [
+            "template" => "view_tree.tpl",
+            "section" => get_translation("View Tree"),
+            "tree_description" => get_translation("Description"),
+            "go_back" => get_translation("Back to List"),            
+            "error" => "",
+            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "graph" => $this->config['graph']
+        ];
+
+        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $data["menu"] = [
+            [
+                "link" => "index.php?action=add_member&tree_id=$treeId",
+                "text" => get_translation("New Member"),
+            ],
+            [
+                "link" => "index.php?action=edit_tree&tree_id=$treeId",
+                "text" => get_translation("List Members"),
+            ],
+            [
+                "link" => "index.php?action=list_trees",
+                "text" =>  get_translation("Trees"),
+            ]
+        
+        ];        
+         echo $this->render_master($data);
+
+        //include $this->basedir . "/templates/view_tree.php";
     }
 
     public function getTreeData()

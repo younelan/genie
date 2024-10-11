@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="res/style.css?Version=1">
     <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
+        <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <!-- Custom CSS -->
     <style>
