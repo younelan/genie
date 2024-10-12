@@ -18,14 +18,34 @@ class AppBase
         if(!is_array($templateContent)) {
             $templateContent = [ "content"=>$templateContent];
         }
+        
 
         $loader = new \Twig\Loader\ArrayLoader($templateContent);
         $twig = new \Twig\Environment($loader);
+        $twig->addFunction(new \Twig\TwigFunction('get_translation', function ($str) {
+            return get_translation($str); 
+        }));
+        $twig->addFunction(new \Twig\TwigFunction('getGenderSymbol', function ($str) {
+            return getGenderSymbol($str); 
+        }));
+        
 
         $renderedContent = $twig->render($template_name, $variables);
     
         return $renderedContent;
     }
+    public function render_master($data) {
+        $master_file = $this->basedir . "/templates/master.tpl";
+        $data["app_title"] = $this->config['app_name']??"Genie";
+        $data["section"] = $data["section"]??"";
+
+        $content_file = $this->basedir . "/templates/" . $data["template"];
+        $data['content'] = $this->render_file($content_file, $data);
+
+        return $this->render_file($master_file, $data);
+
+    }
+
 
 }
 class AppModel extends AppBase {
