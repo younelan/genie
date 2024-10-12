@@ -164,6 +164,44 @@ class TreeController extends AppController
         ];
         $events = [];
         $activities = [];
-        include $this->basedir . "/templates/list_members.php";
+        $data = [
+            "template" => "list_members.tpl",
+            "members"=>$members,
+            "lastUpdates"=> $this->tree->getMembersByTreeId($treeId, 0, $update_limit, $orderby='updated_at DESC'),
+            "section" => get_translation("List Members"),
+            "str_family_members" => get_translation("Family Members"),
+            "str_pages" =>get_translation("Pages"),
+            "totalPages" => ceil($totalMembers / $limit),            
+            "totalMembers" => $this->tree->getPersonCount($treeId),
+            "countByGender" => $this->tree->countMembersByTreeId($treeId),
+            "synonyms" => $this->tree->getSynonymsByTreeId($treeId),
+            "countByLastname" => $this->tree->countTreeMembersByField($treeId,'last_name', $synonyms),
+            "countByFirstname" => $this->tree->countTreeMembersByField($treeId,'first_name', $synonyms),
+            "totalRelationships" => $this->tree->countRelationshipsByTreeId($treeId),
+            "go_back" => get_translation("Back to List"),
+            "error" => "",
+            "treeId" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "graph" => $this->config['graph']
+        ];
+        $data["countByGender"]['Total']=$totalMembers;
+        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $data["menu"] = [
+            [
+                "link" => "index.php?action=add_member&tree_id=$treeId",
+                "text" => get_translation("New Member"),
+            ],
+            [
+                "link" => "index.php?action=view_tree&tree_id=$treeId",
+                "text" => get_translation("Visualize"),
+            ],
+            [
+                "link" => "index.php?action=list_trees",
+                "text" =>  get_translation("Trees"),
+            ]
+        ];
+
+        echo $this->render_master($data);
+
+        //include $this->basedir . "/templates/list_members.php";
     }
 }
