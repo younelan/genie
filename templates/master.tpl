@@ -82,7 +82,12 @@
             </div>
         </nav>
 
+
+        <!-- Main content -->
+        <div class="row mt-5">
+
     {{content|raw}}
+    </div>
     </div>
 </body>
 </html>

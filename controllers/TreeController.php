@@ -180,6 +180,9 @@ class TreeController extends AppController
             "totalRelationships" => $this->tree->countRelationshipsByTreeId($treeId),
             "go_back" => get_translation("Back to List"),
             "error" => "",
+            "stats" => $stats,
+            "events"=> $events,
+            "activities" => $activities,
             "treeId" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
             "graph" => $this->config['graph']
         ];
