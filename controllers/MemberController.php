@@ -22,13 +22,45 @@ class MemberController extends AppController
     {
         $member = $this->member->getMemberById($memberId);
         $tagString = $this->member->getTagString($memberId);
+        $relationships = $this->member->getMemberRelationships($memberId);
+        $relationship_types = $this->member->getRelationshipTypes();
         if (!$member) {
             exit('Member not found.');
         }
 
+        $data = [
+            "tagString" => $tagString,
+            "member" => $member,
+            "memberId"=> $memberId,
+            "template" => "edit_member.tpl",
+            "relationships" => $relationships,
+            "relationship_types" => $relationship_types,
+            "section" => get_translation("Add Member"),
+            "tree_description" => get_translation("Description"),
+            "go_back" => get_translation("Back to List"),            
+            "error" => "",
+            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "graph" => $this->config['graph']
+        ];
+
+        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $data["menu"] = [
+            [
+                "link" => "index.php?action=add_member&tree_id=$treeId",
+                "text" => get_translation("New Member"),
+            ],
+            [
+                "link" => "index.php?action=edit_tree&tree_id=$treeId",
+                "text" => get_translation("List Members"),
+            ],
+            [
+                "link" => "index.php?action=list_trees",
+                "text" =>  get_translation("Trees"),
+            ]
+        
+        ];        
+
         // Fetch member relationships
-        $relationships = $this->member->getMemberRelationships($memberId);
-        $relationship_types = $this->member->getRelationshipTypes();
 
         //apachelog("++++++++++++++++" . $_SERVER['REQUEST_METHOD']);
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -71,10 +103,12 @@ class MemberController extends AppController
                 exit();
             } else {
                 $error = "Failed to update member.";
+                $data["error"] = $error;
             }
         }
 
-        include $this->basedir . "/templates/edit_member.php";
+        echo $this->render_master($data);
+        //include $this->basedir . "/templates/edit_member.php";
     }
     public function addMember($treeId)
     {

@@ -1,21 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Edition Membre</title>
-    <script src="themes/bootstrap/js/jquery-3.7.0.min.js"></script>
-    <script src="themes/bootstrap/js/popper.min.js"></script>
-    <script src="themes/bootstrap/js/bootstrap.min.js"></script>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="res/style.css?Version=1.0.1">
-    <link rel="stylesheet" href="themes/bootstrap/css/bootstrap.min.css">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Genie: Membres Famille</title>
-    <!-- Bootstrap CSS -->
-    <!-- Custom CSS -->
     <style>
         /* Add custom styles here */
         body {
@@ -112,221 +95,215 @@
             min-width: 50px;
         }
     </style>
-</head>
 
-<body>
-    <div class="container-fluid py-4">
 
-        <!-- Navigation menu -->
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top">
-            <img src="res/genie.png" height="40" width="auto" alt="Genie" /> &nbsp;
-            <a class="navbar-brand" href="?">Genie: <?php echo get_translation("Edit Member"); ?></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <?php $treeId = htmlspecialchars($member['family_tree_id']) ?>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li><a class="nav-link" href="index.php?action=add_member&tree_id=<?php echo $treeId; ?>"><?php echo get_translation("New Member"); ?></a></li>
-                    <li><a class="nav-link" href="index.php?action=edit_tree&tree_id=<?php echo $treeId; ?>"><?php echo get_translation("List Members"); ?></a></li>
-                    <li><a class="nav-link" href="index.php?action=view_tree&tree_id=<?php echo $treeId; ?>"><?php echo get_translation("Visualize"); ?></a></li>
-                    <li><a class="nav-link" href="index.php?action=list_trees"><?php echo get_translation("Trees"); ?></a></li>
 
-                </ul>
+ 
+
+
+
+
+
+
+<!-- Main content -->
+<div class="row mt-5">
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                {{ get_translation("Member Details") }}
             </div>
-        </nav>
+            <div class="card-body">
 
-        <!-- Main content -->
-        <div class="row mt-5">
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                    <?php echo get_translation("Member Details"); ?>
-                    </div>
-                    <div class="card-body">
+                {% if error is defined %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endif %}
 
-                        <?php if (isset($error)) : ?>
-                            <p style="color: red;"><?php echo $error; ?></p>
-                        <?php endif; ?>
+                <form id="edit-member-form" method="post" action="">
+                    <input type="hidden" name="member_id" value="{{ member.id|e }}">
 
-                        <form id="edit-member-form" method="post" action="">
-                            <input type="hidden" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
+                    <label for="first_name">{{ get_translation("First Name") }}:</label>
+                    <input type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required><br>
 
-                            <label for="first_name"><?php echo get_translation("First Name"); ?>:</label>
-                            <input type="text" name="first_name" id="first_name" value="<?php echo htmlspecialchars($member['first_name']); ?>" required><br>
+                    <label for="middle_name">{{ get_translation("Middle Name") }}:</label>
+                    <input type="text" name="middle_name" id="middle_name" value="{{ member.middle_name|e }}"><br>
 
-                            <label for="middle_name"><?php echo get_translation("Middle Name"); ?>:</label>
-                            <input type="text" name="middle_name" id="middle_name" value="<?php echo htmlspecialchars($member['middle_name']); ?>"><br>
+                    <label for="last_name">{{ get_translation("Last Name") }}:</label>
+                    <input type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
 
-                            <label for="last_name"><?php echo get_translation("Last Name"); ?>:</label>
-                            <input type="text" name="last_name" id="last_name" value="<?php echo htmlspecialchars($member['last_name']); ?>"><br>
+                    <label for="date_of_birth">{{ get_translation("Date of Birth") }}:</label>
+                    <input type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}"><br>
 
-                            <label for="date_of_birth"><?php echo get_translation("Date of Birth"); ?>:</label>
-                            <input type="date" name="date_of_birth" id="date_of_birth" value="<?php echo htmlspecialchars($member['date_of_birth']); ?>"><br>
+                    <label for="place_of_birth">{{ get_translation("Place of Birth") }}:</label>
+                    <input type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}"><br>
 
-                            <label for="place_of_birth"><?php echo get_translation("Place of Birth"); ?>:</label>
-                            <input type="text" name="place_of_birth" id="place_of_birth" value="<?php echo htmlspecialchars($member['place_of_birth']); ?>"><br>
-
-
-
-                            <label for="gender_id"><?php echo get_translation("Gender"); ?>:</label>
-                            <select name="gender_id" id="gender_id">
-                                <option value="1" <?php if ($member['gender_id'] == 1) echo 'selected'; ?>><?php echo get_translation("Man"); ?></option>
-                                <option value="2" <?php if ($member['gender_id'] == 2) echo 'selected'; ?>><?php echo get_translation("Woman"); ?></option>
-                                <!-- Add more options as needed -->
-                            </select><br>
-                            <div id="taxonomy-tags">
-                                <div class="tag-label"><?php echo get_translation("Tags"); ?>: <button style='float:right;margin-right:30px;' id="copyTagsButton1"><?php echo get_translation("Copy"); ?></button></div>
-                                <div class="tag-input-container" data-tags="<?php echo $tagString ?>" data-endpoint="?"></div>
-                            </div>
-                            <label for="source"><?php echo get_translation("Source"); ?>:</label>
-                            <input type="text" name="source" id="source" value="<?php echo htmlspecialchars($member['source']); ?>"><br>
-                            <?php $aliveChecked = !empty($member['alive']) ? 'checked' : ''; ?>
-                            <label for="alive"><?php echo get_translation("Alive"); ?>:</label>
-                            <input type="checkbox" name="alive" id="alive" value="1" <?php echo $aliveChecked; ?>><br>
-
-                            <div id="additional-fields" style="display: none;">
-                                <label for="alias1"><?php echo get_translation("Title"); ?>:</label>
-                                <input type="text" name="title" id="titlel" value="<?php echo htmlspecialchars($member['title']); ?>"><br>
-                                <label for="alias1"><?php echo get_translation("Alias 1"); ?>:</label>
-                                <input type="text" name="alias1" id="alias1" value="<?php echo htmlspecialchars($member['alias1']); ?>"><br>
-                                <label for="alias2"><?php echo get_translation("Alias 2"); ?>:</label>
-                                <input type="text" name="alias2" id="alias2" value="<?php echo htmlspecialchars($member['alias2']); ?>"><br>
-                                <label for="alias3"><?php echo get_translation("Alias 3"); ?>:</label>
-                                <input type="text" name="alias3" id="alias3" value="<?php echo htmlspecialchars($member['alias3']); ?>"><br>
-                                <label for="body"><?php echo get_translation("Details"); ?></label>
-                                <textarea id="body" name=body cols=50 rows=10><?php echo htmlspecialchars($member['body']); ?></textarea>
-                                <br />
-                                <label for="date_of_death"><?php echo get_translation('Date of Death')?>:</label>
-                                <input type="date" name="date_of_death" id="date_of_death" value="<?php echo htmlspecialchars($member['date_of_death']); ?>"><br>
-
-                                <label for="place_of_death"><?php echo get_translation('Place of Death');?>:</label>
-                                <input type="text" name="place_of_death" id="place_of_death" value="<?php echo htmlspecialchars($member['place_of_death']); ?>"><br>
-
-                            </div>
-                            <br />
-
-                            <button type="submit"><?php echo get_translation('Update Member');?></button> <button type="button" id="toggle-fields-btn"><?php echo get_translation("More"); ?></button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        
-                    <?php echo get_translation("Existing Relations"); ?>
-                    </div>
-                    <div class="card-body">
-
-                        <div id="relationships">
-                            <table class="relationship-table">
-                                <tr>
-                                    <th><?php echo get_translation("Person 1"); ?></th>
-                                    <th><?php echo get_translation("Person 2"); ?></th>
-                                    <th><?php echo get_translation("Type"); ?></th>
-                                    <th><?php echo get_translation("Start"); ?></th>
-                                    <th><?php echo get_translation("End"); ?></th>
-                                    <th><?php echo get_translation("Actions"); ?></th>
-                                </tr>
-                                <tbody id="relationships-table-body">
-                                    <!-- Relationships will be dynamically filled via JavaScript -->
-                                </tbody>
-                            </table>
+                    <label for="gender_id">{{ get_translation("Gender") }}:</label>
+                    <select name="gender_id" id="gender_id">
+                        <option value="1" {% if member.gender_id == 1 %}selected{% endif %}>{{ get_translation("Man") }}</option>
+                        <option value="2" {% if member.gender_id == 2 %}selected{% endif %}>{{ get_translation("Woman") }}</option>
+                        <!-- Add more options as needed -->
+                    </select><br>
+                    <div id="taxonomy-tags">
+                        <div class="tag-label">{{ get_translation("Tags") }}: 
+                            <button style='float:right;margin-right:30px;' id="copyTagsButton1">{{ get_translation("Copy") }}</button>
                         </div>
+                        <div class="tag-input-container" data-tags="{{ tagString }}" data-endpoint="?"></div>
                     </div>
+                    <label for="source">{{ get_translation("Source") }}:</label>
+                    <input type="text" name="source" id="source" value="{{ member.source|e }}"><br>
+                    <label for="alive">{{ get_translation("Alive") }}:</label>
+                    <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}><br>
+
+                    <div id="additional-fields" style="display: none;">
+                        <label for="title">{{ get_translation("Title") }}:</label>
+                        <input type="text" name="title" id="title" value="{{ member.title|e }}"><br>
+                        <label for="alias1">{{ get_translation("Alias 1") }}:</label>
+                        <input type="text" name="alias1" id="alias1" value="{{ member.alias1|e }}"><br>
+                        <label for="alias2">{{ get_translation("Alias 2") }}:</label>
+                        <input type="text" name="alias2" id="alias2" value="{{ member.alias2|e }}"><br>
+                        <label for="alias3">{{ get_translation("Alias 3") }}:</label>
+                        <input type="text" name="alias3" id="alias3" value="{{ member.alias3|e }}"><br>
+                        <label for="body">{{ get_translation("Details") }}</label>
+                        <textarea id="body" name="body" cols="50" rows="10">{{ member.body|e }}</textarea><br>
+                        <label for="date_of_death">{{ get_translation("Date of Death") }}:</label>
+                        <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}"><br>
+                        <label for="place_of_death">{{ get_translation("Place of Death") }}:</label>
+                        <input type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
+                    </div>
+                    <br />
+
+                    <button type="submit">{{ get_translation("Update Member") }}</button>
+                    <button type="button" id="toggle-fields-btn">{{ get_translation("More") }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                {{ get_translation("Existing Relations") }}
+            </div>
+            <div class="card-body">
+                <div id="relationships">
+                    <table class="relationship-table">
+                        <tr>
+                            <th>{{ get_translation("Person 1") }}</th>
+                            <th>{{ get_translation("Person 2") }}</th>
+                            <th>{{ get_translation("Type") }}</th>
+                            <th>{{ get_translation("Start") }}</th>
+                            <th>{{ get_translation("End") }}</th>
+                            <th>{{ get_translation("Actions") }}</th>
+                        </tr>
+                        <tbody id="relationships-table-body">
+                            <!-- Relationships will be dynamically filled via JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                    <?php echo get_translation("Changes"); ?>
-                    </div>
-                    <div class="card-body">
+        </div>
+    </div>
 
-                        <h2><?php echo get_translation("Add Relationship"); ?></h2>
-                        <form id="add-relationship-form">
-                            <input type="hidden" id="member_id" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
-                            <input type="hidden" name="family_tree_id" value="<?php echo htmlspecialchars($member['family_tree_id']); ?>">
-
-                            <!-- Radio buttons to choose between existing or new member -->
-                            <label><input type="radio" name="member_type" value="existing" checked> <?php echo get_translation("Add Relationship With Existing Member"); ?></label><br>
-                            <label><input type="radio" name="member_type" value="new"> <?php echo get_translation("Add Relationship With New Member"); ?></label><br><br>
-
-                            <!-- Section for existing member selection -->
-                            <div id="existing-member-section">
-                                <label for="autocomplete_member"><?php echo get_translation("Select Existing Member"); ?>:</label>
-                                <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
-                                <datalist id="autocomplete-options"></datalist><br>
-
-                                <!-- Hidden fields for person IDs and relationship type -->
-                                <input type="hidden" name="person_id1" id="person_id1" value="<?php echo htmlspecialchars($member['id']); ?>">
-                                <input type="hidden" name="person_id2" id="person_id2" value="">
-                                <input type="hidden" name="relationship_type" id="relationship_type" value="">
-
-                                <label for="relationship_type_select"><?php echo get_translation("Relationship Type"); ?>:</label>
-                                <select name="relationship_type_select" id="relationship_type_select">
-                                    <!-- Options will be populated dynamically via AJAX -->
-                                </select><br>
-                            </div>
-
-                            <!-- Section for new member form -->
-                            <div id="new-member-section" style="display:none;">
-                                <label for="new_first_name"><?php echo get_translation("First Name"); ?>:</label>
-                                <input type="text" id="new_first_name" name="new_first_name"><br>
-
-                                <label for="new_last_name"><?php echo get_translation("Last Name"); ?>:</label>
-                                <input type="text" id="new_last_name" name="new_last_name"><br>
-
-                                <label for="relationship_type_new"><?php echo get_translation("Relationship Type"); ?>:</label>
-                                <select name="relationship_type_new" id="relationship_type_new">
-                                    <!-- Options will be populated dynamically via AJAX -->
-                                </select><br>
-                            </div>
-
-                            <button type="button" id="add-relationship-btn"><?php echo get_translation("Add Relationship"); ?></button>
-                        </form>
-
-
-
-
-                        <!-- Form to edit relationship (hidden by default) -->
-                        <div id="edit-relationship-modal" style="display: none;">
-                            <h2><?php echo get_translation("Edit Relationship"); ?></h2>
-                            <form id="edit-relationship-form">
-                                <input type="hidden" id="edit_relationship_id" name="relationship_id">
-                                <input type="hidden" id="edit_member_id" name="member_id" value="<?php echo htmlspecialchars($member['id']); ?>">
-                                <input type="hidden" name="edit_member2_id" value="<?php echo htmlspecialchars($member['id']); ?>">
-                                <input type="hidden" name="edit_family_tree_id" value="<?php echo htmlspecialchars($member['family_tree_id']); ?>">
-
-                                <label for="edit_relationship_person1"><?php echo get_translation("Person 1"); ?>:</label>
-                                <input type="text" id="edit_relationship_person1" name="person1" readonly><br>
-
-                                <label for="edit_relationship_person2"><?php echo get_translation("Person 2"); ?>:</label>
-                                <input type="text" id="edit_relationship_person2" name="person2" readonly><br>
-                                <input type="date" id="edit_relation_start" name="relation_start"><br>
-                                <input type="date" id="edit_relation_end" name="relation_end"><br>
-
-                                <label for="edit_relationship_type"><?php echo get_translation("Relationship Type"); ?>:</label>
-                                <select name="relationship_type" id="edit_relationship_type">
-                                    <!-- Options will be dynamically filled via AJAX -->
-                                </select><br>
-
-                                <button type="button" id="update-relationship-btn"><?php echo get_translation("Update Relationship"); ?></button>
-                            </form>
-                        </div>
-                        <hr>
-                        <h2><?php echo get_translation("Delete Member"); ?></h2>
-                        <?php echo get_translation("Warning, This Can Not Be Undone"); ?>
-                        <form method="post" class='delete-member-form' action="index.php?action=delete_member">
-                            <input type="hidden" name="member_id" value="<?php echo $member['id']; ?>">
-                            <button type="submit">🗑️ <?php echo get_translation("Delete"); ?></button>
-                        </form>
-                    </div>
-                </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                {{ get_translation("Changes") }}
             </div>
+            <div class="card-body">
+                <h2>{{ get_translation("Add Relationship") }}</h2>
+                <form id="add-relationship-form">
+                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
+                    <input type="hidden" name="family_tree_id" value="{{ member.family_tree_id|e }}">
+
+                    <!-- Radio buttons to choose between existing or new member -->
+                    <label><input type="radio" name="member_type" value="existing" checked> {{ get_translation("Add Relationship With Existing Member") }}</label><br>
+                    <label><input type="radio" name="member_type" value="new"> {{ get_translation("Add Relationship With New Member") }}</label><br><br>
+
+                    <!-- Section for existing member selection -->
+                    <div id="existing-member-section">
+                        <label for="autocomplete_member">{{ get_translation("Select Existing Member") }}:</label>
+                        <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
+                        <datalist id="autocomplete-options"></datalist><br>
+
+                        <!-- Hidden fields for person IDs and relationship type -->
+                        <input type="hidden" name="person_id1" id="person_id1" value="{{ member.id|e }}">
+                        <input type="hidden" name="person_id2" id="person_id2" value="">
+                        <input type="hidden" name="relationship_type" id="relationship_type" value="">
+
+                        <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
+                        <select name="relationship_type_select" id="relationship_type_select">
+                            <!-- Options will be populated dynamically via AJAX -->
+                        </select><br>
+                    </div>
+
+                    <!-- Section for new member form -->
+                    <div id="new-member-section" style="display:none;">
+                        <label for="new_first_name">{{ get_translation("First Name") }}:</label>
+                        <input type="text" id="new_first_name" name="new_first_name"><br>
+
+                        <label for="new_last_name">{{ get_translation("Last Name") }}:</label>
+                        <input type="text" id="new_last_name" name="new_last_name"><br>
+
+                        <label for="relationship_type_new">{{ get_translation("Relationship Type") }}:</label>
+                        <select name="relationship_type_new" id="relationship_type_new">
+                            <!-- Options will be populated dynamically via AJAX -->
+                        </select><br>
+                    </div>
+
+                    <button type="button" id="add-relationship-btn">{{ get_translation("Add Relationship") }}</button>
+                </form>
+
+                <!-- Form to edit relationship (hidden by default) -->
+                <div id="edit-relationship-modal" style="display: none;">
+                    <h2>{{ get_translation("Edit Relationship") }}</h2>
+                    <form id="edit-relationship-form">
+                        <input type="hidden" id="edit_relationship_id" name="relationship_id">
+                        <input type="hidden" id="edit_member_id" name="member_id" value="{{ member.id|e }}">
+                        <input type="hidden" name="edit_member2_id" value="{{ member.id|e }}">
+                        <input type="hidden" name="edit_family_tree_id" value="{{ member.family_tree_id|e }}">
+
+                        <label for="edit_relationship_person1">{{ get_translation("Person 1") }}:</label>
+                        <input type="text" id="edit_relationship_person1" name="person1" readonly><br>
+
+                        <label for="edit_relationship_person2">{{ get_translation("Person 2") }}:</label>
+                        <input type="text" id="edit_relationship_person2" name="person2" readonly><br>
+                        <input type="date" id="edit_relation_start" name="relation_start"><br>
+                        <input type="date" id="edit_relation_end" name="relation_end"><br>
+
+                        <label for="edit_relationship_type">{{ get_translation("Relationship Type") }}:</label>
+                        <select name="relationship_type" id="edit_relationship_type">
+                            <!-- Options will be dynamically filled via AJAX -->
+                        </select><br>
+
+                        <button type="button" id="update-relationship-btn">{{ get_translation("Update Relationship") }}</button>
+                    </form>
+                </div>
+                <hr>
+                <h2>{{ get_translation("Delete Member") }}</h2>
+                {{ get_translation("Warning, This Can Not Be Undone") }}
+                <form method="post" class='delete-member-form' action="index.php?action=delete_member">
+                    <input type="hidden" name="member_id" value="{{ member.id }}">
+                    <button type="submit">🗑️ {{ get_translation("Delete") }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <!-- External JavaScript file -->
             <script>
                 var memberId = <?php echo json_encode($member['id']); ?>; // Pass member ID to JavaScript
@@ -363,8 +340,6 @@
                     }
                 });
             </script>
-</body>
-
 
 
 
@@ -572,5 +547,3 @@
     });
 </script>
 
-
-</html>
