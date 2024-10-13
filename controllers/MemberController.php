@@ -36,7 +36,7 @@ class MemberController extends AppController
             "template" => "edit_member.tpl",
             "relationships" => $relationships,
             "relationship_types" => $relationship_types,
-            "section" => get_translation("Add Member"),
+            "section" => get_translation("Update Member"),
             "tree_description" => get_translation("Description"),
             "go_back" => get_translation("Back to List"),            
             "error" => "",
