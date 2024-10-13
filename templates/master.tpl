@@ -19,6 +19,7 @@
         /* Add custom styles here */
         body {
             background-color: #dfc9a7;
+            min-height: 100%;
         }
         .navbar {
             background-color: #62313c !important;
@@ -59,7 +60,11 @@
         text-align: center;
     
     }
-
+    .footer {
+        color: white;
+        text-align: center;
+        padding-left: 10px;
+    }
     </style>
 </head>
 <body>
@@ -89,6 +94,9 @@
 
     {{content|raw}}
     </div>
+    </div>
+<div class="navbar fixed-bottom footer">
+    &copy; Opensitez Genie (c) 2024
     </div>
 </body>
 </html>
