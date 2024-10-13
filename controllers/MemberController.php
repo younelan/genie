@@ -31,7 +31,8 @@ class MemberController extends AppController
         $data = [
             "tagString" => $tagString,
             "member" => $member,
-            "memberId"=> $memberId,
+            "memberId"=> $member['id']??0,
+            "treeId" => $member['family_tree_id'] ?? 0,
             "template" => "edit_member.tpl",
             "relationships" => $relationships,
             "relationship_types" => $relationship_types,

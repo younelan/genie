@@ -306,8 +306,8 @@
 
             <!-- External JavaScript file -->
             <script>
-                var memberId = <?php echo json_encode($member['id']); ?>; // Pass member ID to JavaScript
-                const treeId = <?php echo json_encode($member['family_tree_id']); ?>; // Pass member ID to JavaScript
+                var memberId = {{memberId}}; // Pass member ID to JavaScript
+                const treeId = {{treeId}}; // Pass member ID to JavaScript
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var script = document.createElement('script');
