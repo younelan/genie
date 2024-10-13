@@ -24,6 +24,7 @@ Check out [The README file](README.md) for more info
         - add_tree
         - view_tree
     - tree height/width from db
+    - translated relationship types
 
 ## 20240908
     - Classes inherit base class
