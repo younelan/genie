@@ -47,37 +47,7 @@ function initializeRelationships(memberId) {
             }
         });
 
-        // Load relationship types for the select dropdown (existing member)
-        $.ajax({
-            url: "index.php?action=get_relationship_types",
-            dataType: "json",
-            success: function (data) {
-                var optionsHtml = '';
-                $.each(data, function (index, relationshipType) {
-                    optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
-                });
-                $('#relationship_type_select').html(optionsHtml);
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching relationship types:', status, error);
-            }
-        });
 
-        // Load relationship types for the select dropdown (new member)
-        $.ajax({
-            url: "index.php?action=get_relationship_types",
-            dataType: "json",
-            success: function (data) {
-                var optionsHtml = '';
-                $.each(data, function (index, relationshipType) {
-                    optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
-                });
-                $('#relationship_type_new').html(optionsHtml);
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching relationship types:', status, error);
-            }
-        });
 
         // Handle click event for add relationship button
         $('#add-relationship-btn').click(function () {

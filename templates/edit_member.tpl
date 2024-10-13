@@ -233,6 +233,10 @@
                         <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
                         <select name="relationship_type_select" id="relationship_type_select">
                             <!-- Options will be populated dynamically via AJAX -->
+                            {% for rtype in relationship_types %}
+                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
+                            {% endfor %}
+
                         </select><br>
                     </div>
 
@@ -247,6 +251,10 @@
                         <label for="relationship_type_new">{{ get_translation("Relationship Type") }}:</label>
                         <select name="relationship_type_new" id="relationship_type_new">
                             <!-- Options will be populated dynamically via AJAX -->
+                            {% for rtype in relationship_types %}
+                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
+                            {% endfor %}
+
                         </select><br>
                     </div>
 
@@ -311,7 +319,7 @@
 
                 document.addEventListener('DOMContentLoaded', function() {
                     var script = document.createElement('script');
-                    script.src = 'res/relationships.js?ver=1';
+                    script.src = 'res/relationships.js?ver=1.1';
 
                     script.onload = function() {
                         // Initialize relationships.js with member ID
@@ -543,6 +551,39 @@
             tagInputs[0].copyTagsToClipboard();
         });
 
+        /*
+        // Load relationship types for the select dropdown (existing member)
+        $.ajax({
+            url: "index.php?action=get_relationship_types",
+            dataType: "json",
+            success: function (data) {
+                var optionsHtml = '';
+                $.each(data, function (index, relationshipType) {
+                    optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
+                });
+                $('#relationship_type_select').html(optionsHtml);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching relationship types:', status, error);
+            }
+        });
+
+        // Load relationship types for the select dropdown (new member)
+        $.ajax({
+            url: "index.php?action=get_relationship_types",
+            dataType: "json",
+            success: function (data) {
+                var optionsHtml = '';
+                $.each(data, function (index, relationshipType) {
+                    optionsHtml += '<option value="' + relationshipType.id + '">' + relationshipType.description + '</option>';
+                });
+                $('#relationship_type_new').html(optionsHtml);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching relationship types:', status, error);
+            }
+        });
+        */
 
     });
 </script>
