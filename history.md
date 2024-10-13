@@ -5,7 +5,6 @@ Check out [The README file](README.md) for more info
 	* Edit relationship types
 	* Edit Synonyms
 	* Simplicity
-		* templates
 		* Auth
 		* Config
 	* Use Simplicity for templates
@@ -15,6 +14,16 @@ Check out [The README file](README.md) for more info
 	* gedcom write/read
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
+
+## 20241013
+    - implemented twig template for
+        - list_member
+        - edit_member
+        - list_trees
+        - add_member
+        - add_tree
+        - view_tree
+    - tree height/width from db
 
 ## 20240908
     - Classes inherit base class
