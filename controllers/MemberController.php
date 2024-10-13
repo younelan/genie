@@ -78,6 +78,32 @@ class MemberController extends AppController
     }
     public function addMember($treeId)
     {
+        $data = [
+            "template" => "add_member.tpl",
+            "section" => get_translation("Add Member"),
+            "tree_description" => get_translation("Description"),
+            "go_back" => get_translation("Back to List"),            
+            "error" => "",
+            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "graph" => $this->config['graph']
+        ];
+
+        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $data["menu"] = [
+            [
+                "link" => "index.php?action=add_member&tree_id=$treeId",
+                "text" => get_translation("New Member"),
+            ],
+            [
+                "link" => "index.php?action=edit_tree&tree_id=$treeId",
+                "text" => get_translation("List Members"),
+            ],
+            [
+                "link" => "index.php?action=list_trees",
+                "text" =>  get_translation("Trees"),
+            ]
+        
+        ];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = $_POST['first_name'];
             $lastName = $_POST['last_name'];
@@ -102,7 +128,9 @@ class MemberController extends AppController
                 $error = "Failed to add member.";
             }
         }
-        include $this->basedir . "/templates/add_member.php";
+        echo $this->render_master($data);
+
+        //include $this->basedir . "/templates/add_member.php";
     }
     public function getRelationshipTypes($treeId)
     {
