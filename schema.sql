@@ -87,6 +87,27 @@ CREATE TABLE events (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table to store sources (optional GEDCOM SOUR)
+CREATE TABLE sources (
+    source_id INT AUTO_INCREMENT PRIMARY KEY,
+    source_title VARCHAR(255),
+    source_text TEXT,
+    data JSON,  -- For any additional optional data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table to link individuals/families/events to sources (GEDCOM SOUR link)
+CREATE TABLE source_links (
+    source_link_id INT AUTO_INCREMENT PRIMARY KEY,
+    individual_id INT,  -- Nullable, if this source is for an individual
+    family_id INT,      -- Nullable, if this source is for a family
+    event_id INT,       -- Nullable, if this source is for an event
+    source_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table structure for table `person_relationship`
 
 DROP TABLE IF EXISTS `person_relationship`;
@@ -122,8 +143,8 @@ CREATE TABLE families (
 );
 
 -- Table to store parent-child relationships
-DROP TABLE IF EXISTS families_children
-CREATE TABLE family_children (
+DROP TABLE IF EXISTS families_relationships
+CREATE TABLE family_relationships (
     family_id INT,
     child_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
