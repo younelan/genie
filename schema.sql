@@ -161,16 +161,27 @@ CREATE TABLE `relationship_type` (
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
 );
-INSERT INTO `relationship_type` (`id`, `family_tree_id`, `description`) VALUES
-(1, 1, 'Fraternal'),
-(2, 1, 'Parent'),
-(3, 1, 'Friend'),
-(4, 1, 'Half Sibling'),
-(5, 1, 'Mariage'),
-(6, 1, 'Fiancailles'),
-(7, 1, 'Child'),
-(8, 1, 'Cousin'),
-(9, 1, 'Step-Parent');
+INSERT INTO `relationship_type` (`id`, `family_tree_id`, `code`, `description`) VALUES
+(1,1,'SIBL','Sibling'),
+(2,1,'FATH','Father'),
+(3,1,'MOTH','Mother'),
+(4,1,'HALF','Half Sibling'),
+(5,1,'HUSB','Husband'),
+(6,1,'WIFE','Wife'),
+(7,1,'CHLD','Enfant'),
+(8,1,'CUSN','Cousin'),
+(9,1,'DIV','Ex Epoux'),
+(10,1,'PART','Partner'),
+(11,1,'FIAN','Fiance'),
+(12,1,'ADOP','Adopted'),
+(13,1,'ILLE','Illegitimate'),
+(14,1,'1ST','1st Cousin'),
+(15,1,'2ND','2nd Cousin'),
+(16,1,'3RD','Third Cousin'),
+(17,1,'GONE','Gone Cousin'),
+(18,1,'ONCE','Once Removed Cousin'),
+(19,1,'STEP','Step Sibling'),
+(20,1,'UNKN','Unknown'
 
 -- Table structure for table `synonyms`
 
