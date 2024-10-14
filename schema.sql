@@ -181,7 +181,7 @@ INSERT INTO `relationship_type` (`id`, `family_tree_id`, `code`, `description`) 
 (17,1,'GONE','Gone Cousin'),
 (18,1,'ONCE','Once Removed Cousin'),
 (19,1,'STEP','Step Sibling'),
-(20,1,'UNKN','Unknown'
+(20,1,'UNKN','Unknown');
 
 -- Table structure for table `synonyms`
 
