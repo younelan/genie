@@ -33,6 +33,7 @@ CREATE TABLE `people_tags` (
 DROP TABLE IF EXISTS `person`;
 CREATE TABLE `person` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `gedcom_id` VARCHAR(20) UNIQUE,  -- This stores the GEDCOM tag like @F1@
   `family_tree_id` int NOT NULL,
   `title` varchar(20) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
