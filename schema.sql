@@ -72,6 +72,21 @@ CREATE TABLE notes (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Table to store events related to individuals or families (events in GEDCOM)
+DROP TABLE if exist events;
+CREATE TABLE events (
+    event_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_type VARCHAR(50),  -- E.g., 'BIRTH', 'DEATH', 'MARRIAGE', 'DIVORCE'
+    event_date DATE,
+    event_place_id INT,
+    individual_id INT,  -- Nullable, if this is an individual event
+    family_id INT,      -- Nullable, if this is a family event
+    description TEXT,
+    data JSON,  -- For any additional optional data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table structure for table `person_relationship`
 
 DROP TABLE IF EXISTS `person_relationship`;
@@ -89,6 +104,8 @@ CREATE TABLE `person_relationship` (
   PRIMARY KEY (`id`)
 );
 
+-- Table to store families
+
 DROP TABLE IF EXISTS `families`;
 CREATE TABLE families (
     family_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,7 +122,8 @@ CREATE TABLE families (
 );
 
 -- Table to store parent-child relationships
-CREATE TABLE FamilyChildren (
+DROP TABLE IF EXISTS families_children
+CREATE TABLE family_children (
     family_id INT,
     child_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
