@@ -75,6 +75,29 @@ CREATE TABLE `person_relationship` (
   PRIMARY KEY (`id`)
 );
 
+DROP TABLE IF EXISTS `families`;
+CREATE TABLE families (
+    family_id INT AUTO_INCREMENT PRIMARY KEY,
+    gedcom_id VARCHAR(20) UNIQUE,  -- This stores the GEDCOM tag like @F1@
+    husband_id INT,
+    wife_id INT,
+    marriage_date DATE,
+    divorce_date DATE,
+    marriage_place_id INT,
+    divorce_place_id INT,
+    data JSON,  -- For any additional optional data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table to store parent-child relationships
+CREATE TABLE FamilyChildren (
+    family_id INT,
+    child_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table structure for table `relationship_type`
 
 DROP TABLE IF EXISTS `relationship_type`;
