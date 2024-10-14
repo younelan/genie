@@ -59,6 +59,19 @@ CREATE TABLE `person` (
   PRIMARY KEY (`id`)
 );
 
+DROP TABLE if exists notes;
+-- Table to store additional notes about individuals, families, or events (optional GEDCOM notes)
+CREATE TABLE notes (
+    note_id INT AUTO_INCREMENT PRIMARY KEY,
+    individual_id INT,  -- Nullable, if this note is for an individual
+    family_id INT,      -- Nullable, if this note is for a family
+    event_id INT,       -- Nullable, if this note is for an event
+    note_text TEXT,
+    data JSON,  -- For any additional optional data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Table structure for table `person_relationship`
 
 DROP TABLE IF EXISTS `person_relationship`;
