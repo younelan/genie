@@ -204,6 +204,17 @@ CREATE TABLE `taxonomy_terms` (
   PRIMARY KEY (`term_id`)
 );
 
+CREATE TABLE users_permissions (
+    permission_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    tree_id INT NOT NULL,
+    can_view BOOLEAN NOT NULL DEFAULT 0,
+    can_edit BOOLEAN NOT NULL DEFAULT 0,
+    is_admin BOOLEAN NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+);
+
 -- Table structure for table `users`
 
 DROP TABLE IF EXISTS `users`;
