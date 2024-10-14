@@ -156,6 +156,7 @@ CREATE TABLE family_relationships (
 DROP TABLE IF EXISTS `relationship_type`;
 CREATE TABLE `relationship_type` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL,
   `family_tree_id` int NOT NULL,
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
