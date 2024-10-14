@@ -16,7 +16,7 @@ Check out [The README file](README.md) for more info
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
 ## 20241013
-    - implemented twig template for
+    - implemented twig template for all views
         - list_member
         - edit_member
         - list_trees
@@ -25,6 +25,7 @@ Check out [The README file](README.md) for more info
         - view_tree
     - tree height/width from db
     - translated relationship types
+    - fixed view_tree missing quote that was breaking visualization
 
 ## 20240908
     - Classes inherit base class
