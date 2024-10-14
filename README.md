@@ -10,6 +10,10 @@ Until I have vetted the app more carefully, I have removed auth.
 
 checkout [The history file](history.md) for changes
 
+## Latest stable version
+- the latest stable version: pre-template tag
+- HEAD has fixes and mostly works but tree visualization is still a bit buggy for some reason from when I switched to twig
+
 ## Features:
 - multiple trees
 - Multiple people can have as many relationships as possible
@@ -24,7 +28,7 @@ checkout [The history file](history.md) for changes
 - refactor into classes, more mvc, better folder structure
 
 ## Setup
-
+- checkout pre-template (latest stable version)
 - enable php, pdo on your web folder
 - put in a web accessible folder
 - create a configuration file
