@@ -145,10 +145,12 @@ CREATE TABLE families (
 -- Table to store parent-child relationships
 DROP TABLE IF EXISTS families_relationships
 CREATE TABLE family_relationships (
-    family_id INT,
-    child_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `family_id` INT,
+    `child_id` INT,
+    `code` VARCHAR(32),
+    `data` JSON,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Table structure for table `relationship_type`
