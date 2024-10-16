@@ -118,6 +118,7 @@ CREATE TABLE `person_relationship` (
   `person_id2` int NOT NULL,
   `relationship_type_id` int NOT NULL,
   `relation_start` date DEFAULT NULL,
+  `code` VARCHAR(32) DEFAULT NULL,
   `relation_end` date DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
