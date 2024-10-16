@@ -27,6 +27,7 @@ class MemberController extends AppController
         if (!$member) {
             exit('Member not found.');
         }
+        $treeId = $member['family_tree_id']??$_GET['tree_id'] ?? $_GET['family_tree_id']??0; // Get family_tree_id from the request
 
         $data = [
             "tagString" => $tagString,
@@ -44,7 +45,7 @@ class MemberController extends AppController
             "graph" => $this->config['graph']
         ];
 
-        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+
         $data["menu"] = [
             [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
