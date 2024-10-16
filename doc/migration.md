@@ -23,3 +23,16 @@ LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
 WHERE t.code IN ("HUSB","WIFE");
 ```
 
+## Delete husband/wife in old relationship table
+DELETE r 
+FROM person_relationship r
+LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
+WHERE t.code IN ("HUSB","WIFE");
+
+## Add relationship code to avoid join
+ALTER TABLE person_relationship
+ADD COLUMN RELCODE VARCHAR(255);
+UPDATE person_relationship r
+LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
+SET
+  r.RELCODE = t.code;
