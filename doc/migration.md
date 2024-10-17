@@ -24,10 +24,18 @@ WHERE t.code IN ("HUSB","WIFE");
 ```
 
 ## Delete husband/wife in old relationship table
-DELETE r 
+```DELETE r 
 FROM person_relationship r
 LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
 WHERE t.code IN ("HUSB","WIFE");
+```
+
+## restore deleted husband wife from family in case you still need it
+```
+INSERT INTO person_relationship (person_id1,person_id2,created_at,updated_at,RELCODE,relationship_type_id,family_tree_id)
+SELECT  `husband_id`,`wife_id`,f.`created_at`,f.`updated_at`, 'HUSB',5,1
+FROM families f
+```
 
 ## Add relationship code to avoid join
 ALTER TABLE person_relationship
