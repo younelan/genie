@@ -11,8 +11,9 @@ Until I have vetted the app more carefully, I have removed auth.
 checkout [The history file](history.md) for changes
 
 ## Latest stable version
-- the latest stable version: v0.1.0 
-
+- the latest stable version: v0.1.0 (git tag)
+- current version is in doc/version
+ 
 ## Features:
 - multiple trees
 - Multiple people can have as many relationships as possible

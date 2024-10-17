@@ -15,7 +15,7 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
-## 20241013
+## 20241017
     - implemented twig template for all views
         - list_member
         - edit_member
@@ -26,7 +26,13 @@ Check out [The README file](README.md) for more info
     - tree height/width from db
     - translated relationship types
     - fixed view_tree missing quote that was breaking visualization
-
+    - fixed issue with missing menu tree in edit_member
+    - schema change for easier GEDCOM integration
+        - migration script to new schema (in progress)
+            - create families/delete query
+            - add relationship code to member (gedcom code)
+        - updated schema
+        - relationship code is now directly in relationship
 ## 20240908
     - Classes inherit base class
     - added translation function
