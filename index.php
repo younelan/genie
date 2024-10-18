@@ -3,6 +3,7 @@ session_start();
 
 $basedir = __DIR__;
 
+require_once "$basedir/vendor/autoload.php";
 require_once "$basedir/init.php";
 
 //$i18n = new I18n();
@@ -32,7 +33,7 @@ function apachelog($foo) {
 }
 $action = $_GET['action'] ?? $_POST['action']??'';
 
-$user = new UserModel($config['connection']);
+$user = new UserModel($config);
 $userId = $user->getCurrentUserId();
 $config['current-user']=$userId;
 if (!$userId) {
