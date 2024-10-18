@@ -1,7 +1,12 @@
 <?php 
 class AppBase
 {
+    private $config;
+    
+    function __construct($config) {
+        $this->config = $config;
 
+    }
     function render_file($fname, $blocks)
     {
 
