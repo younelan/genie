@@ -1,42 +1,4 @@
-    <style>
-        /* Add custom styles here */
-        body {
-            background-color: #dfc9a7;
-        }
-        .navbar {
-            background-color: #62313c !important;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: #f0e2d8;
-            color: black;
-        }
-        .card a  {
-            color: #240c0c;
-        }
-        .card-header {
-            background-color: #e5d7d3;
-            border-bottom: 1px solid #dee2e6;
-            font-weight: bold;
-            color: #6d1818;
-            }
-        .list-group-item {
-            background-color: #fff3f3;
-            border: 1px solid rgba(234, 186, 186, 0.56);
-        }
-        .badge-primary {
-            color: #b3ccf5;
-            background-color: #06158e;
-        }
-        #search {
-            display: block;
-            width: 100%;
-            margin-bottom: 5px;
-            border: 1px solid #ccc;
-            padding: 5px;
-        }
-    </style>
+
 
 
 <!-- People list -->
