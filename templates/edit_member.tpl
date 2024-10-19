@@ -99,12 +99,6 @@
 
 
 
- 
-
-
-
-
-
 
 <!-- Main content -->
 <div class="row mt-5">
@@ -299,55 +293,40 @@
 </div>
 
 
+<script>
+    var memberId = {{memberId}}; // Pass member ID to JavaScript
+    const treeId = {{treeId}}; // Pass member ID to JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        var script = document.createElement('script');
+        script.src = 'res/relationships.js?ver=1.1';
 
+        script.onload = function() {
+            // Initialize relationships.js with member ID
+            initializeRelationships(memberId);
+        };
+        document.head.appendChild(script);
+    });
 
+    $(document).ready(function() {
+        // Handle delete tree form submission with confirmation
+        $('.delete-member-form').submit(function(event) {
+            if (!confirm('{{ get_translation("Are you sure you want to delete this tree?")}}')) {
+                event.preventDefault();
+            }
+        });
+    });
 
-
-
-
-
-
-
-
-
-
-
-            <!-- External JavaScript file -->
-            <script>
-                var memberId = {{memberId}}; // Pass member ID to JavaScript
-                const treeId = {{treeId}}; // Pass member ID to JavaScript
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    var script = document.createElement('script');
-                    script.src = 'res/relationships.js?ver=1.1';
-
-                    script.onload = function() {
-                        // Initialize relationships.js with member ID
-                        initializeRelationships(memberId);
-                    };
-                    document.head.appendChild(script);
-                });
-
-                $(document).ready(function() {
-                    // Handle delete tree form submission with confirmation
-                    $('.delete-member-form').submit(function(event) {
-                        if (!confirm('<?php echo get_translation("Are you sure you want to delete this tree?"); ?>')) {
-                            event.preventDefault();
-                        }
-                    });
-                });
-
-                document.getElementById('toggle-fields-btn').addEventListener('click', function() {
-                    var additionalFields = document.getElementById('additional-fields');
-                    if (additionalFields.style.display === 'none') {
-                        additionalFields.style.display = 'block';
-                        this.textContent = '<?php echo get_translation("Less Fields"); ?>';
-                    } else {
-                        additionalFields.style.display = 'none';
-                        this.textContent = '<?php echo get_translation("More Fields"); ?>';
-                    }
-                });
-            </script>
+    document.getElementById('toggle-fields-btn').addEventListener('click', function() {
+        var additionalFields = document.getElementById('additional-fields');
+        if (additionalFields.style.display === 'none') {
+            additionalFields.style.display = 'block';
+            this.textContent = '{{ get_translation("Less Fields") }} ';
+        } else {
+            additionalFields.style.display = 'none';
+            this.textContent = '{{ get_translation("More Fields") }}';
+        }
+    });
+</script>
 
 
 
