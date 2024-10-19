@@ -1,6 +1,10 @@
 body {
     background-color: #dfc9a7;
 }
+.error {
+    color: red;
+}
+
 .navbar {
     background-color: #62313c !important;
 }

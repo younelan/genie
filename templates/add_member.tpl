@@ -1,11 +1,4 @@
 
-    <style>
-        .error {
-            color: red;
-        }
-    </style>
-
-<body>
     <h1>{{get_translation("Add New Member")}}</h1>
     {% if error is defined %}
         <p class='error'>{{ error }}</p>
@@ -34,6 +27,4 @@
     </form>
     <br>
     <a href="index.php?action=list_members&tree_id={{ treeId }}">{{get_translation("Back to List")}}</a>
-</body>
 
-</html>
