@@ -46,6 +46,18 @@ button {
     margin: 1px;
     border-radius: 5px;
 }
+.relation-button {
+    width: 23px;
+    border: 1px solid #cbb;
+    padding: 0px;
+    display: inline-block;
+    height: 30px;
+}
+
+.relationship-table form {
+    display: inline-block;
+}
+
 
 /*tags*/
 .tag-input-container {
@@ -57,6 +69,7 @@ button {
     width: 300px;
     margin-bottom: 10px;
 }
+
 .tag {
     display: flex;
     align-items: center;
@@ -66,13 +79,16 @@ button {
     padding: 3px 8px;
     margin: 2px;
 }
+
 .tag span {
     margin-right: 5px;
 }
+
 .tag .close-btn {
     cursor: pointer;
     font-size: 12px;
 }
+
 .tag-input {
     flex: 1;
     border: none;
