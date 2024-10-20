@@ -1,6 +1,6 @@
 body {
     background-color: #dfc9a7;
-    min-height: 100%;
+    overflow: auto;
 }
 .error {
     color: red;
