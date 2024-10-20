@@ -96,3 +96,20 @@ button {
     outline: none;
     min-width: 50px;
 }
+.node circle {
+    fill: #eaf5c5;
+    stroke: #b02f3b;
+    stroke-width: 2px;
+}
+
+.node text {
+    font: 12px sans-serif;
+    color: red;
+}
+
+.link {
+    fill: #ffc;
+    stroke: #555;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5px;
+}
