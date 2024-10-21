@@ -41,7 +41,7 @@ class MemberController extends AppController
             "tree_description" => get_translation("Description"),
             "go_back" => get_translation("Back to List"),            
             "error" => "",
-            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "tree_id" => $treeId,
             "graph" => $this->config['graph']
         ];
 
