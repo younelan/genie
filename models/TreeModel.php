@@ -71,6 +71,8 @@ class TreeModel extends AppModel
         }
 
         $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id $orderby LIMIT :offset, :limit";
+        
+        apachelog($query."\nlimit $limit offset $offset\n");
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
