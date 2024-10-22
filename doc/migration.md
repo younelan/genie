@@ -10,6 +10,22 @@ left join relationship_type t on r.relationship_type_id = t.id
 where t.code in ("HUSB","WIFE");
 ```
 
+## Make sure relationships are compatible
+
+because of the way gedcom format works, relationships are tracked by families and as a result relationships need no be prepared for migration
+
+### No siblings
+
+GEDCOM siblings are determined by families. As a result, all sibling links will be ignored. Because there is no way to guess parents of the child with multiple parents, As a result, make sure you put parents first and children are all children of the parent instead
+
+### Put children left
+
+For the migration to work, the script needs to find who is the parent and who is the childre. Make sure that in all children relationships, the child is on the left side of the relationship
+
+### Child relations are CHLD
+
+Previously, there was a way to add FATHER/MOTHER link. To be gedcom compliant, make sure the link between parent and children is CHLD
+
 ## Parents to Families
 create families
 
