@@ -22,6 +22,19 @@ GEDCOM siblings are determined by families. As a result, all sibling links will 
 
 For the migration to work, the script needs to find who is the parent and who is the childre. Make sure that in all children relationships, the child is on the left side of the relationship
 
+one way to find children who were put on the right is finding people who have no children. You can do that with the following query:
+
+```
+SELECT p1.id, p1.first_name, p1.last_name
+FROM person p1
+WHERE NOT EXISTS (
+  SELECT r.id
+  FROM person_relationship r
+  JOIN relationship_type t ON r.relationship_type_id = t.id
+  WHERE r.person_id1 = p1.id AND t.code = 'CHLD'
+);
+```
+
 ### Child relations are CHLD
 
 Previously, there was a way to add FATHER/MOTHER link. To be gedcom compliant, make sure the link between parent and children is CHLD
