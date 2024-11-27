@@ -126,7 +126,7 @@ class RelationshipMigrator {
             SELECT r.person_id1 AS husb, r.person_id2 AS wife, r.id AS relation_id, t.code
             FROM person_relationship r
             LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
-            WHERE t.code IN ('HUSB', 'WIFE') 
+            WHERE t.code IN ('HUSB', 'WIFE','DIV') 
             AND r.family_tree_id = :family_tree_id
         ";
 
