@@ -114,6 +114,7 @@ class RelationshipMigrator {
                     //print  "+++$name1 : 1 Parent $parentid1\n";
                     switch(count($spouses)) {
                         case 0:
+                            $name2 = $this->getName($parentid1);
                             print "$name1 child of $name2 (no spouse)\n";
                             break;
                         case 1:
