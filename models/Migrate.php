@@ -12,7 +12,51 @@ class RelationshipMigrator {
     public function __construct($config) {
         $this->pdo = $config['connection'];
     }
+    public function showPeople() {
+        foreach($this->people as $pid=>$person) {
+            print "$pid - {$person['first_name']} {$person['last_name']}\n";
+            if($this->relationships[$pid]) {
+                foreach($this->relationships[$pid] as $rid=>$relation) {
+                    print_r($relation);
+                    exit;
+                    $relid1 = $relation['person_id1']??0;
+                    $relid2 = $relation['person_id2']??0;
 
+                    if($relid1 && $this->people[$relid1]) {
+                        $rel1 = $this->people[$relid1]??false;
+                        $name1 = "{$rel1['first_name']} {$rel1['last_name']}";
+
+                    } else {
+                        $rel1=false;
+                        $name1="((undefined $relid1))";
+                    }
+                    if($relid2 && $this->people[$relid2]) {
+                        $rel2 = $this->people[$relid2]??false;
+                        $name2 = "{$rel2['first_name']} {$rel2['last_name']}";
+ 
+                    } else {
+                        $rel2 = false;
+                        $name2 = " ((undefined $relid2)) ";
+                    }
+
+                    // if($rel1) {
+                    //     $name1 = "{$rel1['first_name']} {$rel1['last_name']}";
+                    // } else {
+                    //     $name = "((undefined))";
+                    // }
+                    // if($rel2) {
+                    //     $name2 = "{$rel2['first_name']} {$rel2['last_name']}";
+                    // } else {
+                    //     $name2 = "((undefined))";
+                    // }
+
+                    print "    - $rid - {$name1} {$name2}\n";
+
+                }
+
+            }
+        } 
+    }
     public function migrate($family_tree_id) {
         // Start a transaction
         $this->pdo->beginTransaction();
@@ -20,8 +64,9 @@ class RelationshipMigrator {
         try {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
+            $this->showPeople();
             print "fetched:\n";
-            print_r($this->relationships);
+            //print_r($this->relationships);
             exit;
             // Insert the families into the database
             $this->insertFamilies();
@@ -94,7 +139,7 @@ class RelationshipMigrator {
             // Fetch people if not already done
             $id1=$this->fetchPersonIfNeeded($row['husb']);
             $id2=$this->fetchPersonIfNeeded($row['wife']);
-            if($id2['gender']==1) {
+            if($id2['gender_id']==1) {
                 $husb=intval($row['wife']);
                 $wife=intval($row['husb']);
             } else {
