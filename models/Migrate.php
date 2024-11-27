@@ -9,6 +9,7 @@ class RelationshipMigrator {
     private $relations = [];
     private $people = [];
     private $children = [];
+    private $spouses = [];
     private $relationships = [];
 
     public function __construct($config) {
@@ -29,7 +30,7 @@ class RelationshipMigrator {
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
-            if($this->relationships[$pid]) {
+            if($this->spouses[$pid]) {
                 foreach($this->relationships[$pid] as $rid=>$relation) {
                     $relid1 = $relation['person_id1']??0;
                     $relid2 = $relation['person_id2']??0;
@@ -96,11 +97,51 @@ class RelationshipMigrator {
 
             $name1=$this->getName($child);
             $parentnames=[];
-            foreach($curparents as $parent) {
-                $parentnames[]=$this->getName($parent);
+            $numparents=count($curparents); 
+            switch($numparents) {
+                case 0:
+                    print "+++$name1 : No Parents\n";
+                    break;
+                case 1:
+                    if($curparents) {
+                        $parentid1=$curparents[array_key_first($curparents)];
+
+                    } else {
+                        $parentid1=0;
+                    }
+                    $spouses = $this->spouses[$parentid1]??[];
+                    //print_r($spouses);
+                    //print  "+++$name1 : 1 Parent $parentid1\n";
+                    switch(count($spouses)) {
+                        case 0:
+                            print "$name1 child of $name2 (no spouse)\n";
+                            break;
+                        case 1:
+                            $name2 = $this->getName($parentid1);
+                            $parentid2=array_key_first($spouses);
+                            //print_r($spouses);
+                            $parentnames = [
+                                $parentnames[]=$this->getName($parentid1),
+                                $parentnames[]=$this->getName($parentid2)
+                            ];                          
+                            $name2=implode("," , $parentnames);
+                            print "$name1 $parentid1 child of $name2 $parentid2 (added 1 parent)\n";
+                            break;
+                        default:
+                            $name2 = $this->getName($parentid1);
+                            print "+++$name1 child of $name2 (many parents)\n";
+
+                    }
+                    break;
+                case 2: 
+                    foreach($curparents as $parent) {
+                        $parentnames[]=$this->getName($parent) . " $parent";
+                    }
+                    $name2=implode("," , $parentnames);
+                    print "$name1 $child child of $name2\n";
+        
+                    break;
             }
-            $name2=implode("," , $parentnames);
-            print "$name1 child of $name2\n";
 
         }
         exit;
@@ -211,8 +252,8 @@ class RelationshipMigrator {
                 // var_dump($this->families);
                 // var_dump($this->people);
                 // Store the relation ID for both husband and wife
-                $this->relationships[$husb][] = $row['relation_id'];
-                $this->relationships[$wife][] = $row['relation_id'];
+                $this->spouses[$husb][$wife] = $row['relation_id'];
+                $this->spouses[$wife][$husb] = $row['relation_id'];
             //}
             // exit;
         }
@@ -232,7 +273,8 @@ class RelationshipMigrator {
             $stmt->execute();
             
             // Store the family relationship
-            $this->relationships[] = [
+            print "need check already there is spouse";exit;
+            $this->spouses[] = [
                 'husb' => $family['husb'],
                 'wife' => $family['wife'],
                 'relation_id' => $family['relation_id'],
