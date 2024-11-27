@@ -4,21 +4,33 @@ require $basedir . '/init.php'; // Ensure you include the autoload file
 
 class RelationshipMigrator {
     private $pdo;
+    private $parents = [];
     private $families = [];
     private $relations = [];
     private $people = [];
+    private $children = [];
     private $relationships = [];
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
+    }
+    function getName($id) {
+        if(isset($this->people[$id])) {
+            $person = $this->people[$id];
+            $name = "{$person['first_name']} {$person['last_name']}";
+
+        } else {
+            $name = false;
+        }
+
+        return $name;
+
     }
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
             if($this->relationships[$pid]) {
                 foreach($this->relationships[$pid] as $rid=>$relation) {
-                    print_r($relation);
-                    exit;
                     $relid1 = $relation['person_id1']??0;
                     $relid2 = $relation['person_id2']??0;
 
@@ -57,6 +69,42 @@ class RelationshipMigrator {
             }
         } 
     }
+    public function fetchChildren($family_tree_id) {
+        $sql = "
+            SELECT r.person_id1 AS child, r.person_id2 AS parent, r.id AS relation_id, t.code
+            FROM person_relationship r
+            LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
+            WHERE t.code IN ('FATH', 'MOTH','CHLD') 
+            AND r.family_tree_id = :family_tree_id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':family_tree_id', $family_tree_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // Store the results and fetch people details
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $child=$this->fetchPersonIfNeeded($row['child']);
+            $parent=$this->fetchPersonIfNeeded($row['parent']);
+            if(!isset($this->parents[$row['child']])) {
+                $this->parents[$row['child']]=[];
+            }
+            $this->parents[$row['child']][$row['parent']]=$row['parent'];
+
+        }        
+        foreach ($this->parents as $child=>$curparents) {
+
+            $name1=$this->getName($child);
+            $parentnames=[];
+            foreach($curparents as $parent) {
+                $parentnames[]=$this->getName($parent);
+            }
+            $name2=implode("," , $parentnames);
+            print "$name1 child of $name2\n";
+
+        }
+        exit;
+    }
     public function migrate($family_tree_id) {
         // Start a transaction
         $this->pdo->beginTransaction();
@@ -64,6 +112,7 @@ class RelationshipMigrator {
         try {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
+            $this->fetchChildren($family_tree_id);
             $this->showPeople();
             print "fetched:\n";
             //print_r($this->relationships);
