@@ -45,7 +45,7 @@ class RelationshipMigrator {
             $gedcom .= "1 NAME " . $individual['first_name'] . " /" . $individual['last_name'] . "/\n";
             foreach($this->spouses[$id]??[] as $spouseid=>$familyid) {
                 //if ($individual['spouse']??false) {
-                    $gedcom .= "1 FAMS @" . $familyid . " spouse $spouseid\n";
+                    $gedcom .= "1 FAMS @" . $familyid . "\n";
                 //}
     
             }
@@ -54,6 +54,8 @@ class RelationshipMigrator {
                 $gedcom .= "1 DEAT\n";
                 $gedcom .= "2 DATE " . $individual['date_of_death'] . "\n";
                 $gedcom .= "2 PLAC " . $individual['place_of_death'] . "\n";
+            } elseif (!$individual['alive']) {
+                $gedcom .= "1 DEAT Y\n";
             }
     
             // // Check if both parents are defined
