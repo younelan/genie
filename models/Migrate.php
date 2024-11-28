@@ -34,18 +34,20 @@ class RelationshipMigrator {
     }
     function exportGedcom() {
         $gedcom = "0 HEAD\n";
-        $gedcom .= "1 SOUR {$this->appSource}\n";
-        $gedcom .= "2 VERS ${$this->appVersion}\n";
+        $gedcom .= "1 SOUR $this->appSource\n";
+        $gedcom .= "2 VERS $this->appVersion\n";
         $gedcom .= "2 NAME {$this->appName}\n";
         $gedcom .= "2 CORP {$this->appCorp}\n";
         $gedcom .= "0 TRLR\n";
         
-        foreach ($this->people as $individual) {
+        foreach ($this->people as $id=>$individual) {
             $gedcom .= "0 @" . $individual['id'] . " INDI\n";
             $gedcom .= "1 NAME " . $individual['first_name'] . " /" . $individual['last_name'] . "/\n";
+            foreach($this->spouses[$id]??[] as $spouseid=>$familyid) {
+                //if ($individual['spouse']??false) {
+                    $gedcom .= "1 FAMS @" . $familyid . " spouse $spouseid\n";
+                //}
     
-            if ($individual['spouse']??false) {
-                $gedcom .= "1 FAMS @" . $individual['spouse']['familyId'] . "\n";
             }
     
             if ($individual['date_of_death']) {
