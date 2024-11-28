@@ -11,6 +11,8 @@ class RelationshipMigrator {
     private $children = [];
     private $spouses = [];
     private $relationships = [];
+    private $rel_map = [];
+
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
@@ -27,6 +29,7 @@ class RelationshipMigrator {
         return $name;
 
     }
+
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
@@ -115,12 +118,13 @@ class RelationshipMigrator {
                     switch(count($spouses)) {
                         case 0:
                             $name2 = $this->getName($parentid1);
-                            print "$name1 child of $name2 (no spouse)\n";
+                            //print "$name1 child of $name2 (no spouse)\n";
                             break;
                         case 1:
                             $name2 = $this->getName($parentid1);
                             $parentid2=array_key_first($spouses);
-                            //print_r($spouses);
+                            $this->parents[$child][$parentid2]=$parentid2;
+                            print_r($this->parents[$child]);
                             $parentnames = [
                                 $parentnames[]=$this->getName($parentid1),
                                 $parentnames[]=$this->getName($parentid2)
@@ -240,6 +244,8 @@ class RelationshipMigrator {
 
             // Store the family data with full person records
             //if ($husb && $wife) {
+                $rel_string = min($row['husb'],$row['wife']) . "-" . max($row['husb'],$row['wife']); 
+                $this->rel_map[$rel_string]=$row['relation_id'];
                 $this->families[$row['relation_id']] = [
                     'husb' => $husb,
                     'husb_name'=>$this->people[$husb]['first_name'] . " " . $this->people[$husb]['last_name'] ,
