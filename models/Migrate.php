@@ -76,7 +76,24 @@ class RelationshipMigrator {
     
             // // ... other individual details
         }
-    
+
+        foreach ($this->families as $famid=>$family) {
+            $gedcom .= "0 @" . $famid . " FAM\n";
+            $gedcom .= "1 HUSB @" . $family['husb'] . "\n";
+            $gedcom .= "1 WIFE @" . $family['wife'] . "\n";
+            if (isset($family['divorce_date']) && isset($family['divorce_place'])) {
+                $gedcom .= "1 DIV\n";
+                $gedcom .= "2 DATE " . $family['divorce_date'] . "\n";
+                $gedcom .= "2 PLAC " . $family['divorce_place'] . "\n";
+            } else if (isset($family['divorced']) && $family['divorced']) {
+                $gedcom .= "1 DIV\n";
+                //print_r($family);
+            }
+                
+            foreach ($family['children']??[] as $childId) {
+                $gedcom .= "1 CHIL @" . $childId . "\n";
+            }
+        }    
         // ... process families and their relationships
         print $gedcom;  
         return $gedcom;
@@ -193,13 +210,19 @@ class RelationshipMigrator {
                     foreach($curparents as $parent) {
                         $parentnames[]=$this->getName($parent) . " $parent";
                     }
+                    $parentid1=$curparents[array_key_first($curparents)];
+                    $parentid2 = $curparents[array_key_last($curparents)];
+                    $rel_string = min($parentid1,$parentid2) . "-" . max($parentid1,$parentid2); 
+                    $familyid =$this->rel_map[$rel_string]??0;
+    
                     $name2=implode("," , $parentnames);
-                    //print "$name1 $child child of $name2\n";
+                    //print "$name1 $child child of $name2 fam$familyid\n";
         
                     break;
             }
 
         }
+        //exit;
     }
     public function migrate($family_tree_id) {
         // Start a transaction
@@ -291,7 +314,13 @@ class RelationshipMigrator {
                 $husb=$row['husb'];
                 $wife=$row['wife'];
             }
-
+            if($row['code']=="DIV") {
+                $divorced=true;
+                
+            } else {
+                $divorced=false;
+            }
+            //print_r($row);
             // Store the family data with full person records
             //if ($husb && $wife) {
                 $rel_string = min($row['husb'],$row['wife']) . "-" . max($row['husb'],$row['wife']); 
@@ -301,6 +330,8 @@ class RelationshipMigrator {
                     'husb_name'=>$this->people[$husb]['first_name'] . " " . $this->people[$husb]['last_name'] ,
                     'wife_name'=>$this->people[$wife]['first_name'] . " " . $this->people[$wife]['last_name'] ,
                     'wife' => $wife,
+                    'divorced'=>$divorced,
+                    'children'=>[],
                     'relation_id' => $row['relation_id'],
                     'code' => $row['code'],
                 ];
@@ -314,6 +345,7 @@ class RelationshipMigrator {
             //}
             // exit;
         }
+        
     }
 
 
