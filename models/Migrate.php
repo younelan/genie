@@ -12,7 +12,10 @@ class RelationshipMigrator {
     private $spouses = [];
     private $relationships = [];
     private $rel_map = [];
-
+    private $appSource= "GEDCOM";
+    private $appName = "Genie";
+    private $appCorp = "Opensitez";
+    private $appVersion="5.5";
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
@@ -29,7 +32,51 @@ class RelationshipMigrator {
         return $name;
 
     }
-
+    function exportGedcom() {
+        $gedcom = "0 HEAD\n";
+        $gedcom .= "1 SOUR {$this->appSource}\n";
+        $gedcom .= "2 VERS ${$this->appVersion}\n";
+        $gedcom .= "2 NAME {$this->appName}\n";
+        $gedcom .= "2 CORP {$this->appCorp}\n";
+        $gedcom .= "0 TRLR\n";
+        
+        foreach ($this->people as $individual) {
+            $gedcom .= "0 @" . $individual['id'] . " INDI\n";
+            $gedcom .= "1 NAME " . $individual['first_name'] . " /" . $individual['last_name'] . "/\n";
+    
+            if ($individual['spouse']??false) {
+                $gedcom .= "1 FAMS @" . $individual['spouse']['familyId'] . "\n";
+            }
+    
+            if ($individual['date_of_death']) {
+                $gedcom .= "1 DEAT\n";
+                $gedcom .= "2 DATE " . $individual['date_of_death'] . "\n";
+                $gedcom .= "2 PLAC " . $individual['place_of_death'] . "\n";
+            }
+    
+            // // Check if both parents are defined
+            // if ($individual['parents'][0] && $individual['parents'][1]) {
+            //     // Two-parent family
+            //     $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
+            //     $gedcom .= "1 FAMC @" . $individual['parents'][1]['familyId'] . "\n";
+            //     // ... process both parents and their ancestors
+            // } elseif ($individual['parents'][0]) {
+            //     // Single-parent family (parent 1)
+            //     $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
+            //     // ... process parent 1 and their ancestors
+            // } elseif ($individual['parents'][1]) {
+            //     // Single-parent family (parent 2)
+            //     $gedcom .= "1 FAMC @" . $individual['parents'][1]['familyId'] . "\n";
+            //     // ... process parent 2 and their ancestors
+            // }
+    
+            // // ... other individual details
+        }
+    
+        // ... process families and their relationships
+        print $gedcom;  
+        return $gedcom;
+    }
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
@@ -124,17 +171,17 @@ class RelationshipMigrator {
                             $name2 = $this->getName($parentid1);
                             $parentid2=array_key_first($spouses);
                             $this->parents[$child][$parentid2]=$parentid2;
-                            print_r($this->parents[$child]);
+                            //print_r($this->parents[$child]);
                             $parentnames = [
                                 $parentnames[]=$this->getName($parentid1),
                                 $parentnames[]=$this->getName($parentid2)
                             ];                          
                             $name2=implode("," , $parentnames);
-                            print "$name1 $parentid1 child of $name2 $parentid2 (added 1 parent)\n";
+                            //print "$name1 $parentid1 child of $name2 $parentid2 (added 1 parent)\n";
                             break;
                         default:
                             $name2 = $this->getName($parentid1);
-                            print "+++$name1 child of $name2 (many parents)\n";
+                            //print "+++$name1 child of $name2 (many parents)\n";
 
                     }
                     break;
@@ -143,13 +190,12 @@ class RelationshipMigrator {
                         $parentnames[]=$this->getName($parent) . " $parent";
                     }
                     $name2=implode("," , $parentnames);
-                    print "$name1 $child child of $name2\n";
+                    //print "$name1 $child child of $name2\n";
         
                     break;
             }
 
         }
-        exit;
     }
     public function migrate($family_tree_id) {
         // Start a transaction
@@ -159,7 +205,7 @@ class RelationshipMigrator {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
-            $this->showPeople();
+            $this->exportGedcom();
             print "fetched:\n";
             //print_r($this->relationships);
             exit;
