@@ -16,6 +16,7 @@ class RelationshipMigrator {
     private $appName = "Genie";
     private $appCorp = "Opensitez";
     private $appVersion="5.5";
+    private $warnings=[];
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
@@ -79,8 +80,13 @@ class RelationshipMigrator {
 
         foreach ($this->families as $famid=>$family) {
             $gedcom .= "0 @" . $famid . " FAM\n";
-            $gedcom .= "1 HUSB @" . $family['husb'] . "\n";
-            $gedcom .= "1 WIFE @" . $family['wife'] . "\n";
+            if(isset($family['husb']) && $family['husb']) {
+                $gedcom .= "1 HUSB @" . $family['husb'] . "\n";
+
+            }
+            if(isset($family['wife']) && $family['wife']) {
+                $gedcom .= "1 WIFE @" . $family['wife'] . "\n";
+            }
             if (isset($family['divorce_date']) && isset($family['divorce_place'])) {
                 $gedcom .= "1 DIV\n";
                 $gedcom .= "2 DATE " . $family['divorce_date'] . "\n";
@@ -169,9 +175,12 @@ class RelationshipMigrator {
             $name1=$this->getName($child);
             $parentnames=[];
             $numparents=count($curparents); 
+            $parentid1=0;
+            $parentid2=0;
             switch($numparents) {
                 case 0:
-                    print "+++$name1 : No Parents\n";
+                    ///print "+++$name1 : No Parents\n";
+                    $name2= "+++No Parents";
                     break;
                 case 1:
                     if($curparents) {
@@ -192,6 +201,7 @@ class RelationshipMigrator {
                             $name2 = $this->getName($parentid1);
                             $parentid2=array_key_first($spouses);
                             $this->parents[$child][$parentid2]=$parentid2;
+                            $curparents[$parentid2]=$parentid2;
                             //print_r($this->parents[$child]);
                             $parentnames = [
                                 $parentnames[]=$this->getName($parentid1),
@@ -213,24 +223,57 @@ class RelationshipMigrator {
                     }
                     $parentid1=$curparents[array_key_first($curparents)];
                     $parentid2 = $curparents[array_key_last($curparents)];
-                    $rel_string = min($parentid1,$parentid2) . "-" . max($parentid1,$parentid2); 
-                    $familyid =$this->rel_map[$rel_string]??0;
+        
+                    break;
+            }
+            if(count($this->parents[$child])==2) {
+                $rel_string = min($parentid1,$parentid2) . "-" . max($parentid1,$parentid2); 
+                $familyid =$this->rel_map[$rel_string]??0;
+                if($familyid) {
                     if(isset($this->families[$familyid])) {
                         $this->families[$familyid]['children'][]=$child;
-
+        
                     } else {
                         // print "+++$name1 $child child of $name2 fam$familyid\n";
- 
+        
                         // print_r($this->people[$parentid2]);
                         // print_r($curparents);
                         // print "+++No family for $child, $rel_string ($name1 $name2)\n";
                     }
-                    //print "$name1 $child child of $name2 fam$familyid\n";
         
-                    break;
+                }
+            } elseif(count($this->parents[$child])==1) {
+                $newid = "n$parentid1";
+                $parent_details = $this->fetchPersonIfNeeded($parentid1);
+                if($parent_details['gender_id']==2) {
+                    $parent_field = "husb";
+                } else {
+                    $parent_field = "wife";
+                }
+                
+                $newfamily = [
+                    $parent_field => $parentid1,
+                    'divorced'=>0,
+                    'new'=>true,
+                    'children'=>[],
+                    'relation_id' => $newid,
+                    'code' => "SINGLE",
+                ];
+                print "New Family $newid for $child\n";
+                if(!isset($this->families[$newid])) {
+                    //print_r($newfamily);
+                    $this->families[] = $newfamily;                    
+                }
+                $newfamily[]['children'][]=$child;
+            }else {
+                $co=count($this->parents[$child]);
+               $this->warnings[] = "Warning: $co parents No Family $child for $name1 $child child of $name2 $rel_string fam$familyid";
+
             }
+            //print "$name1 $child child of $name2 fam$familyid\n";
 
         }
+        print implode("\n",$this->warnings);
         //exit;
     }
     public function migrate($family_tree_id) {
