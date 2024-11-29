@@ -207,6 +207,7 @@ class RelationshipMigrator {
                     }
                     break;
                 case 2: 
+                    $name2=implode("," , $parentnames);
                     foreach($curparents as $parent) {
                         $parentnames[]=$this->getName($parent) . " $parent";
                     }
@@ -214,8 +215,16 @@ class RelationshipMigrator {
                     $parentid2 = $curparents[array_key_last($curparents)];
                     $rel_string = min($parentid1,$parentid2) . "-" . max($parentid1,$parentid2); 
                     $familyid =$this->rel_map[$rel_string]??0;
-    
-                    $name2=implode("," , $parentnames);
+                    if(isset($this->families[$familyid])) {
+                        $this->families[$familyid]['children'][]=$child;
+
+                    } else {
+                        // print "+++$name1 $child child of $name2 fam$familyid\n";
+ 
+                        // print_r($this->people[$parentid2]);
+                        // print_r($curparents);
+                        // print "+++No family for $child, $rel_string ($name1 $name2)\n";
+                    }
                     //print "$name1 $child child of $name2 fam$familyid\n";
         
                     break;
