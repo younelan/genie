@@ -35,20 +35,24 @@ class RelationshipMigrator {
     }
     function exportGedcom() {
         $gedcom = "0 HEAD\n";
+        $gedcom .= "1 GEDC\n";
+        $gedcom .= "1 CHAR UTF-8";
         $gedcom .= "1 SOUR $this->appSource\n";
         $gedcom .= "2 VERS $this->appVersion\n";
         $gedcom .= "2 NAME {$this->appName}\n";
         $gedcom .= "2 CORP {$this->appCorp}\n";
-        $gedcom .= "0 TRLR\n";
+        //$gedcom .= "0 TRLR\n";
         
         foreach ($this->people as $id=>$individual) {
-            $gedcom .= "0 @" . $individual['id'] . " INDI\n";
+            $gedcom .= "0 @" . $individual['id'] . "@ INDI\n";
             $gedcom .= "1 NAME " . $individual['first_name'] . " /" . $individual['last_name'] . "/\n";
             foreach($this->spouses[$id]??[] as $spouseid=>$familyid) {
-                //if ($individual['spouse']??false) {
-                    $gedcom .= "1 FAMS @" . $familyid . "\n";
-                //}
-    
+                    $gedcom .= "1 FAMS @" . $familyid . "@\n";
+            }
+            if(isset($this->families["n$id"])) {
+                $gedcom .= "1 FAMS @" . "n$id" . "@\n";
+                // print "++creating a fam for $id n$id";
+                // exit;
             }
     
             if ($individual['date_of_death']) {
@@ -58,34 +62,16 @@ class RelationshipMigrator {
             } elseif (!$individual['alive']) {
                 $gedcom .= "1 DEAT Y\n";
             }
-    
-            // // Check if both parents are defined
-            // if ($individual['parents'][0] && $individual['parents'][1]) {
-            //     // Two-parent family
-            //     $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
-            //     $gedcom .= "1 FAMC @" . $individual['parents'][1]['familyId'] . "\n";
-            //     // ... process both parents and their ancestors
-            // } elseif ($individual['parents'][0]) {
-            //     // Single-parent family (parent 1)
-            //     $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
-            //     // ... process parent 1 and their ancestors
-            // } elseif ($individual['parents'][1]) {
-            //     // Single-parent family (parent 2)
-            //     $gedcom .= "1 FAMC @" . $individual['parents'][1]['familyId'] . "\n";
-            //     // ... process parent 2 and their ancestors
-            // }
-    
-            // // ... other individual details
         }
 
         foreach ($this->families as $famid=>$family) {
-            $gedcom .= "0 @" . $famid . " FAM\n";
+            $gedcom .= "0 @" . $famid . " FAM@\n";
             if(isset($family['husb']) && $family['husb']) {
-                $gedcom .= "1 HUSB @" . $family['husb'] . "\n";
+                $gedcom .= "1 HUSB @" . $family['husb'] . "@\n";
 
             }
             if(isset($family['wife']) && $family['wife']) {
-                $gedcom .= "1 WIFE @" . $family['wife'] . "\n";
+                $gedcom .= "1 WIFE @" . $family['wife'] . "@\n";
             }
             if (isset($family['divorce_date']) && isset($family['divorce_place'])) {
                 $gedcom .= "1 DIV\n";
@@ -94,13 +80,17 @@ class RelationshipMigrator {
             } else if (isset($family['divorced']) && $family['divorced']) {
                 $gedcom .= "1 DIV\n";
                 //print_r($family);
-            }
+            }            
+            //if(isset($family['husb']) && $family['husb']) {
+
                 
             foreach ($family['children']??[] as $childId) {
-                $gedcom .= "1 CHIL @" . $childId . "\n";
+                $gedcom .= "1 CHIL @" . $childId . "@\n";
             }
         }    
         // ... process families and their relationships
+        $gedcom .= "0 TRLR\n";
+
         print $gedcom;  
         return $gedcom;
     }
@@ -259,12 +249,12 @@ class RelationshipMigrator {
                     'relation_id' => $newid,
                     'code' => "SINGLE",
                 ];
-                print "New Family $newid for $child\n";
+                //print "New Family $newid for $child\n";
                 if(!isset($this->families[$newid])) {
                     //print_r($newfamily);
-                    $this->families[] = $newfamily;                    
+                    $this->families[$newid] = $newfamily;                    
                 }
-                $newfamily[]['children'][]=$child;
+                $this->families[$newid]['children'][]=$child;
             }else {
                 $co=count($this->parents[$child]);
                $this->warnings[] = "Warning: $co parents No Family $child for $name1 $child child of $name2 $rel_string fam$familyid";
