@@ -16,6 +16,8 @@ class RelationshipMigrator {
     private $appName = "Genie";
     private $appCorp = "Opensitez";
     private $appVersion="5.5";
+
+    private $appEncoding="UTF-8";
     private $warnings=[];
 
     public function __construct($config) {
@@ -33,15 +35,22 @@ class RelationshipMigrator {
         return $name;
 
     }
-    function exportGedcom() {
+    private function sanitizeGedcomString($string) {
+        // Sanitize strings for GEDCOM export
+        $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+        $string = str_replace(['@', '/'], ['', ''], $string);
+        return trim($string);
+    }
+    function oldexportGedcom() {
+
         $gedcom = "0 HEAD\n";
-        $gedcom .= "1 GEDC\n";
         $gedcom .= "1 CHAR UTF-8";
         $gedcom .= "1 SOUR $this->appSource\n";
-        $gedcom .= "2 VERS $this->appVersion\n";
         $gedcom .= "2 NAME {$this->appName}\n";
         $gedcom .= "2 CORP {$this->appCorp}\n";
-        //$gedcom .= "0 TRLR\n";
+        $gedcom .= "1 GEDC\n";
+        $gedcom .= "2 VERS $this->appVersion\n";
+        //$gedcom .= "0 TRLR\n";You made it ascii which is bad for international characters _ you stopped using mbstring. Give me just updated code
         
         foreach ($this->people as $id=>$individual) {
             $gedcom .= "0 @" . $individual['id'] . "@ INDI\n";
@@ -94,6 +103,114 @@ class RelationshipMigrator {
         print $gedcom;  
         return $gedcom;
     }
+
+    //claude
+    function exportGedcom() {
+        $gedcom = "0 HEAD\n";
+        $gedcom .= "1 SOUR $this->appSource\n";
+        $gedcom .= "1 GEDC\n";
+        $gedcom .= "2 NAME {$this->appName}\n";
+        $gedcom .= "2 CORP {$this->appCorp}\n";
+        $gedcom .= "2 VERS $this->appVersion\n";  // Specify GEDCOM version
+        $gedcom .= "2 FORM LINEAGE-LINKED\n";  // Add FORM tag
+        $gedcom .= "1 CHAR $this->appEncoding\n";  // Use ASCII as a safe default
+        $gedcom .= "1 SUBM @SUB1@\n";  // Add submitter record reference
+    
+        // Add submitter record
+        $gedcom .= "0 @SUB1@ SUBM\n";
+        $gedcom .= "1 NAME Genie Genealogy Export\n";
+    
+        foreach ($this->people as $id => $individual) {
+            // Ensure ID is alphanumeric
+            $safeId = $this->sanitizeGedcomString($id); 
+            
+            $gedcom .= "0 @{$safeId}@ INDI\n";
+            
+            // Sanitize names
+            $firstName = str_replace(['@', '/'], ['', ''], $individual['first_name']);
+            $lastName = str_replace(['@', '/'], ['', ''], $individual['last_name']);
+            
+            $gedcom .= "1 NAME {$firstName} /{$lastName}/\n";
+            
+            foreach($this->spouses[$id]??[] as $spouseid => $familyid) {
+                // Sanitize family ID
+                $safeFamilyId = $this->sanitizeGedcomString($familyid); 
+                $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
+            }
+            if ($individual['parents'][0]) {
+                $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
+            }
+                
+            if(isset($this->families["n$id"])) {
+                $safeFamilyId = $this->sanitizeGedcomString("n$id"); 
+                $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
+            }
+    
+            if ($individual['date_of_death']) {
+                // Convert date to GEDCOM format (DD MMM YYYY)
+                $deathDate = $this->convertToGedcomDate($individual['date_of_death']);
+                $gedcom .= "1 DEAT\n";
+                $gedcom .= "2 DATE {$deathDate}\n";
+                $gedcom .= "2 PLAC " . $individual['place_of_death'] . "\n";
+            } elseif (!$individual['alive']) {
+                $gedcom .= "1 DEAT Y\n";
+            }
+        }
+    
+        foreach ($this->families as $famid => $family) {
+            // Sanitize family ID
+            //$safeFamId = preg_replace('/[^a-zA-Z0-9]/', '', $famid);
+            $safeFamId = $this->sanitizeGedcomString("$famid"); 
+            
+            $gedcom .= "0 @{$safeFamId}@ FAM\n";
+            
+            if(isset($family['husb']) && $family['husb']) {
+                // $safeHusbId = preg_replace('/[^a-zA-Z0-9]/', '', $family['husb']);
+                $safeHusbId = $this->sanitizeGedcomString($family['husb']); 
+
+                $gedcom .= "1 HUSB @{$safeHusbId}@\n";
+            }
+            
+            if(isset($family['wife']) && $family['wife']) {
+                //$safeWifeId = preg_replace('/[^a-zA-Z0-9]/', '', $family['wife']);
+                $safeWifeId = $this->sanitizeGedcomString($family['wife']); 
+                $gedcom .= "1 WIFE @{$safeWifeId}@\n";
+            }
+    
+            if (isset($family['divorce_date']) && isset($family['divorce_place'])) {
+                $divorceDate = $this->convertToGedcomDate($family['divorce_date']);
+                $gedcom .= "1 DIV\n";
+                $gedcom .= "2 DATE {$divorceDate}\n";
+                $gedcom .= "2 PLAC " . $family['divorce_place'] . "\n";
+            } elseif (isset($family['divorced']) && $family['divorced']) {
+                $gedcom .= "1 DIV\n";
+            }
+            
+            foreach ($family['children']??[] as $childId) {
+                $safeChildId = preg_replace('/[^a-zA-Z0-9]/', '', $childId);
+                $gedcom .= "1 CHIL @{$safeChildId}@\n";
+            }
+        }    
+        
+        $gedcom .= "0 TRLR\n";
+    
+        print $gedcom;  
+        return $gedcom;
+    }
+    
+    // Helper method to convert dates to GEDCOM format
+    private function convertToGedcomDate($dateString) {
+        try {
+            $date = new DateTime($dateString);
+            return $date->format('d M Y');
+        } catch (Exception $e) {
+            // Fallback to a default or log the error
+            return 'ABT ' . $dateString;
+        }
+    }
+
+    //claude
+
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
@@ -234,6 +351,7 @@ class RelationshipMigrator {
                 }
             } elseif(count($this->parents[$child])==1) {
                 $newid = "n$parentid1";
+                $familyid=$newid;
                 $parent_details = $this->fetchPersonIfNeeded($parentid1);
                 if($parent_details['gender_id']==2) {
                     $parent_field = "husb";
@@ -256,6 +374,7 @@ class RelationshipMigrator {
                 }
                 $this->families[$newid]['children'][]=$child;
             }else {
+                $familyid=false;
                 $co=count($this->parents[$child]);
                $this->warnings[] = "Warning: $co parents No Family $child for $name1 $child child of $name2 $rel_string fam$familyid";
 
@@ -275,7 +394,6 @@ class RelationshipMigrator {
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
             $this->exportGedcom();
-            print "fetched:\n";
             //print_r($this->relationships);
             exit;
             // Insert the families into the database
@@ -419,7 +537,7 @@ $migrator = new RelationshipMigrator($config);
 
 
 // Specify the family tree ID you want to import into
-$familyTreeId = 1; // Example ID
+$familyTreeId = 9; // Example ID
 
 // Import the GEDCOM content
 $migrator->migrate($familyTreeId);
