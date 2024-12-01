@@ -108,9 +108,9 @@ class RelationshipMigrator {
     function exportGedcom() {
         $gedcom = "0 HEAD\n";
         $gedcom .= "1 SOUR $this->appSource\n";
-        $gedcom .= "1 GEDC\n";
         $gedcom .= "2 NAME {$this->appName}\n";
         $gedcom .= "2 CORP {$this->appCorp}\n";
+        $gedcom .= "1 GEDC\n";
         $gedcom .= "2 VERS $this->appVersion\n";  // Specify GEDCOM version
         $gedcom .= "2 FORM LINEAGE-LINKED\n";  // Add FORM tag
         $gedcom .= "1 CHAR $this->appEncoding\n";  // Use ASCII as a safe default
@@ -137,8 +137,11 @@ class RelationshipMigrator {
                 $safeFamilyId = $this->sanitizeGedcomString($familyid); 
                 $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
             }
-            if ($individual['parents'][0]) {
-                $gedcom .= "1 FAMC @" . $individual['parents'][0]['familyId'] . "\n";
+            if ($individual['famc']??false) {
+                $gedcom .= "1 FAMC @" . $individual['famc'] . "@\n";
+            } else {
+                print "1 NAME {$firstName} /{$lastName}/\n";
+
             }
                 
             if(isset($this->families["n$id"])) {
@@ -378,6 +381,9 @@ class RelationshipMigrator {
                 $co=count($this->parents[$child]);
                $this->warnings[] = "Warning: $co parents No Family $child for $name1 $child child of $name2 $rel_string fam$familyid";
 
+            }
+            if($familyid) {
+                $this->people[$child]['famc']=$familyid;
             }
             //print "$name1 $child child of $name2 fam$familyid\n";
 
