@@ -48,6 +48,10 @@ class MemberController extends AppController
 
         $data["menu"] = [
             [
+                "link" => "index.php?action=export_tree&tree_id=$treeId",
+                "text" => get_translation("Export Tree"),
+            ],
+            [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
                 "text" => get_translation("New Member"),
             ],
@@ -126,6 +130,11 @@ class MemberController extends AppController
 
         $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
         $data["menu"] = [
+            [
+                "link" => "index.php?action=export_tree&tree_id=$treeId",
+                "text" => get_translation("Export Tree"),
+            ],
+
             [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
                 "text" => get_translation("New Member"),
