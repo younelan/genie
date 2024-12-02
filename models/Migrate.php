@@ -140,7 +140,7 @@ class RelationshipMigrator {
             if ($individual['famc']??false) {
                 $gedcom .= "1 FAMC @" . $individual['famc'] . "@\n";
             } else {
-                print "1 NAME {$firstName} /{$lastName}/\n";
+                $this->warnings[] = "no family NAME {$individual['id']} {$firstName} /{$lastName}/";
 
             }
                 
@@ -148,7 +148,8 @@ class RelationshipMigrator {
                 $safeFamilyId = $this->sanitizeGedcomString("n$id"); 
                 $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
             }
-    
+ 
+            
             if ($individual['date_of_death']) {
                 // Convert date to GEDCOM format (DD MMM YYYY)
                 $deathDate = $this->convertToGedcomDate($individual['date_of_death']);
@@ -158,8 +159,15 @@ class RelationshipMigrator {
             } elseif (!$individual['alive']) {
                 $gedcom .= "1 DEAT Y\n";
             }
+            if ($individual['gender_id'] == 1) {
+                $gedcom .= "1 SEX M\n";
+            } elseif ($individual['gender_id'] == 2) {
+                $gedcom .= "1 SEX F\n";
+            } else {
+                // Handle unknown or other gender identities as needed
+                $gedcom .= "1 SEX U\n"; // U for Unknown
+            }
         }
-    
         foreach ($this->families as $famid => $family) {
             // Sanitize family ID
             //$safeFamId = preg_replace('/[^a-zA-Z0-9]/', '', $famid);
@@ -197,7 +205,7 @@ class RelationshipMigrator {
         
         $gedcom .= "0 TRLR\n";
     
-        print $gedcom;  
+        //print $gedcom;  
         return $gedcom;
     }
     
@@ -388,7 +396,7 @@ class RelationshipMigrator {
             //print "$name1 $child child of $name2 fam$familyid\n";
 
         }
-        print implode("\n",$this->warnings);
+        //print implode("\n",$this->warnings);
         //exit;
     }
     public function migrate($family_tree_id) {
@@ -399,7 +407,9 @@ class RelationshipMigrator {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
-            $this->exportGedcom();
+            $gedcom = $this->exportGedcom();
+            return $gedcom;
+	        //print implode("\n",$this->warnings);
             //print_r($this->relationships);
             exit;
             // Insert the families into the database
@@ -537,13 +547,14 @@ class RelationshipMigrator {
         }
     }
 }
-
+/*
 // Create an instance of the GEDCOMImporter
 $migrator = new RelationshipMigrator($config);
 
 
 // Specify the family tree ID you want to import into
-$familyTreeId = 9; // Example ID
+$familyTreeId = 1; // Example ID
 
 // Import the GEDCOM content
 $migrator->migrate($familyTreeId);
+*/

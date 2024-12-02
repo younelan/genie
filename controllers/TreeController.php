@@ -83,6 +83,25 @@ class TreeController extends AppController
         echo $this->render_master($data);
         //include $this->basedir . "/templates/add_tree.php";
     }
+    public function exportTree() {
+        $migrator = new RelationshipMigrator($this->config);
+        //print "hi";
+        $familyTreeId = $_GET['tree_id']??0;
+        if(!$familyTreeId) {
+            print "Invalid tree";
+            exit;
+        }
+        // Specify the family tree ID you want to import into
+        //$familyTreeId = 1; // Example ID
+        header('Content-Type: text/gedcom');
+        header('Content-Disposition: attachment; filename="family_tree.ged"');
+                
+        // Import the GEDCOM content
+        $gedcom = $migrator->migrate($familyTreeId);
+        print $gedcom;
+        exit;
+               
+    }
     public function viewTree()
     {
         $data = [

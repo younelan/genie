@@ -40,7 +40,7 @@ if (!$userId) {
     header("Location: login.php");
     exit();
 }
-
+$page = $_GET['page'] ?? 1;
 $treeController = new TreeController($config);
 $memberController = new MemberController($config);
 switch ($action) {
@@ -49,6 +49,9 @@ switch ($action) {
         break;
     case 'add_tree':
         $treeController->addTree();
+        break;
+    case 'export_tree':
+        $treeController->exportTree();
         break;
     case 'view_tree':
         $treeController->viewTree();
@@ -62,7 +65,6 @@ switch ($action) {
     case 'edit_tree':
     case 'list_members':
         $treeId = $_GET['tree_id'];
-        $page = $_GET['page'] ?? 1;
         $treeController->listMembers($treeId, $page);
         break;
 
