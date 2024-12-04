@@ -15,6 +15,12 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
+## 20241203
+    - Gedcom Migration to the menu
+    - Migrate Class that exports gedcom
+    - Warnings when tree have issues
+    - likely last version before rewrite
+
 ## 20241017
     - implemented twig template for all views
         - list_member
