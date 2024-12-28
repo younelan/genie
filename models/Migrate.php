@@ -155,8 +155,29 @@ class RelationshipMigrator {
         }
     }
 
-    //claude
+    private function insertFamilies() {
+        
+        foreach ($this->families as $famid=>$family) {
+            $sql = "
+                INSERT INTO families (husband_id, wife_id, created_at, updated_at)
+                VALUES (:husb, :wife, NOW(), NOW());
+            ";
 
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
+            $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
+            $stmt->execute();
+            foreach ($family['children']??[] as $childId) {
+                // $sql2 = "
+                // ";
+                // $safeChildId = preg_replace('/[^a-zA-Z0-9]/', '', $childId);
+                // $gedcom .= "1 CHIL @{$safeChildId}@\n";            foreach ($family['children']??[] as $childId) {
+                //     $safeChildId = preg_replace('/[^a-zA-Z0-9]/', '', $childId);
+                //     $gedcom .= "1 CHIL @{$safeChildId}@\n";
+                }
+            }           
+        }
+    }
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
             print "$pid - {$person['first_name']} {$person['last_name']}\n";
@@ -342,19 +363,20 @@ class RelationshipMigrator {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
+            $this->insertFamilies();
 	        //print implode("\n",$this->warnings);
             //print_r($this->relationships);
-            exit;
+            //exit;
             // Insert the families into the database
-            $this->insertFamilies();
 
 
             // Commit the transaction
             $this->pdo->commit();
-            echo "Migration for family tree ID $family_tree_id completed successfully.";
+            return true;
         } catch (Exception $e) {
             // Rollback the transaction if something went wrong
             $this->pdo->rollBack();
+            return false;
             echo "Migration failed: " . $e->getMessage();
         }
     }
@@ -455,29 +477,6 @@ class RelationshipMigrator {
             // exit;
         }
         
-    }
-
-
-    private function insertFamilies() {
-        foreach ($this->families as $family) {
-            $sql = "
-                INSERT INTO families (husband_id, wife_id, created_at, updated_at)
-                VALUES (:husb, :wife, NOW(), NOW());
-            ";
-
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
-            $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
-            $stmt->execute();
-            
-            // Store the family relationship
-            print "need check already there is spouse";exit;
-            $this->spouses[] = [
-                'husb' => $family['husb'],
-                'wife' => $family['wife'],
-                'relation_id' => $family['relation_id'],
-            ];
-        }
     }
 }
 /*
