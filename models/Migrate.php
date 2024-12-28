@@ -41,70 +41,6 @@ class RelationshipMigrator {
         $string = str_replace(['@', '/'], ['', ''], $string);
         return trim($string);
     }
-    function oldexportGedcom() {
-
-        $gedcom = "0 HEAD\n";
-        $gedcom .= "1 CHAR UTF-8";
-        $gedcom .= "1 SOUR $this->appSource\n";
-        $gedcom .= "2 NAME {$this->appName}\n";
-        $gedcom .= "2 CORP {$this->appCorp}\n";
-        $gedcom .= "1 GEDC\n";
-        $gedcom .= "2 VERS $this->appVersion\n";
-        //$gedcom .= "0 TRLR\n";You made it ascii which is bad for international characters _ you stopped using mbstring. Give me just updated code
-        
-        foreach ($this->people as $id=>$individual) {
-            $gedcom .= "0 @" . $individual['id'] . "@ INDI\n";
-            $gedcom .= "1 NAME " . $individual['first_name'] . " /" . $individual['last_name'] . "/\n";
-            foreach($this->spouses[$id]??[] as $spouseid=>$familyid) {
-                    $gedcom .= "1 FAMS @" . $familyid . "@\n";
-            }
-            if(isset($this->families["n$id"])) {
-                $gedcom .= "1 FAMS @" . "n$id" . "@\n";
-                // print "++creating a fam for $id n$id";
-                // exit;
-            }
-    
-            if ($individual['date_of_death']) {
-                $gedcom .= "1 DEAT\n";
-                $gedcom .= "2 DATE " . $individual['date_of_death'] . "\n";
-                $gedcom .= "2 PLAC " . $individual['place_of_death'] . "\n";
-            } elseif (!$individual['alive']) {
-                $gedcom .= "1 DEAT Y\n";
-            }
-        }
-
-        foreach ($this->families as $famid=>$family) {
-            $gedcom .= "0 @" . $famid . " FAM@\n";
-            if(isset($family['husb']) && $family['husb']) {
-                $gedcom .= "1 HUSB @" . $family['husb'] . "@\n";
-
-            }
-            if(isset($family['wife']) && $family['wife']) {
-                $gedcom .= "1 WIFE @" . $family['wife'] . "@\n";
-            }
-            if (isset($family['divorce_date']) && isset($family['divorce_place'])) {
-                $gedcom .= "1 DIV\n";
-                $gedcom .= "2 DATE " . $family['divorce_date'] . "\n";
-                $gedcom .= "2 PLAC " . $family['divorce_place'] . "\n";
-            } else if (isset($family['divorced']) && $family['divorced']) {
-                $gedcom .= "1 DIV\n";
-                //print_r($family);
-            }            
-            //if(isset($family['husb']) && $family['husb']) {
-
-                
-            foreach ($family['children']??[] as $childId) {
-                $gedcom .= "1 CHIL @" . $childId . "@\n";
-            }
-        }    
-        // ... process families and their relationships
-        $gedcom .= "0 TRLR\n";
-
-        print $gedcom;  
-        return $gedcom;
-    }
-
-    //claude
     function exportGedcom($family_tree_id) {
         $this->fetchFamilies($family_tree_id);
         $this->fetchChildren($family_tree_id);
@@ -146,15 +82,11 @@ class RelationshipMigrator {
                 $gedcom .= "1 FAMC @" . $individual['famc'] . "@\n";
             } else {
                 $this->warnings[] = "no family NAME {$individual['id']} {$firstName} /{$lastName}/";
-
             }
-                
             if(isset($this->families["n$id"])) {
                 $safeFamilyId = $this->sanitizeGedcomString("n$id"); 
                 $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
             }
- 
-            
             if ($individual['date_of_death']) {
                 // Convert date to GEDCOM format (DD MMM YYYY)
                 $deathDate = $this->convertToGedcomDate($individual['date_of_death']);
@@ -169,7 +101,6 @@ class RelationshipMigrator {
             } elseif ($individual['gender_id'] == 2) {
                 $gedcom .= "1 SEX F\n";
             } else {
-                // Handle unknown or other gender identities as needed
                 $gedcom .= "1 SEX U\n"; // U for Unknown
             }
         }
@@ -210,7 +141,6 @@ class RelationshipMigrator {
         
         $gedcom .= "0 TRLR\n";
     
-        //print $gedcom;  
         return $gedcom;
     }
     
