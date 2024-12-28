@@ -44,7 +44,9 @@ class TreeModel extends AppModel
     {
         $query = "INSERT INTO $this->tree_table  (owner_id, name, description) VALUES (:owner_id, :name, :description)";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute(['owner_id' => $ownerId, 'name' => $name, 'description' => $description]);
+        $result = $stmt->execute(['owner_id' => $ownerId, 'name' => $name, 'description' => $description]);
+        return $this->db->lastInsertId();
+
     }
     public function searchMembers($treeId, $query)
     {
