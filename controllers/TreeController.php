@@ -97,7 +97,7 @@ class TreeController extends AppController
         header('Content-Disposition: attachment; filename="family_tree.ged"');
                 
         // Import the GEDCOM content
-        $gedcom = $migrator->migrate($familyTreeId);
+        $gedcom = $migrator->exportGedcom($familyTreeId);
         print $gedcom;
         exit;
                

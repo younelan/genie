@@ -105,7 +105,10 @@ class RelationshipMigrator {
     }
 
     //claude
-    function exportGedcom() {
+    function exportGedcom($family_tree_id) {
+        $this->fetchFamilies($family_tree_id);
+        $this->fetchChildren($family_tree_id);
+
         $gedcom = "0 HEAD\n";
         $gedcom .= "1 SOUR $this->appSource\n";
         $gedcom .= "2 NAME {$this->appName}\n";
@@ -409,8 +412,6 @@ class RelationshipMigrator {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
-            $gedcom = $this->exportGedcom();
-            return $gedcom;
 	        //print implode("\n",$this->warnings);
             //print_r($this->relationships);
             exit;
