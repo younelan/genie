@@ -131,6 +131,8 @@ class RelationshipMigrator {
             $lastName = str_replace(['@', '/'], ['', ''], $individual['last_name']);
             
             $gedcom .= "1 NAME {$firstName} /{$lastName}/\n";
+            $gedcom .= "2 SURN {$lastName}\n";
+            $gedcom .= "2 GIVN {$firstName}\n";
             
             foreach($this->spouses[$id]??[] as $spouseid => $familyid) {
                 // Sanitize family ID
