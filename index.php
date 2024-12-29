@@ -159,6 +159,14 @@ switch ($action) {
         $controller->deleteRelationship($relationshipId);
         break;
 
+    case 'delete_family_member':
+        $memberController->deleteFamilyMember();
+        break;
+
+    case 'replace_spouse':
+        $memberController->replaceSpouse();
+        break;
+
     default:
         header("Location: index.php?action=list_trees");
         exit();

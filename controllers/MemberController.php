@@ -476,4 +476,72 @@ class MemberController extends AppController
         }
         exit;
     }
+    public function replaceSpouse()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            error_log('Replace spouse request: ' . print_r($_POST, true));
+            
+            $familyId = $_POST['family_id'] ?? null;
+            $spouseType = $_POST['spouse_type'] ?? null;
+            $memberGender = $_POST['member_gender'] ?? null;
+            $spouseId = $_POST['spouse_id'] ?? null;
+            $treeId = $_POST['family_tree_id'] ?? null;
+
+            error_log("Processing replace spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender, Tree: $treeId");
+
+            if (!$familyId || !$spouseType || !$memberGender || !$treeId) {
+                throw new Exception('Missing required parameters: ' . 
+                                  (!$familyId ? 'family_id ' : '') .
+                                  (!$spouseType ? 'spouse_type ' : '') .
+                                  (!$memberGender ? 'member_gender ' : '') .
+                                  (!$treeId ? 'tree_id' : ''));
+            }
+
+            if ($spouseType === 'existing') {
+                if (!$spouseId) {
+                    throw new Exception('No spouse selected');
+                }
+            } else {
+                // Create new spouse
+                if (empty($_POST['new_first_name']) || empty($_POST['new_last_name'])) {
+                    throw new Exception('First name and last name are required for new spouse');
+                }
+                
+                $new_member = [
+                    'treeId' => $treeId,
+                    'firstName' => $_POST['new_first_name'],
+                    'lastName' => $_POST['new_last_name'],
+                    'dateOfBirth' => $_POST['new_birth_date'] ?? null,
+                    'genderId' => $memberGender == 1 ? 2 : 1, // Opposite gender
+                ];
+                $spouseId = $this->member->addMember($new_member);
+                if (!$spouseId) {
+                    throw new Exception('Failed to create new spouse');
+                }
+            }
+
+            // Update the family
+            $success = $this->member->updateFamilySpouse(
+                $familyId, 
+                $spouseId, 
+                $memberGender, 
+                $_POST['marriage_date'] ?? null
+            );
+
+            if (!$success) {
+                throw new Exception('Failed to update family with new spouse');
+            }
+
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            error_log('Error in replaceSpouse: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
 }

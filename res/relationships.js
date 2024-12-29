@@ -498,6 +498,102 @@ function initializeRelationships(memberId) {
 
         // Trigger the change event on page load to set initial state
         $('input[name="relation_category"]:checked').trigger('change');
+
+        // Handle replace spouse button click
+        $('.replace-spouse-btn').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const familyId = $(this).data('family-id');
+            $('#replace_family_id').val(familyId);
+            $('#replaceSpouseModal').modal('show');
+        });
+
+        // Handle spouse type selection
+        $('input[name="spouse_type"]').change(function() {
+            if ($(this).val() === 'existing') {
+                $('#replace-existing-section').show();
+                $('#replace-new-section').hide();
+            } else {
+                $('#replace-existing-section').hide();
+                $('#replace-new-section').show();
+            }
+        });
+
+        // Handle autocomplete for replace spouse
+        $('#replace_spouse').on('input', function() {
+            var input = $(this).val();
+            $.ajax({
+                url: 'index.php?action=autocomplete_member&tree_id=' + treeId,
+                method: 'GET',
+                data: { term: input },
+                dataType: 'json',
+                success: function(data) {
+                    $('#replace-spouse-options').empty();
+                    data.forEach(function(item) {
+                        $('#replace-spouse-options').append(
+                            `<option value="${item.label}" data-person-id="${item.id}">`
+                        );
+                    });
+                }
+            });
+        });
+
+        // Handle selection from datalist options for replace spouse
+        $('#replace_spouse').on('change', function () {
+            var selectedOption = $('#replace-spouse-options option[value="' + $(this).val() + '"]');
+            if (selectedOption.length > 0) {
+                $('#replace_spouse_id').val(selectedOption.data('person-id'));
+            } else {
+                $('#replace_spouse_id').val('');
+            }
+        });
+
+        // Update the replace spouse confirmation handler
+        $('#confirmReplaceSpouse').click(function() {
+            const formData = new FormData($('#replace-spouse-form')[0]);
+            formData.append('action', 'replace_spouse');
+            formData.append('family_tree_id', treeId); // Add tree ID
+            
+            // If existing spouse, get the ID from the hidden input
+            if ($('input[name="spouse_type"]:checked').val() === 'existing') {
+                const spouseId = $('#replace_spouse_id').val();
+                if (!spouseId) {
+                    alert('Please select an existing person');
+                    return;
+                }
+                formData.set('spouse_id', spouseId);
+            }
+
+            console.log('Sending replace spouse request:', {
+                family_id: formData.get('family_id'),
+                spouse_type: formData.get('spouse_type'),
+                spouse_id: formData.get('spouse_id'),
+                member_gender: formData.get('member_gender'),
+                tree_id: formData.get('family_tree_id')
+            });
+
+            $.ajax({
+                url: 'index.php',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Server response:', response);
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Failed to replace spouse');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    alert('Failed to replace spouse. Please try again.');
+                }
+            });
+        });
     });
 }
 

@@ -624,4 +624,60 @@ class MemberModel  extends AppModel
             return false;
         }
     }
+
+    public function updateFamilySpouse($familyId, $spouseId, $memberGender, $marriageDate)
+    {
+        $this->db->beginTransaction();
+        try {
+            error_log("Updating family spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender");
+
+            // First verify the family exists
+            $query = "SELECT * FROM families WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+            $family = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$family) {
+                throw new Exception("Family not found");
+            }
+
+            error_log("Current family data: " . print_r($family, true));
+
+            // Handle empty marriage date
+            $marriageDate = !empty($marriageDate) ? $marriageDate : null;
+
+            // Update the appropriate spouse field based on gender
+            $query = "UPDATE families 
+                      SET " . ($memberGender == 1 ? "wife_id" : "husband_id") . " = :spouse_id,
+                          marriage_date = :marriage_date
+                      WHERE family_id = :family_id";
+            
+            error_log("Update query: $query");
+            error_log("Parameters: " . print_r([
+                'spouse_id' => $spouseId,
+                'family_id' => $familyId,
+                'marriage_date' => $marriageDate
+            ], true));
+            
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                'spouse_id' => $spouseId,
+                'family_id' => $familyId,
+                'marriage_date' => $marriageDate  // Will be NULL if empty
+            ]);
+
+            if (!$result) {
+                error_log("Database error: " . print_r($stmt->errorInfo(), true));
+                throw new Exception("Failed to update family");
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error updating family spouse: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
+        }
+    }
 }

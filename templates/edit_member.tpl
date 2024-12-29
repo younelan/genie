@@ -116,12 +116,27 @@
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     {{ get_translation("Marriage Details") }}
-                                    <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                            data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
-                                            data-family-id="{{ family.family_id }}"
-                                            onclick="event.stopPropagation();">
-                                        🗑️ {{ get_translation("Delete Spouse") }}
-                                    </button>
+                                    {% if (member.gender_id == 1 and not family.wife_id) or (member.gender_id == 2 and not family.husband_id) %}
+                                        <div>
+                                            <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
+                                                    data-family-id="{{ family.family_id }}">
+                                                {{ get_translation("Replace Unknown Spouse") }}
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                                                    data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                    data-family-id="{{ family.family_id }}"
+                                                    onclick="event.stopPropagation();">
+                                                🗑️ {{ get_translation("Delete Spouse") }}
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                                                data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                data-family-id="{{ family.family_id }}"
+                                                onclick="event.stopPropagation();">
+                                            🗑️ {{ get_translation("Delete Spouse") }}
+                                        </button>
+                                    {% endif %}
                                 </div>
                                 <div class="card-body">
                                     <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
@@ -412,6 +427,59 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteChild">{{ get_translation("Delete") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this with your other modals -->
+<div class="modal fade" id="replaceSpouseModal" tabindex="-1" role="dialog" aria-labelledby="replaceSpouseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="replaceSpouseModalLabel">{{ get_translation("Replace Unknown Spouse") }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="replace-spouse-form">
+                    <input type="hidden" id="replace_family_id" name="family_id">
+                    <input type="hidden" name="member_gender" value="{{ member.gender_id }}">
+
+                    <!-- Person selection type -->
+                    <div class="form-group">
+                        <label><input type="radio" name="spouse_type" value="existing" checked> {{ get_translation("Existing Person") }}</label><br>
+                        <label><input type="radio" name="spouse_type" value="new"> {{ get_translation("New Person") }}</label>
+                    </div>
+
+                    <!-- Existing person section -->
+                    <div id="replace-existing-section">
+                        <label for="replace_spouse">{{ get_translation("Select Person") }}:</label>
+                        <input type="text" id="replace_spouse" name="replace_spouse" list="replace-spouse-options" autocomplete="off" class="form-control">
+                        <datalist id="replace-spouse-options"></datalist>
+                        <input type="hidden" name="spouse_id" id="replace_spouse_id">
+                    </div>
+
+                    <!-- New person section -->
+                    <div id="replace-new-section" style="display:none;">
+                        <label>{{ get_translation("First Name") }}:</label>
+                        <input type="text" name="new_first_name" class="form-control"><br>
+                        <label>{{ get_translation("Last Name") }}:</label>
+                        <input type="text" name="new_last_name" class="form-control"><br>
+                        <label>{{ get_translation("Birth Date") }}:</label>
+                        <input type="date" name="new_birth_date" class="form-control">
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label>{{ get_translation("Marriage Date") }}:</label>
+                        <input type="date" name="marriage_date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                <button type="button" class="btn btn-primary" id="confirmReplaceSpouse">{{ get_translation("Replace Spouse") }}</button>
             </div>
         </div>
     </div>
