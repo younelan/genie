@@ -245,13 +245,15 @@
                     <!-- Family selection for adding child (only shown when adding child) -->
                     <div id="family-selection-section" style="display:none;">
                         <label for="family_id">{{ get_translation("Select Family") }}:</label>
-                        <select name="family_id" id="family_id">
+                        <select name="family_id" id="family_id" class="form-control">
                             {% for family in spouse_families %}
                                 <option value="{{ family.family_id }}">
                                     {% if member.gender_id == 1 and family.wife_name %}
                                         {{ get_translation("With") }} {{ family.wife_name }}
                                     {% elseif member.gender_id == 2 and family.husband_name %}
                                         {{ get_translation("With") }} {{ family.husband_name }}
+                                    {% else %}
+                                        {{ get_translation("Unknown Spouse") }}
                                     {% endif %}
                                 </option>
                             {% endfor %}
@@ -355,7 +357,7 @@
     const treeId = {{treeId}}; // Pass member ID to JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         var script = document.createElement('script');
-        script.src = 'res/relationships.js?ver=1.1';
+        script.src = 'res/relationships.js?ver=1.2'; // Increment version number
 
         script.onload = function() {
             // Initialize relationships.js with member ID

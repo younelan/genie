@@ -62,11 +62,53 @@ function initializeRelationships(memberId) {
 
             $.post('index.php?action=add_relationship', formData, function(response) {
                 if (response.success) {
-                    location.reload(); // Keep the simple reload for now
+                    // Reload both relationships and families
+                    loadRelationships(memberId);
+                    
+                    // Reload families section
+                    $.get('index.php?action=get_families&member_id=' + memberId, function(data) {
+                        if (data.success) {
+                            updateFamilyDisplay(data);
+                        }
+                    });
+                    
+                    // Clear the form
+                    $('#add-relationship-form')[0].reset();
+                    $('#person_id2').val(''); // Clear the hidden input
                 } else {
                     alert('Failed to add relationship: ' + response.message);
                 }
             }, 'json');
+        });
+
+        // Fix Firefox datalist handling
+        $('#autocomplete_member').on('input change', function () {
+            var input = $(this).val();
+            var option = $('#autocomplete-options option[value="' + input + '"]');
+            
+            if (option.length > 0) {
+                $('#person_id2').val(option.data('person-id'));
+            } else {
+                // If no exact match, check if we're in the middle of typing
+                if (!this.list || !this.list.options.length) {
+                    // If no options or still typing, make the AJAX call
+                    $.ajax({
+                        url: 'index.php?action=autocomplete_member&tree_id=' + treeId,
+                        method: 'GET',
+                        data: { term: input },
+                        dataType: 'json',
+                        success: function (data) {
+                            $('#autocomplete-options').empty();
+                            data.forEach(function (item) {
+                                $('#autocomplete-options').append(
+                                    `<option value="${item.label}" data-person-id="${item.id}">`
+                                );
+                            });
+                        }
+                    });
+                }
+                $('#person_id2').val('');
+            }
         });
 
         //end new func
@@ -215,17 +257,30 @@ function initializeRelationships(memberId) {
         loadRelationships(memberId);
 
         // Handle relationship category selection
-        $('input[name="relation_category"]').change(function() {
+        $('input[name="relation_category"]').on('change', function() {
             const category = $(this).val();
-            $('#other-relationship-section').toggle(category === 'other');
-            $('#family-details-section').toggle(category === 'spouse');
-            $('#family-selection-section').toggle(category === 'child');
+            console.log('Category changed to:', category);
             
-            // Update form fields based on category
-            if (category === 'spouse') {
-                const memberGender = $('input[name="member_gender"]').val();
-                $('#new_gender').val(memberGender === '1' ? '2' : '1');
+            // Hide all special sections first
+            $('#other-relationship-section').hide();
+            $('#family-details-section').hide();
+            $('#family-selection-section').hide();
+            
+            // Show appropriate section based on category
+            switch(category) {
+                case 'other':
+                    $('#other-relationship-section').show();
+                    break;
+                case 'spouse':
+                    $('#family-details-section').show();
+                    break;
+                case 'child':
+                    $('#family-selection-section').show();
+                    break;
             }
+            
+            // Log visibility status after changes
+            logVisibility();
         });
 
         // Function to reload family section
@@ -237,5 +292,106 @@ function initializeRelationships(memberId) {
                 }
             });
         }
+
+        // Add this new function to handle updating the family display
+        function updateFamilyDisplay(data) {
+            // Update spouse families section
+            if (data.spouse_families) {
+                let tabsHtml = '';
+                let contentHtml = '';
+                
+                data.spouse_families.forEach((family, index) => {
+                    const isActive = index === 0;
+                    const memberGender = $('input[name="member_gender"]').val();
+                    const spouseName = memberGender == 1 ? family.wife_name : family.husband_name;
+                    
+                    // Build tabs HTML
+                    tabsHtml += `
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link ${isActive ? 'active' : ''}" 
+                                    id="family-tab-${family.family_id}" 
+                                    data-toggle="tab" 
+                                    data-target="#family-${family.family_id}" 
+                                    type="button" 
+                                    role="tab">
+                                ${spouseName || 'Unknown Spouse'}
+                            </button>
+                        </li>`;
+
+                    // Build content HTML
+                    contentHtml += `
+                        <div class="tab-pane fade ${isActive ? 'show active' : ''}" 
+                             id="family-${family.family_id}" 
+                             role="tabpanel">
+                            <!-- Marriage Details -->
+                            <div class="card mt-3">
+                                <div class="card-header">Marriage Details</div>
+                                <div class="card-body">
+                                    <p><strong>Marriage Date:</strong> ${family.marriage_date ? formatBrowserDate(family.marriage_date) : '-'}</p>
+                                    <p><strong>Divorce Date:</strong> ${family.divorce_date ? formatBrowserDate(family.divorce_date) : '-'}</p>
+                                </div>
+                            </div>
+                            <!-- Children -->
+                            <div class="card mt-3">
+                                <div class="card-header">Children</div>
+                                <div class="card-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Birth Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${family.children ? family.children.map(child => `
+                                                <tr>
+                                                    <td>
+                                                        <a href="index.php?action=edit_member&member_id=${child.id}">
+                                                            ${child.first_name} ${child.last_name}
+                                                        </a>
+                                                    </td>
+                                                    <td>${child.date_of_birth ? formatBrowserDate(child.date_of_birth) : '-'}</td>
+                                                </tr>
+                                            `).join('') : ''}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                $('#familyTabs').html(tabsHtml);
+                $('#familyTabsContent').html(contentHtml);
+            }
+
+            // Update child families section
+            if (data.child_families) {
+                let parentsHtml = data.child_families.map(family => `
+                    <tr>
+                        <td>${family.husband_id ? 
+                            `<a href="index.php?action=edit_member&member_id=${family.husband_id}">
+                                ${family.husband_name}
+                            </a>` : '-'}</td>
+                        <td>${family.wife_id ? 
+                            `<a href="index.php?action=edit_member&member_id=${family.wife_id}">
+                                ${family.wife_name}
+                            </a>` : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                $('#child-families-body').html(parentsHtml);
+            }
+        }
+
+        // Trigger the change event on page load to set initial state
+        $('input[name="relation_category"]:checked').trigger('change');
     });
+}
+
+// Add this function at the top level
+function logVisibility() {
+    console.log('Visibility status:');
+    console.log('Other relationship section:', $('#other-relationship-section').is(':visible'));
+    console.log('Family details section:', $('#family-details-section').is(':visible'));
+    console.log('Family selection section:', $('#family-selection-section').is(':visible'));
 }
