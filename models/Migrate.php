@@ -155,18 +155,25 @@ class RelationshipMigrator {
         }
     }
 
-    private function insertFamilies() {
-        
+    private function insertFamilies($treeId) {
+        $treeId=intval($treeId);
+        $sql = "delete FROM `families` WHERE tree_id=$treeId;";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+
         foreach ($this->families as $famid=>$family) {
             $sql = "
-                INSERT INTO families (husband_id, wife_id, created_at, updated_at)
-                VALUES (:husb, :wife, NOW(), NOW());
+                INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
+                VALUES (:tree_id,:gedcom_id,:husb, :wife, NOW(), NOW());
             ";
 
             $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':tree_id', $family['tree_id'], PDO::PARAM_INT);
+            $stmt->bindParam(':gedcom_id', $family['gedcom_id'], PDO::PARAM_STR);
             $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
             $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
             $stmt->execute();
+            $new_id= $stmt->lastInsertId();
             foreach ($family['children']??[] as $childId) {
                 // $sql2 = "
                 // ";
@@ -176,7 +183,14 @@ class RelationshipMigrator {
                 //     $gedcom .= "1 CHIL @{$safeChildId}@\n";
                 }
             }           
-        }
+            // Store the family relationship
+            //print "need check already there is spouse";exit;
+            // $this->spouses[] = [
+            //     'husb' => $family['husb'],
+            //     'wife' => $family['wife'],
+            //     'relation_id' => $family['relation_id'],
+            // ];
+        //}
     }
     public function showPeople() {
         foreach($this->people as $pid=>$person) {
