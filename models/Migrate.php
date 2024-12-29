@@ -15,15 +15,17 @@ class RelationshipMigrator {
     private $appSource= "GEDCOM";
     private $appName = "Genie";
     private $appCorp = "Opensitez";
-    private $family_relationship_table;
+    private $family_children;
     private $appVersion="5.5";
 
     private $appEncoding="UTF-8";
     private $warnings=[];
+    private $export_db="gedcom";
+
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
-        $this->family_relationship_table="families_relationships";
+        $this->family_children="family_children";
 
     }
     function getName($id) {
@@ -146,6 +148,48 @@ class RelationshipMigrator {
     
         return $gedcom;
     }
+    private function insertIndividuals($treeId) {
+        foreach ($this->people as $id => $individual) {
+            $firstName = str_replace(['@', '/'], ['', ''], $individual['first_name']);
+            $lastName = str_replace(['@', '/'], ['', ''], $individual['last_name']);
+            $deathPlace = $individual['place_of_death'];
+            $deathDate = $individual['date_of_death'];
+            $birthPlace = $individual['place_of_birth'];
+            $birthDate = $individual['date_of_birth'];
+    
+            if ($individual['gender_id'] == 1) {
+                $gender="M";
+            } elseif ($individual['gender_id'] == 2) {
+                $gender="F";
+            } else {
+                $gender= null; // U for Unknown
+            }
+
+            $sql = "
+INSERT INTO $this->export_db.individuals
+(first_name,last_name,tree_id,birth_place,birth_date,death_place,death_date,gender)
+VALUES
+(:first_name,:last_name,:tree_id,:birth_place,:birth_date,:death_place,:death_date,:gender)
+
+            ";
+            print_r($individual["date_of_birth"]);
+            //print $sql;exit;
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->bindParam(':first_name', $firstName);
+            $stmt->bindParam(':last_name', $lastName);
+            $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
+            $stmt->bindParam(':gender', $gender, PDO::PARAM_INT);
+            $stmt->bindParam(':birth_place', $birthPlace, PDO::PARAM_INT);
+            $stmt->bindParam(':birth_date', $birthDate);
+
+            $stmt->bindParam(':death_place', $deathPlace, PDO::PARAM_INT);
+            $stmt->bindParam(':death_date', $deathDate);
+            $stmt->execute();
+
+
+        }
+    }
     
     // Helper method to convert dates to GEDCOM format
     private function convertToGedcomDate($dateString) {
@@ -158,45 +202,62 @@ class RelationshipMigrator {
         }
     }
     private function clearFamilies($treeId) {
-        print "clearing families<br/>";
-        $sql = "delete FROM `families` WHERE tree_id=$treeId;";
+        $sql = "delete FROM $this->export_db.`$this->family_children` WHERE tree_id=$treeId;";
+        $sql = "
+        DELETE fc
+        FROM $this->export_db.`$this->family_children` fc
+        JOIN $this->export_db.`families` f ON fc.family_id = f.id 
+        WHERE f.tree_id = $treeId;
+        ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();        
+        $sql = "delete FROM $this->export_db.`families` WHERE tree_id=$treeId;";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
-        print "clearing families<br/>";
-        $sql = "delete FROM `families_relationships` WHERE tree_id=$treeId;";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
+
     }
     private function insertFamilies($treeId) {
         $treeId=intval($treeId);
+        
         $this->clearFamilies($treeId);
-        print "inserting families<br/>";
         foreach ($this->families as $famid=>$family) {
-            //print "inserting family $famid int $treeId<br/>";
+            //print "inserting family $famid int $treeId<br/>";        $sql = "delete FROM $this->export_db.`$this->family_children` WHERE tree_id=$treeId;";
+
+            print "1";
 
             $sql = "
                 INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
                 VALUES (:tree_id,:gedcom_id,:husb, :wife, NOW(), NOW());
             ";
+            $sql = "
+                INSERT INTO $this->export_db.families (tree_id,husband_id, wife_id)
+                VALUES (:tree_id,:husb, :wife);
+            ";
             // print "$sql<br/>";
             $stmt = $this->pdo->prepare($sql);
+            print " 2";
             $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
-            $stmt->bindParam(':gedcom_id', $family['gedcom_id']);
+            //$stmt->bindParam(':gedcom_id', $family['gedcom_id']);
             $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
             $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
-            //print "inserting<br/>";
             if ($stmt->execute()) {
                 $new_id = $this->pdo->lastInsertId(); // Get the last inserted ID here
                 //print "Inserted family with ID: $new_id<br/>";
+                print " 3";
                 foreach($family['children']??[] as $childId) {
                     $sql = "
-                      INSERT INTO $this->family_relationship_table 
+                      INSERT INTO $this->family_children 
                              (tree_id,family_id,gedcom_id,child_id) VALUES
                              (:tree_id,:family_id,:gedcom_id,:child_id)
                     ";
+                    $sql = "
+                      INSERT INTO $this->export_db.$this->family_children 
+                             (family_id,child_id) VALUES
+                             (:family_id,:child_id)
+                    ";
                     $stmt = $this->pdo->prepare($sql);
-                    $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
-                    $stmt->bindParam(':gedcom_id', $childId);
+                    //$stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
+                    //$stmt->bindParam(':gedcom_id', $childId);
                     $stmt->bindParam(':family_id', $new_id, PDO::PARAM_INT);
                     $stmt->bindParam(':child_id', $childId, PDO::PARAM_INT);
                     $stmt->execute();
@@ -407,12 +468,13 @@ class RelationshipMigrator {
     }
     public function migrate($family_tree_id) {
         // Start a transaction
-        $this->pdo->beginTransaction();
+        //$this->pdo->beginTransaction();
         
         try {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
+            $this->insertIndividuals($family_tree_id);
             $this->insertFamilies($family_tree_id);
 	        //print implode("\n",$this->warnings);
             //print_r($this->relationships);
