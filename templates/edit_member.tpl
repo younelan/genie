@@ -265,6 +265,7 @@
                         <label>{{ get_translation("Relationship Type") }}:</label><br>
                         <label><input type="radio" name="relation_category" value="spouse" checked> {{ get_translation("Add Spouse") }}</label><br>
                         <label><input type="radio" name="relation_category" value="child"> {{ get_translation("Add Child") }}</label><br>
+                        <label><input type="radio" name="relation_category" value="parent"> {{ get_translation("Add Parents") }}</label><br>
                         <label><input type="radio" name="relation_category" value="other"> {{ get_translation("Add Other Relationship") }}</label><br>
                     </div>
 
@@ -324,7 +325,7 @@
                         <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
                         <select name="relationship_type_select" id="relationship_type_select">
                             {% for rtype in relationship_types %}
-                                <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
+                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
                             {% endfor %}
                         </select><br>
                     </div>
@@ -333,6 +334,83 @@
                     <div id="family-details-section" style="display:none;">
                         <label for="marriage_date">{{ get_translation("Marriage Date") }}:</label>
                         <input type="date" id="marriage_date" name="marriage_date"><br>
+                    </div>
+
+                    <!-- Add this in the "Add Relationship" section, after the existing radio buttons -->
+                    <div class="form-group">
+                        <label><input type="radio" name="relation_category" value="parent"> {{ get_translation("Add Parents") }}</label>
+                    </div>
+
+                    <!-- Add a new section for parent selection -->
+                    <div id="parent-selection-section" style="display:none;">
+                        <!-- First Parent -->
+                        <div class="first-parent-section">
+                            <h5>{{ get_translation("First Parent") }}</h5>
+                            <div class="form-group">
+                                <label><input type="radio" name="first_parent_type" value="existing" checked> {{ get_translation("Existing Person") }}</label>
+                                <label><input type="radio" name="first_parent_type" value="new"> {{ get_translation("New Person") }}</label>
+                            </div>
+
+                            <!-- Existing First Parent -->
+                            <div id="existing-first-parent-section">
+                                <label for="first_parent_autocomplete">{{ get_translation("Select Person") }}:</label>
+                                <input type="text" id="first_parent_autocomplete" list="first-parent-options" class="form-control">
+                                <datalist id="first-parent-options"></datalist>
+                                <input type="hidden" id="first_parent_id" name="first_parent_id">
+                            </div>
+
+                            <!-- New First Parent -->
+                            <div id="new-first-parent-section" style="display:none;">
+                                <label>{{ get_translation("First Name") }}:</label>
+                                <input type="text" name="first_parent_first_name" class="form-control">
+                                <label>{{ get_translation("Last Name") }}:</label>
+                                <input type="text" name="first_parent_last_name" class="form-control">
+                                <label>{{ get_translation("Gender") }}:</label>
+                                <select name="first_parent_gender" class="form-control">
+                                    <option value="1">{{ get_translation("Man") }}</option>
+                                    <option value="2">{{ get_translation("Woman") }}</option>
+                                </select>
+                                <label>{{ get_translation("Birth Date") }}:</label>
+                                <input type="date" name="first_parent_birth_date" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Second Parent -->
+                        <div class="second-parent-section mt-3">
+                            <h5>{{ get_translation("Second Parent") }}</h5>
+                            <div id="second-parent-options-section">
+                                <div class="form-group">
+                                    <label><input type="radio" name="second_parent_type" value="existing_family" checked> {{ get_translation("From Existing Family") }}</label>
+                                    <label><input type="radio" name="second_parent_type" value="new_person"> {{ get_translation("New Person") }}</label>
+                                    <label><input type="radio" name="second_parent_type" value="existing_person"> {{ get_translation("Other Existing Person") }}</label>
+                                </div>
+
+                                <!-- Existing Family Selection -->
+                                <div id="existing-family-section">
+                                    <select id="existing_family_select" class="form-control" style="display:none;">
+                                        <!-- Will be populated via JavaScript when first parent is selected -->
+                                    </select>
+                                </div>
+
+                                <!-- New Second Parent -->
+                                <div id="new-second-parent-section" style="display:none;">
+                                    <label>{{ get_translation("First Name") }}:</label>
+                                    <input type="text" name="second_parent_first_name" class="form-control">
+                                    <label>{{ get_translation("Last Name") }}:</label>
+                                    <input type="text" name="second_parent_last_name" class="form-control">
+                                    <label>{{ get_translation("Birth Date") }}:</label>
+                                    <input type="date" name="second_parent_birth_date" class="form-control">
+                                </div>
+
+                                <!-- Existing Second Parent -->
+                                <div id="existing-second-parent-section" style="display:none;">
+                                    <label for="second_parent_autocomplete">{{ get_translation("Select Person") }}:</label>
+                                    <input type="text" id="second_parent_autocomplete" list="second-parent-options" class="form-control">
+                                    <datalist id="second-parent-options"></datalist>
+                                    <input type="hidden" id="second_parent_id" name="second_parent_id">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <button type="button" id="add-relationship-btn" class="btn btn-primary mt-3">
@@ -509,7 +587,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         var script = document.createElement('script');
         script.src = 'res/relationships.js?ver=1.4'; // Increment version number
-        
+
         script.onload = function() {
             initializeRelationships(memberId);
         };

@@ -378,6 +378,7 @@ function initializeRelationships(memberId) {
             $('#other-relationship-section').hide();
             $('#family-details-section').hide();
             $('#family-selection-section').hide();
+            $('#parent-selection-section').hide();
             
             // Show appropriate section based on category
             switch(category) {
@@ -389,6 +390,9 @@ function initializeRelationships(memberId) {
                     break;
                 case 'child':
                     $('#family-selection-section').show();
+                    break;
+                case 'parent':
+                    $('#parent-selection-section').show();
                     break;
             }
             
@@ -594,6 +598,79 @@ function initializeRelationships(memberId) {
                 }
             });
         });
+
+        // Handle first parent type selection
+        $('input[name="first_parent_type"]').change(function() {
+            if ($(this).val() === 'existing') {
+                $('#existing-first-parent-section').show();
+                $('#new-first-parent-section').hide();
+            } else {
+                $('#existing-first-parent-section').hide();
+                $('#new-first-parent-section').show();
+            }
+            // Clear second parent sections when first parent changes
+            $('#existing_family_select').empty().hide();
+            clearSecondParentInputs();
+        });
+
+        // Handle second parent type selection
+        $('input[name="second_parent_type"]').change(function() {
+            const type = $(this).val();
+            $('#existing-family-section').hide();
+            $('#new-second-parent-section').hide();
+            $('#existing-second-parent-section').hide();
+            
+            switch(type) {
+                case 'existing_family':
+                    $('#existing-family-section').show();
+                    $('#existing_family_select').show();
+                    break;
+                case 'new_person':
+                    $('#new-second-parent-section').show();
+                    break;
+                case 'existing_person':
+                    $('#existing-second-parent-section').show();
+                    break;
+            }
+        });
+
+        // Handle first parent selection
+        $('#first_parent_autocomplete').on('change', function() {
+            const selectedOption = $('#first-parent-options option[value="' + $(this).val() + '"]');
+            if (selectedOption.length > 0) {
+                const parentId = selectedOption.data('person-id');
+                $('#first_parent_id').val(parentId);
+                
+                // Load existing families for this parent
+                $.get('index.php?action=get_spouse_families&member_id=' + parentId, function(response) {
+                    if (response.success) {
+                        const select = $('#existing_family_select');
+                        select.empty();
+                        select.append('<option value="">{{ get_translation("Select Family") }}</option>');
+                        
+                        response.families.forEach(family => {
+                            const spouseName = family.spouse_name || '{{ get_translation("Unknown Spouse") }}';
+                            select.append(`<option value="${family.family_id}">${spouseName}</option>`);
+                        });
+                        
+                        if (response.families.length > 0) {
+                            $('input[name="second_parent_type"][value="existing_family"]').prop('disabled', false);
+                        } else {
+                            $('input[name="second_parent_type"][value="existing_family"]').prop('disabled', true)
+                                .prop('checked', false);
+                            $('input[name="second_parent_type"][value="new_person"]').prop('checked', true).trigger('change');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Helper function to clear second parent inputs
+        function clearSecondParentInputs() {
+            $('#new-second-parent-section input').val('');
+            $('#existing-second-parent-section input').val('');
+            $('#second_parent_id').val('');
+        }
     });
 }
 
