@@ -154,13 +154,15 @@ class RelationshipMigrator {
             return 'ABT ' . $dateString;
         }
     }
-
-    private function insertFamilies($treeId) {
-        $treeId=intval($treeId);
+    private function clearFamilies($treeId) {
         $sql = "delete FROM `families` WHERE tree_id=$treeId;";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
 
+    }
+    private function insertFamilies($treeId) {
+        $treeId=intval($treeId);
+        $this->clearFamilies($treeId);
         foreach ($this->families as $famid=>$family) {
             $sql = "
                 INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
@@ -377,7 +379,7 @@ class RelationshipMigrator {
             // Fetch the family data
             $this->fetchFamilies($family_tree_id);
             $this->fetchChildren($family_tree_id);
-            $this->insertFamilies();
+            $this->insertFamilies($family_tree_id);
 	        //print implode("\n",$this->warnings);
             //print_r($this->relationships);
             //exit;
