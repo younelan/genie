@@ -422,4 +422,58 @@ class MemberController extends AppController
         ]);
         exit;
     }
+    public function deleteFamilyMember()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            error_log('Delete family member request: ' . print_r($_POST, true));
+            
+            $familyId = $_POST['family_id'] ?? null;
+            $childId = $_POST['child_id'] ?? null;
+            $spouseId = $_POST['spouse_id'] ?? null;
+            $deleteType = $_POST['delete_type'] ?? null;
+
+            if (!$familyId) {
+                throw new Exception('Family ID is required');
+            }
+
+            if ($childId) {
+                // Handle child deletion
+                if ($deleteType === 'remove') {
+                    $success = $this->member->removeChildFromFamily($childId, $familyId);
+                } else {
+                    $success = $this->member->deleteMember($childId);
+                }
+            } else {
+                // Handle spouse deletion - even if spouseId is null
+                switch ($deleteType) {
+                    case '1': // Remove relationship only
+                        $success = $this->member->removeSpouseFromFamily($spouseId, $familyId);
+                        break;
+                    case '2': // Delete spouse, keep children
+                        $success = $spouseId ? 
+                            $this->member->deleteSpouseKeepChildren($spouseId, $familyId) :
+                            $this->member->removeSpouseFromFamily($spouseId, $familyId);
+                        break;
+                    case '3': // Delete spouse and children
+                        $success = $spouseId ? 
+                            $this->member->deleteSpouseAndChildren($spouseId, $familyId) :
+                            $this->member->deleteFamilyAndChildren($familyId);
+                        break;
+                    default:
+                        throw new Exception('Invalid delete type');
+                }
+            }
+
+            echo json_encode(['success' => $success]);
+        } catch (Exception $e) {
+            error_log('Error in deleteFamilyMember: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
 }

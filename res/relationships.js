@@ -5,6 +5,123 @@ $(document).ready(function () {
 
 function initializeRelationships(memberId) {
     $(function () {
+        // Initialize Bootstrap modals
+        $('#deleteSpouseModal').modal({
+            show: false,
+            backdrop: 'static'
+        });
+        
+        $('#deleteChildModal').modal({
+            show: false,
+            backdrop: 'static'
+        });
+
+        // Delete child handlers
+        $('.delete-child-btn').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const childId = $(this).data('child-id');
+            const familyId = $(this).data('family-id');
+            
+            console.log('Delete child clicked:', childId, familyId);
+            
+            $('#deleteChildId').val(childId);
+            $('#deleteChildFamilyId').val(familyId);
+            $('#deleteChildModal').modal('show');
+        });
+
+        $('#confirmDeleteChild').on('click', function() {
+            const childId = $('#deleteChildId').val();
+            const familyId = $('#deleteChildFamilyId').val();
+            const deleteType = $('#childDeleteOption').val();
+
+            console.log('Sending delete request:', {
+                child_id: childId,
+                family_id: familyId,
+                delete_type: deleteType
+            });
+
+            $.ajax({
+                url: 'index.php',
+                method: 'POST',
+                data: {
+                    action: 'delete_family_member',
+                    child_id: childId,
+                    family_id: familyId,
+                    delete_type: deleteType
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Server response:', response);
+                    $('#deleteChildModal').modal('hide');
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert(response.message || 'Failed to delete child');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    alert('Failed to delete child. Please try again.');
+                }
+            });
+        });
+
+        // Delete spouse handlers
+        $('.delete-spouse-btn').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const spouseId = $(this).data('spouse-id');
+            const familyId = $(this).data('family-id');
+            
+            console.log('Delete spouse clicked:', spouseId, familyId);
+            
+            $('#deleteSpouseId').val(spouseId);
+            $('#deleteFamilyId').val(familyId);
+            $('#deleteSpouseModal').modal('show');
+        });
+
+        $('#confirmDeleteSpouse').on('click', function() {
+            const spouseId = $('#deleteSpouseId').val();
+            const familyId = $('#deleteFamilyId').val();
+            const deleteType = $('#spouseDeleteOption').val();
+
+            console.log('Sending delete request:', {
+                spouse_id: spouseId,
+                family_id: familyId,
+                delete_type: deleteType
+            });
+
+            $.ajax({
+                url: 'index.php',
+                method: 'POST',
+                data: {
+                    action: 'delete_family_member',
+                    spouse_id: spouseId,
+                    family_id: familyId,
+                    delete_type: deleteType
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Server response:', response);
+                    $('#deleteSpouseModal').modal('hide');
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert(response.message || 'Failed to delete spouse');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    alert('Failed to delete spouse. Please try again.');
+                }
+            });
+        });
+
         //new add relationship
         // Show/hide sections based on radio button selection
         $('input[name="member_type"]').change(function () {

@@ -1,4 +1,3 @@
-
 <!-- Main content -->
 <div class="row mt-5">
     <div class="col-lg-4 mb-4">
@@ -115,8 +114,14 @@
                             
                             <!-- Marriage Details -->
                             <div class="card mt-3">
-                                <div class="card-header">
+                                <div class="card-header d-flex justify-content-between align-items-center">
                                     {{ get_translation("Marriage Details") }}
+                                    <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                                            data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                            data-family-id="{{ family.family_id }}"
+                                            onclick="event.stopPropagation();">
+                                        🗑️ {{ get_translation("Delete Spouse") }}
+                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
@@ -148,6 +153,12 @@
                                                         <a href="index.php?action=edit_member&member_id={{ child.id }}">
                                                             {{ child.first_name }} {{ child.last_name }}
                                                         </a>
+                                                        <button type="button" class="btn btn-danger btn-sm delete-child-btn" 
+                                                                data-child-id="{{ child.id }}"
+                                                                data-family-id="{{ family.family_id }}"
+                                                                onclick="event.stopPropagation();">
+                                                            🗑️
+                                                        </button>
                                                     </td>
                                                     <td>{{ child.date_of_birth ? child.date_of_birth|date("M d, Y") : '-' }}</td>
                                                 </tr>
@@ -351,16 +362,87 @@
     </div>
 </div>
 
+<!-- Delete Spouse Modal -->
+<div class="modal fade" id="deleteSpouseModal" tabindex="-1" role="dialog" aria-labelledby="deleteSpouseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteSpouseModalLabel">{{ get_translation("Delete Spouse") }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>{{ get_translation("Choose delete option:") }}</p>
+                <select id="spouseDeleteOption" class="form-control">
+                    <option value="1">{{ get_translation("Remove relationship only") }}</option>
+                    <option value="2">{{ get_translation("Delete spouse (keeps children)") }}</option>
+                    <option value="3">{{ get_translation("Delete spouse and all children") }}</option>
+                </select>
+                <input type="hidden" id="deleteSpouseId">
+                <input type="hidden" id="deleteFamilyId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteSpouse">{{ get_translation("Delete") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Child Modal -->
+<div class="modal fade" id="deleteChildModal" tabindex="-1" role="dialog" aria-labelledby="deleteChildModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteChildModalLabel">{{ get_translation("Delete Child") }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>{{ get_translation("Choose action:") }}</p>
+                <select id="childDeleteOption" class="form-control">
+                    <option value="remove">{{ get_translation("Remove from family only") }}</option>
+                    <option value="delete">{{ get_translation("Delete child completely") }}</option>
+                </select>
+                <input type="hidden" id="deleteChildId">
+                <input type="hidden" id="deleteChildFamilyId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteChild">{{ get_translation("Delete") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     var memberId = {{memberId}}; // Pass member ID to JavaScript
     const treeId = {{treeId}}; // Pass member ID to JavaScript
+    
+    // Add translations object
+    const translations = {
+        "Choose action for child": "{{ get_translation("Choose action for child") }}",
+        "Remove from family only": "{{ get_translation("Remove from family only") }}",
+        "Delete child completely": "{{ get_translation("Delete child completely") }}",
+        "Press OK to remove from family only, Cancel to delete completely": "{{ get_translation("Press OK to remove from family only, Cancel to delete completely") }}",
+        "Choose delete option (enter number)": "{{ get_translation("Choose delete option (enter number)") }}",
+        "Remove relationship only": "{{ get_translation("Remove relationship only") }}",
+        "Delete spouse (keeps children)": "{{ get_translation("Delete spouse (keeps children)") }}",
+        "Delete spouse and all children": "{{ get_translation("Delete spouse and all children") }}"
+    };
+
+    // Add translation function
+    function get_translation(key) {
+        return translations[key] || key;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var script = document.createElement('script');
-        script.src = 'res/relationships.js?ver=1.2'; // Increment version number
-
+        script.src = 'res/relationships.js?ver=1.4'; // Increment version number
+        
         script.onload = function() {
-            // Initialize relationships.js with member ID
             initializeRelationships(memberId);
         };
         document.head.appendChild(script);

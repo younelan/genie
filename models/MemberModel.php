@@ -448,4 +448,180 @@ class MemberModel  extends AppModel
             'tree_id' => $treeId
         ]);
     }
+
+    public function removeChildFromFamily($childId, $familyId)
+    {
+        $query = "DELETE FROM family_children WHERE child_id = :child_id AND family_id = :family_id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'child_id' => $childId,
+            'family_id' => $familyId
+        ]);
+    }
+
+    public function removeSpouseFromFamily($spouseId, $familyId)
+    {
+        $this->db->beginTransaction();
+        try {
+            error_log("Starting removeSpouseFromFamily - spouseId: $spouseId, familyId: $familyId");
+
+            // Check if family has children
+            $query = "SELECT COUNT(*) FROM family_children WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+            $hasChildren = (int)$stmt->fetchColumn() > 0;
+            error_log("Has children: " . ($hasChildren ? 'yes' : 'no'));
+
+            if ($spouseId) {
+                // Update the family to remove the specific spouse
+                $query = "UPDATE families 
+                          SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
+                              wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
+                          WHERE family_id = :family_id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute([
+                    'spouse_id' => $spouseId,
+                    'family_id' => $familyId
+                ]);
+            }
+
+            // If no children, delete the family
+            if (!$hasChildren) {
+                error_log("No children, deleting family $familyId");
+                $query = "DELETE FROM families WHERE family_id = :family_id";
+                $stmt = $this->db->prepare($query);
+                $result = $stmt->execute(['family_id' => $familyId]);
+                error_log("Delete result: " . ($result ? 'success' : 'failed'));
+            } else {
+                error_log("Has children, keeping family");
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error removing spouse from family: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteSpouseKeepChildren($spouseId, $familyId)
+    {
+        $this->db->beginTransaction();
+        try {
+            // First set spouse to null in family
+            $query = "UPDATE families 
+                      SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
+                          wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
+                      WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                'spouse_id' => $spouseId,
+                'family_id' => $familyId
+            ]);
+
+            // Delete the spouse if one was specified
+            if ($spouseId) {
+                $this->deleteMember($spouseId);
+            }
+
+            // Check if family has children
+            $query = "SELECT COUNT(*) FROM family_children WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+            $hasChildren = (int)$stmt->fetchColumn() > 0;
+
+            // If no children, delete the family
+            if (!$hasChildren) {
+                $query = "DELETE FROM families WHERE family_id = :family_id";
+                $stmt = $this->db->prepare($query);
+                $stmt->execute(['family_id' => $familyId]);
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error deleting spouse: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteSpouseAndChildren($spouseId, $familyId)
+    {
+        $this->db->beginTransaction();
+        try {
+            // Delete all children first
+            $query = "SELECT child_id FROM family_children WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+            $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            foreach ($children as $childId) {
+                $this->deleteMember($childId);
+            }
+
+            // Delete the spouse if one was specified
+            if ($spouseId) {
+                $this->deleteMember($spouseId);
+            }
+
+            // Delete the family
+            $query = "DELETE FROM families WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error deleting spouse and children: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteFamilyAndChildren($familyId)
+    {
+        $this->db->beginTransaction();
+        try {
+            error_log("Starting deleteFamilyAndChildren for familyId: $familyId");
+
+            // Get all children from this family
+            $query = "SELECT child_id FROM family_children WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+            $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            error_log("Found children: " . print_r($children, true));
+
+            // Delete all children
+            foreach ($children as $childId) {
+                error_log("Deleting child: $childId");
+                $this->deleteMember($childId);
+            }
+
+            // Delete family_children records first
+            error_log("Deleting family_children records");
+            $query = "DELETE FROM family_children WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+
+            // Delete the family record
+            error_log("Deleting family record");
+            $query = "DELETE FROM families WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute(['family_id' => $familyId]);
+            error_log("Family delete result: " . ($result ? 'success' : 'failed'));
+            if (!$result) {
+                error_log("Family delete error: " . print_r($stmt->errorInfo(), true));
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error in deleteFamilyAndChildren: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return false;
+        }
+    }
 }
