@@ -237,42 +237,99 @@ class MemberController extends AppController
     }
     public function addRelationship()
     {
-        $memberId = $_POST['member_id'] ?? null;
-        $familyTreeId = $_POST['family_tree_id'] ?? null;
-        $memberType = $_POST['member_type'] ?? 'existing';
-        if ($memberType === 'existing') {
-            $personId1 = $_POST['person_id1'];
-            $personId2 = $_POST['person_id2'];
-            $relationshipType = $_POST['relationship_type_select'];
-        } else {
-            $firstName = $_POST['new_first_name'];
-            $lastName = $_POST['new_last_name'];
-            $personId1 = $_POST['person_id1'];
-            $relationshipType = $_POST['relationship_type_new'];
-            $new_member = [
-                'treeId' => $familyTreeId,
-                'firstName' => $firstName,
-                'lastName' => $lastName,
-                'dateOfBirth' => null,
-                'placeOfBirth' => null,
-                'genderId' => null,
-                'dateOfDeath' => null,
-            ];
-            // Add new member
-            //$firstName, $lastName, $familyTreeId
-            $personId2 = $this->member->addMember($new_member);
-        }
+        try {
+            $memberId = $_POST['member_id'] ?? null;
+            $familyTreeId = $_POST['family_tree_id'] ?? null;
+            $memberType = $_POST['member_type'] ?? 'existing';
+            $relationCategory = $_POST['relation_category'] ?? 'other';
+            $memberGender = intval($_POST['member_gender'] ?? 0);
 
-        if ($personId2) {
-            $success = $this->member->addRelationship($personId1, $personId2, $relationshipType, $familyTreeId);
+            // Log incoming data
+            error_log("Adding relationship - POST data: " . print_r($_POST, true));
 
-            $response = ['success' => true, 'message' => 'Relationship added successfully.'];
-        } else {
-            $response = ['success' => false, 'message' => 'Failed to add relationship.'];
+            if (!$memberId || !$familyTreeId) {
+                throw new Exception('Missing required member_id or family_tree_id');
+            }
+
+            if (!$memberGender) {
+                throw new Exception('Invalid member gender');
+            }
+
+            // Create or get person2
+            if ($memberType === 'existing') {
+                $personId2 = $_POST['person_id2'] ?? null;
+                if (!$personId2) {
+                    throw new Exception('No person selected for existing member');
+                }
+            } else {
+                if (empty($_POST['new_first_name']) || empty($_POST['new_last_name'])) {
+                    throw new Exception('First name and last name are required for new member');
+                }
+
+                // For spouses, set opposite gender
+                $newGender = ($relationCategory === 'spouse') 
+                    ? ($memberGender === 1 ? 2 : 1) 
+                    : ($_POST['new_gender'] ?? null);
+
+                $new_member = [
+                    'treeId' => $familyTreeId,
+                    'firstName' => $_POST['new_first_name'],
+                    'lastName' => $_POST['new_last_name'],
+                    'dateOfBirth' => $_POST['new_birth_date'] ?? null,
+                    'genderId' => $newGender,
+                ];
+                $personId2 = $this->member->addMember($new_member);
+                if (!$personId2) {
+                    throw new Exception('Failed to create new member');
+                }
+            }
+
+            if ($personId2) {
+                $success = false;
+                if ($relationCategory === 'spouse') {
+                    // Determine husband and wife based on gender
+                    $familyData = [
+                        'tree_id' => $familyTreeId,
+                        'husband_id' => ($memberGender === 1) ? $memberId : $personId2,
+                        'wife_id' => ($memberGender === 2) ? $memberId : $personId2,
+                        'marriage_date' => !empty($_POST['marriage_date']) ? $_POST['marriage_date'] : null
+                    ];
+                    error_log("Creating family with data: " . print_r($familyData, true));
+                    $success = $this->member->createFamily($familyData);
+                    if (!$success) {
+                        throw new Exception('Failed to create family');
+                    }
+                } elseif ($relationCategory === 'child') {
+                    $familyId = $_POST['family_id'] ?? null;
+                    if (!$familyId) {
+                        throw new Exception('No family selected for child');
+                    }
+                    $success = $this->member->addChildToFamily($familyId, $personId2, $familyTreeId);
+                    if (!$success) {
+                        throw new Exception('Failed to add child to family');
+                    }
+                } else {
+                    if (empty($_POST['relationship_type_select'])) {
+                        throw new Exception('No relationship type selected');
+                    }
+                    $success = $this->member->addRelationship($memberId, $personId2, $_POST['relationship_type_select'], $familyTreeId);
+                    if (!$success) {
+                        throw new Exception('Failed to add relationship');
+                    }
+                }
+
+                $response = ['success' => true, 'message' => 'Relationship added successfully'];
+            } else {
+                throw new Exception('Failed to create or find person');
+            }
+        } catch (Exception $e) {
+            error_log("Error adding relationship: " . $e->getMessage());
+            $response = ['success' => false, 'message' => $e->getMessage()];
         }
 
         header('Content-Type: application/json');
         echo json_encode($response);
+        exit;
     }
     public function updateRelationship($postData)
     {
@@ -341,5 +398,28 @@ class MemberController extends AppController
             echo json_encode(['success' => false, 'error' => 'Failed to delete relationship.']);
         }
         exit();
+    }
+    public function getFamilies($memberId = null)
+    {
+        if (!$memberId) {
+            $memberId = $_GET['member_id'] ?? null;
+        }
+        
+        if (!$memberId) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'No member ID provided']);
+            exit;
+        }
+
+        $spouse_families = $this->member->getSpouseFamilies($memberId);
+        $child_families = $this->member->getChildFamilies($memberId);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'spouse_families' => $spouse_families,
+            'child_families' => $child_families
+        ]);
+        exit;
     }
 }

@@ -232,33 +232,48 @@
                 <form id="add-relationship-form">
                     <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
                     <input type="hidden" name="family_tree_id" value="{{ member.family_tree_id|e }}">
+                    <input type="hidden" name="member_gender" value="{{ member.gender_id|e }}">
 
-                    <!-- Radio buttons to choose between existing or new member -->
-                    <label><input type="radio" name="member_type" value="existing" checked> {{ get_translation("Add Relationship With Existing Member") }}</label><br>
-                    <label><input type="radio" name="member_type" value="new"> {{ get_translation("Add Relationship With New Member") }}</label><br><br>
-
-                    <!-- Section for existing member selection -->
-                    <div id="existing-member-section">
-                        <label for="autocomplete_member">{{ get_translation("Select Existing Member") }}:</label>
-                        <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
-                        <datalist id="autocomplete-options"></datalist><br>
-
-                        <!-- Hidden fields for person IDs and relationship type -->
-                        <input type="hidden" name="person_id1" id="person_id1" value="{{ member.id|e }}">
-                        <input type="hidden" name="person_id2" id="person_id2" value="">
-                        <input type="hidden" name="relationship_type" id="relationship_type" value="">
-
-                        <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
-                        <select name="relationship_type_select" id="relationship_type_select">
-                            <!-- Options will be populated dynamically via AJAX -->
-                            {% for rtype in relationship_types %}
-                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
-                            {% endfor %}
-
-                        </select><br>
+                    <!-- Relationship type selection -->
+                    <div class="form-group">
+                        <label>{{ get_translation("Relationship Type") }}:</label><br>
+                        <label><input type="radio" name="relation_category" value="spouse" checked> {{ get_translation("Add Spouse") }}</label><br>
+                        <label><input type="radio" name="relation_category" value="child"> {{ get_translation("Add Child") }}</label><br>
+                        <label><input type="radio" name="relation_category" value="other"> {{ get_translation("Add Other Relationship") }}</label><br>
                     </div>
 
-                    <!-- Section for new member form -->
+                    <!-- Family selection for adding child (only shown when adding child) -->
+                    <div id="family-selection-section" style="display:none;">
+                        <label for="family_id">{{ get_translation("Select Family") }}:</label>
+                        <select name="family_id" id="family_id">
+                            {% for family in spouse_families %}
+                                <option value="{{ family.family_id }}">
+                                    {% if member.gender_id == 1 and family.wife_name %}
+                                        {{ get_translation("With") }} {{ family.wife_name }}
+                                    {% elseif member.gender_id == 2 and family.husband_name %}
+                                        {{ get_translation("With") }} {{ family.husband_name }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Person selection type -->
+                    <div class="form-group mt-3">
+                        <label><input type="radio" name="member_type" value="existing" checked> {{ get_translation("Existing Person") }}</label><br>
+                        <label><input type="radio" name="member_type" value="new"> {{ get_translation("New Person") }}</label>
+                    </div>
+
+                    <!-- Section for existing person selection -->
+                    <div id="existing-member-section">
+                        <label for="autocomplete_member">{{ get_translation("Select Existing Person") }}:</label>
+                        <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
+                        <datalist id="autocomplete-options"></datalist>
+                        <input type="hidden" name="person_id1" id="person_id1" value="{{ member.id|e }}">
+                        <input type="hidden" name="person_id2" id="person_id2" value="">
+                    </div>
+
+                    <!-- Section for new person -->
                     <div id="new-member-section" style="display:none;">
                         <label for="new_first_name">{{ get_translation("First Name") }}:</label>
                         <input type="text" id="new_first_name" name="new_first_name"><br>
@@ -266,17 +281,35 @@
                         <label for="new_last_name">{{ get_translation("Last Name") }}:</label>
                         <input type="text" id="new_last_name" name="new_last_name"><br>
 
-                        <label for="relationship_type_new">{{ get_translation("Relationship Type") }}:</label>
-                        <select name="relationship_type_new" id="relationship_type_new">
-                            <!-- Options will be populated dynamically via AJAX -->
-                            {% for rtype in relationship_types %}
-                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
-                            {% endfor %}
+                        <label for="new_gender">{{ get_translation("Gender") }}:</label>
+                        <select name="new_gender" id="new_gender">
+                            <option value="1">{{ get_translation("Man") }}</option>
+                            <option value="2">{{ get_translation("Woman") }}</option>
+                        </select><br>
 
+                        <label for="new_birth_date">{{ get_translation("Birth Date") }}:</label>
+                        <input type="date" id="new_birth_date" name="new_birth_date"><br>
+                    </div>
+
+                    <!-- Other relationship type selection (only shown when "other" is selected) -->
+                    <div id="other-relationship-section" style="display:none;">
+                        <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
+                        <select name="relationship_type_select" id="relationship_type_select">
+                            {% for rtype in relationship_types %}
+                                <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
+                            {% endfor %}
                         </select><br>
                     </div>
 
-                    <button type="button" id="add-relationship-btn">{{ get_translation("Add Relationship") }}</button>
+                    <!-- Family details section (only shown for spouse relationships) -->
+                    <div id="family-details-section" style="display:none;">
+                        <label for="marriage_date">{{ get_translation("Marriage Date") }}:</label>
+                        <input type="date" id="marriage_date" name="marriage_date"><br>
+                    </div>
+
+                    <button type="button" id="add-relationship-btn" class="btn btn-primary mt-3">
+                        {{ get_translation("Add Relationship") }}
+                    </button>
                 </form>
 
                 <!-- Form to edit relationship (hidden by default) -->

@@ -26,13 +26,10 @@ function initializeRelationships(memberId) {
                 data: { term: input },
                 dataType: 'json',
                 success: function (data) {
-                    $('#autocomplete-options').empty();  // Clear previous options
+                    $('#autocomplete-options').empty();
                     data.forEach(function (item) {
                         $('#autocomplete-options').append(`<option value="${item.label}" data-person-id="${item.id}">`);
                     });
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error fetching autocomplete data:', status, error);
                 }
             });
         });
@@ -47,39 +44,30 @@ function initializeRelationships(memberId) {
             }
         });
 
-
-
-        // Handle click event for add relationship button
-        $('#add-relationship-btn').click(function () {
+        // Handle add relationship button click
+        $('#add-relationship-btn').click(function() {
             var formData = $('#add-relationship-form').serialize();
+            const relationCategory = $('input[name="relation_category"]:checked').val();
+            const memberType = $('input[name="member_type"]:checked').val();
 
-            // Determine which relationship type to use based on member_type selection
-            var relationshipType = '';
-            if ($('input[name="member_type"]:checked').val() === 'existing') {
-                relationshipType = $('#relationship_type_select').val();
+            if (memberType === 'existing') {
+                formData += '&relationship_type=' + (relationCategory === 'spouse' ? 'spouse' : 
+                            relationCategory === 'child' ? 'child' : 
+                            $('#relationship_type_select').val());
             } else {
-                relationshipType = $('#relationship_type_new').val();
-                formData += '&new_first_name=' + $('#new_first_name').val(); // Include new member details
-                formData += '&new_last_name=' + $('#new_last_name').val();
+                formData += '&relationship_type=' + (relationCategory === 'spouse' ? 'spouse' : 
+                            relationCategory === 'child' ? 'child' : 
+                            $('#relationship_type_new').val());
             }
 
-            formData += '&relationship_type=' + relationshipType;
-
-            // Example: AJAX submission (adjust URL and data as needed)
-            $.post('index.php?action=add_relationship', formData, function (response) {
+            $.post('index.php?action=add_relationship', formData, function(response) {
                 if (response.success) {
-                    loadRelationships(memberId); // Reload relationships after addition
-
-                    // Handle success
+                    location.reload(); // Keep the simple reload for now
                 } else {
-                    // Handle failure
+                    alert('Failed to add relationship: ' + response.message);
                 }
             }, 'json');
         });
-
-
-
-
 
         //end new func
         // Load relationship types for the select dropdown
@@ -94,19 +82,6 @@ function initializeRelationships(memberId) {
                 $('#relationship_type, #edit_relationship_type').html(optionsHtml);
             }
         });
-
-        // Handle click event for add relationship button
-        // $('#add-relationship-btn').click(function() {
-        //     var formData = $('#add-relationship-form').serialize();
-        //     $.post('index.php?action=add_relationship', formData, function(response) {
-        //         if (response.success) {
-        //             $('#add-relationship-form')[0].reset(); // Clear form
-        //             loadRelationships(memberId); // Reload relationships after addition
-        //         } else {
-        //             alert('Failed to add relationship.');
-        //         }
-        //     }, 'json');
-        // });
 
         // Function to load relationships dynamically using AJAX
         function loadRelationships(memberId) {
@@ -238,5 +213,29 @@ function initializeRelationships(memberId) {
 
         // Initial load of relationships
         loadRelationships(memberId);
+
+        // Handle relationship category selection
+        $('input[name="relation_category"]').change(function() {
+            const category = $(this).val();
+            $('#other-relationship-section').toggle(category === 'other');
+            $('#family-details-section').toggle(category === 'spouse');
+            $('#family-selection-section').toggle(category === 'child');
+            
+            // Update form fields based on category
+            if (category === 'spouse') {
+                const memberGender = $('input[name="member_gender"]').val();
+                $('#new_gender').val(memberGender === '1' ? '2' : '1');
+            }
+        });
+
+        // Function to reload family section
+        function reloadFamilySection(memberId) {
+            $.get('index.php?action=get_families&member_id=' + memberId, function(data) {
+                if (data.success) {
+                    // Update the family sections...
+                    // (Keep your existing update code here)
+                }
+            });
+        }
     });
 }

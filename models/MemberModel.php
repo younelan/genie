@@ -407,4 +407,45 @@ class MemberModel  extends AppModel
         }
         return $families;
     }
+
+    public function createFamily($familyData)
+    {
+        try {
+            error_log("Creating family with data: " . print_r($familyData, true));
+            
+            // Handle empty marriage date
+            $marriage_date = !empty($familyData['marriage_date']) ? $familyData['marriage_date'] : null;
+            
+            $query = "INSERT INTO families (tree_id, husband_id, wife_id, marriage_date) 
+                      VALUES (:tree_id, :husband_id, :wife_id, :marriage_date)";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                'tree_id' => $familyData['tree_id'],
+                'husband_id' => $familyData['husband_id'],
+                'wife_id' => $familyData['wife_id'],
+                'marriage_date' => $marriage_date
+            ]);
+            
+            if (!$result) {
+                error_log("Database error: " . print_r($stmt->errorInfo(), true));
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error creating family: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function addChildToFamily($familyId, $childId, $treeId)
+    {
+        $query = "INSERT INTO family_children (family_id, child_id, tree_id) 
+                  VALUES (:family_id, :child_id, :tree_id)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'family_id' => $familyId,
+            'child_id' => $childId,
+            'tree_id' => $treeId
+        ]);
+    }
 }
