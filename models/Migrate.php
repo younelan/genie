@@ -15,6 +15,7 @@ class RelationshipMigrator {
     private $appSource= "GEDCOM";
     private $appName = "Genie";
     private $appCorp = "Opensitez";
+    private $family_relationship_table;
     private $appVersion="5.5";
 
     private $appEncoding="UTF-8";
@@ -22,6 +23,8 @@ class RelationshipMigrator {
 
     public function __construct($config) {
         $this->pdo = $config['connection'];
+        $this->family_relationship_table="families_relationships";
+
     }
     function getName($id) {
         if(isset($this->people[$id])) {
@@ -166,7 +169,7 @@ class RelationshipMigrator {
         $this->clearFamilies($treeId);
         print "inserting families<br/>";
         foreach ($this->families as $famid=>$family) {
-            print "inserting family $famid int $treeId<br/>";
+            //print "inserting family $famid int $treeId<br/>";
 
             $sql = "
                 INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
@@ -178,12 +181,32 @@ class RelationshipMigrator {
             $stmt->bindParam(':gedcom_id', $family['gedcom_id']);
             $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
             $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
-            print "inserting<br/>";
-            $stmt->execute();
-            print "yes";
-
-            //$new_id= $stmt->lastInsertId();
-            print "inserted $new_id<br/>";
+            //print "inserting<br/>";
+            if ($stmt->execute()) {
+                $new_id = $this->pdo->lastInsertId(); // Get the last inserted ID here
+                //print "Inserted family with ID: $new_id<br/>";
+                foreach($family['children']??[] as $childId) {
+                    $sql = "
+                      INSERT INTO $this->family_relationship_table 
+                             (tree_id,family_id,gedcom_id,child_id) VALUES
+                             (:tree_id,:family_id,:gedcom_id,:child_id)
+                    ";
+                    $stmt = $this->pdo->prepare($sql);
+                    $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
+                    $stmt->bindParam(':gedcom_id', $childId);
+                    $stmt->bindParam(':family_id', $new_id, PDO::PARAM_INT);
+                    $stmt->bindParam(':child_id', $childId, PDO::PARAM_INT);
+                    $stmt->execute();
+        
+                }
+    
+            } else {
+                // Handle the error
+                print "Error inserting family: " . $stmt->errorInfo()[2] . "<br/>";
+                // You might want to log this error or take other appropriate actions.
+            }
+            
+            //print "inserted $new_id<br/>";
             foreach ($family['children']??[] as $childId) {
                 // $sql2 = "
                 // ";
