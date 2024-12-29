@@ -167,14 +167,15 @@ class RelationshipMigrator {
 
             $sql = "
 INSERT INTO $this->export_db.individuals
-(first_name,last_name,tree_id,birth_place,birth_date,death_place,death_date,gender)
+(id,first_name,last_name,tree_id,birth_place,birth_date,death_place,death_date,gender)
 VALUES
-(:first_name,:last_name,:tree_id,:birth_place,:birth_date,:death_place,:death_date,:gender)
+(:id,:first_name,:last_name,:tree_id,:birth_place,:birth_date,:death_place,:death_date,:gender)
 
             ";
-            print_r($individual["date_of_birth"]);
+            //print_r($individual["date_of_birth"]);
             //print $sql;exit;
             $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':id',$id);
 
             $stmt->bindParam(':first_name', $firstName);
             $stmt->bindParam(':last_name', $lastName);
@@ -223,8 +224,6 @@ VALUES
         foreach ($this->families as $famid=>$family) {
             //print "inserting family $famid int $treeId<br/>";        $sql = "delete FROM $this->export_db.`$this->family_children` WHERE tree_id=$treeId;";
 
-            print "1";
-
             $sql = "
                 INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
                 VALUES (:tree_id,:gedcom_id,:husb, :wife, NOW(), NOW());
@@ -233,9 +232,9 @@ VALUES
                 INSERT INTO $this->export_db.families (tree_id,husband_id, wife_id)
                 VALUES (:tree_id,:husb, :wife);
             ";
-            // print "$sql<br/>";
+            $replaced = str_replace([":tree_id",":husb",":wife"],[$treeId,$family['husb'],$family['wife']],$sql);
+            print "$replaced<br/>";
             $stmt = $this->pdo->prepare($sql);
-            print " 2";
             $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
             //$stmt->bindParam(':gedcom_id', $family['gedcom_id']);
             $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
@@ -468,7 +467,7 @@ VALUES
     }
     public function migrate($family_tree_id) {
         // Start a transaction
-        //$this->pdo->beginTransaction();
+        $this->pdo->beginTransaction();
         
         try {
             // Fetch the family data
