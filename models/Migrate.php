@@ -155,6 +155,7 @@ class RelationshipMigrator {
         }
     }
     private function clearFamilies($treeId) {
+        print "clearing families<br/>";
         $sql = "delete FROM `families` WHERE tree_id=$treeId;";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
@@ -163,19 +164,26 @@ class RelationshipMigrator {
     private function insertFamilies($treeId) {
         $treeId=intval($treeId);
         $this->clearFamilies($treeId);
+        print "inserting families<br/>";
         foreach ($this->families as $famid=>$family) {
+            print "inserting family $famid int $treeId<br/>";
+
             $sql = "
                 INSERT INTO families (tree_id,gedcom_id,husband_id, wife_id, created_at, updated_at)
                 VALUES (:tree_id,:gedcom_id,:husb, :wife, NOW(), NOW());
             ";
-
+            // print "$sql<br/>";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':tree_id', $family['tree_id'], PDO::PARAM_INT);
-            $stmt->bindParam(':gedcom_id', $family['gedcom_id'], PDO::PARAM_STR);
+            $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
+            $stmt->bindParam(':gedcom_id', $family['gedcom_id']);
             $stmt->bindParam(':husb', $family['husb'], PDO::PARAM_INT);
             $stmt->bindParam(':wife', $family['wife'], PDO::PARAM_INT);
+            print "inserting<br/>";
             $stmt->execute();
-            $new_id= $stmt->lastInsertId();
+            print "yes";
+
+            //$new_id= $stmt->lastInsertId();
+            print "inserted $new_id<br/>";
             foreach ($family['children']??[] as $childId) {
                 // $sql2 = "
                 // ";
@@ -392,8 +400,8 @@ class RelationshipMigrator {
         } catch (Exception $e) {
             // Rollback the transaction if something went wrong
             $this->pdo->rollBack();
-            return false;
-            echo "Migration failed: " . $e->getMessage();
+            echo "Migration failed: " . $e->getMessage();            return false;
+
         }
     }
     private function fetchPersonIfNeeded($person_id) {
