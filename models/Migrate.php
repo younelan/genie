@@ -162,7 +162,10 @@ class RelationshipMigrator {
         $sql = "delete FROM `families` WHERE tree_id=$treeId;";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
-
+        print "clearing families<br/>";
+        $sql = "delete FROM `families_relationships` WHERE tree_id=$treeId;";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
     }
     private function insertFamilies($treeId) {
         $treeId=intval($treeId);
