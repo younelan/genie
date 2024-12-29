@@ -53,6 +53,9 @@ switch ($action) {
     case 'export_tree':
         $treeController->exportTree();
         break;
+    case 'migrate_tree':
+        $treeController->migrateTree();
+        break;
     case 'view_tree':
         $treeController->viewTree();
         break;

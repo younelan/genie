@@ -102,6 +102,27 @@ class TreeController extends AppController
         exit;
                
     }
+    public function migrateTree() {
+        $migrator = new RelationshipMigrator($this->config);
+
+        $familyTreeId = $_GET['tree_id']??0;
+        if(!$familyTreeId) {
+            print "Invalid tree";
+            exit;
+        }                
+        // Import the GEDCOM content
+        $migration = $migrator->migrate($familyTreeId);
+        if($migration) {
+            echo "Migration for family tree ID $familyTreeId completed successfully.";
+
+        } else {
+            echo "Migration for family tree ID $familyTreeId failed.";
+        }
+        //print $gedcom;
+        exit;
+               
+    }
+
     public function viewTree()
     {
         $data = [
@@ -211,6 +232,14 @@ class TreeController extends AppController
             [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
                 "text" => get_translation("New Member"),
+            ],
+            [
+                "link" => "index.php?action=migrate_tree&tree_id=$treeId",
+                "text" => get_translation("Migrate Tree"),
+            ],
+            [
+                "link" => "index.php?action=export_tree&tree_id=$treeId",
+                "text" => get_translation("Export Tree"),
             ],
             [
                 "link" => "index.php?action=view_tree&tree_id=$treeId",
