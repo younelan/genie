@@ -570,4 +570,28 @@ class MemberController extends AppController
         }
         exit;
     }
+
+    public function visualizeDescendants($memberId) {
+        $member = $this->member->getMemberById($memberId);
+        if (!$member) {
+            exit('Member not found.');
+        }
+
+        $data = [
+            "member" => $member,
+            "template" => "visualize_descendants.tpl",
+            "section" => get_translation("Visualize Descendants"),
+            "memberId" => $memberId,
+            "treeId" => $member['family_tree_id'],
+        ];
+
+        echo $this->render_master($data);
+    }
+
+    public function getDescendantsData($memberId) {
+        header('Content-Type: application/json');
+        $descendants = $this->member->getDescendantsHierarchy($memberId);
+        echo json_encode($descendants);
+        exit;
+    }
 }

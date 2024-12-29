@@ -98,6 +98,17 @@ switch ($action) {
         $memberId = $_GET['member_id'];
         $memberController->editMember($memberId);
         break;
+
+    case 'visualize_descendants':
+        $memberId = $_GET['member_id'];
+        $memberController->visualizeDescendants($memberId);
+        break;
+
+    case 'get_descendants_data':
+        $memberId = $_GET['member_id'];
+        $memberController->getDescendantsData($memberId);
+        break;
+
     case 'get_relationship_types':
         $memberId = $_GET['tree_id']??1;
         echo $memberController->getRelationshipTypes($memberId);

@@ -680,4 +680,59 @@ class MemberModel  extends AppModel
             throw $e;
         }
     }
+
+    public function getDescendantsHierarchy($memberId) {
+        $person = $this->getMemberById($memberId);
+        if (!$person) {
+            return null;
+        }
+
+        // Get all families where this person is a spouse
+        $spouseFamilies = $this->getSpouseFamilies($memberId);
+        
+        $result = [
+            'id' => $person['id'],
+            'name' => trim($person['first_name'] . ' ' . $person['last_name']),
+            'data' => [
+                'birth' => $person['date_of_birth'],
+                'death' => $person['date_of_death'],
+                'gender' => $person['gender_id']
+            ],
+            'marriages' => []
+        ];
+
+        // Process each family
+        foreach ($spouseFamilies as $family) {
+            $spouseId = ($person['gender_id'] == 1) ? $family['wife_id'] : $family['husband_id'];
+            $spouseName = ($person['gender_id'] == 1) ? $family['wife_name'] : $family['husband_name'];
+            
+            $marriage = [
+                'id' => $family['family_id'],
+                'spouse' => $spouseId ? [
+                    'id' => $spouseId,
+                    'name' => $spouseName,
+                    'data' => [
+                        'birth' => null,  // Add spouse birth date if available
+                        'death' => null,  // Add spouse death date if available
+                        'gender' => $person['gender_id'] == 1 ? 2 : 1
+                    ]
+                ] : null,
+                'children' => []
+            ];
+
+            // Add children for this marriage
+            if (isset($family['children'])) {
+                foreach ($family['children'] as $child) {
+                    $childDescendants = $this->getDescendantsHierarchy($child['id']);
+                    if ($childDescendants) {
+                        $marriage['children'][] = $childDescendants;
+                    }
+                }
+            }
+            
+            $result['marriages'][] = $marriage;
+        }
+
+        return $result;
+    }
 }

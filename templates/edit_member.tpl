@@ -4,6 +4,10 @@
         <div class="card">
             <div class="card-header">
                 {{ get_translation("Member Details") }}
+                <a href="index.php?action=visualize_descendants&member_id={{ member.id }}" 
+                   class="btn btn-primary float-right">
+                    {{ get_translation("Visualize Descendants") }}
+                </a>
             </div>
             <div class="card-body">
 
@@ -474,7 +478,7 @@
                 </select>
                 <input type="hidden" id="deleteSpouseId">
                 <input type="hidden" id="deleteFamilyId">
-            </div>
+            </div>/relationships.js?ver=1.1
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteSpouse">{{ get_translation("Delete") }}</button>
