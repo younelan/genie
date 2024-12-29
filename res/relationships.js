@@ -60,25 +60,21 @@ function initializeRelationships(memberId) {
                             $('#relationship_type_new').val());
             }
 
+            console.log('Sending form data:', formData);
+
             $.post('index.php?action=add_relationship', formData, function(response) {
+                console.log('Server response:', response);
                 if (response.success) {
-                    // Reload both relationships and families
-                    loadRelationships(memberId);
-                    
-                    // Reload families section
-                    $.get('index.php?action=get_families&member_id=' + memberId, function(data) {
-                        if (data.success) {
-                            updateFamilyDisplay(data);
-                        }
-                    });
-                    
-                    // Clear the form
-                    $('#add-relationship-form')[0].reset();
-                    $('#person_id2').val(''); // Clear the hidden input
+                    window.location.reload();
                 } else {
                     alert('Failed to add relationship: ' + response.message);
                 }
-            }, 'json');
+            }, 'json')
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX Error:', textStatus, errorThrown);
+                console.error('Response Text:', jqXHR.responseText);
+                alert('Failed to add relationship. Please try again.');
+            });
         });
 
         // Fix Firefox datalist handling
