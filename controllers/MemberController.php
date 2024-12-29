@@ -24,10 +24,15 @@ class MemberController extends AppController
         $tagString = $this->member->getTagString($memberId);
         $relationships = $this->member->getMemberRelationships($memberId);
         $relationship_types = $this->member->getRelationshipTypes();
+        
+        // Add these lines to fetch family data
+        $spouse_families = $this->member->getSpouseFamilies($memberId);
+        $child_families = $this->member->getChildFamilies($memberId);
+        
         if (!$member) {
             exit('Member not found.');
         }
-        $treeId = $member['family_tree_id']??$_GET['tree_id'] ?? $_GET['family_tree_id']??0; // Get family_tree_id from the request
+        $treeId = $member['family_tree_id']??$_GET['tree_id'] ?? $_GET['family_tree_id']??0;
 
         $data = [
             "tagString" => $tagString,
@@ -37,6 +42,9 @@ class MemberController extends AppController
             "template" => "edit_member.tpl",
             "relationships" => $relationships,
             "relationship_types" => $relationship_types,
+            // Add these lines to pass family data to template
+            "spouse_families" => $spouse_families,
+            "child_families" => $child_families,
             "section" => get_translation("Update Member"),
             "tree_description" => get_translation("Description"),
             "go_back" => get_translation("Back to List"),            

@@ -75,9 +75,134 @@
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
-                {{ get_translation("Existing Relations") }}
+                {{ get_translation("Family Relationships") }}
             </div>
             <div class="card-body">
+                <!-- Families where person is a spouse -->
+                <h5>{{ get_translation("Families") }}</h5>
+                
+                <!-- Tabs for spouses -->
+                <ul class="nav nav-tabs" id="familyTabs" role="tablist">
+                    {% for family in spouse_families %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                    id="family-tab-{{ family.family_id }}" 
+                                    data-toggle="tab" 
+                                    data-target="#family-{{ family.family_id }}" 
+                                    type="button" 
+                                    role="tab" 
+                                    aria-controls="family-{{ family.family_id }}" 
+                                    aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
+                                {% if member.gender_id == 1 and family.wife_id %}
+                                    {{ family.wife_name }}
+                                {% elseif member.gender_id == 2 and family.husband_id %}
+                                    {{ family.husband_name }}
+                                {% else %}
+                                    {{ get_translation("Unknown Spouse") }}
+                                {% endif %}
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Tab content -->
+                <div class="tab-content" id="familyTabsContent">
+                    {% for family in spouse_families %}
+                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                             id="family-{{ family.family_id }}" 
+                             role="tabpanel" 
+                             aria-labelledby="family-tab-{{ family.family_id }}">
+                            
+                            <!-- Marriage Details -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    {{ get_translation("Marriage Details") }}
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
+                                        {{ family.marriage_date ? family.marriage_date|date("M d, Y") : '-' }}
+                                    </p>
+                                    <p><strong>{{ get_translation("Divorce Date") }}:</strong> 
+                                        {{ family.divorce_date ? family.divorce_date|date("M d, Y") : '-' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Children from this family -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    {{ get_translation("Children") }}
+                                </div>
+                                <div class="card-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>{{ get_translation("Name") }}</th>
+                                                <th>{{ get_translation("Birth Date") }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for child in family.children|default([]) %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="index.php?action=edit_member&member_id={{ child.id }}">
+                                                            {{ child.first_name }} {{ child.last_name }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ child.date_of_birth ? child.date_of_birth|date("M d, Y") : '-' }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Families where person is a child -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        {{ get_translation("Parents") }}
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ get_translation("Father") }}</th>
+                                    <th>{{ get_translation("Mother") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for family in child_families %}
+                                    <tr>
+                                        <td>
+                                            {% if family.husband_id %}
+                                                <a href="index.php?action=edit_member&member_id={{ family.husband_id }}">
+                                                    {{ family.husband_name }}
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if family.wife_id %}
+                                                <a href="index.php?action=edit_member&member_id={{ family.wife_id }}">
+                                                    {{ family.wife_name }}
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Other relationships section -->
+                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
                 <div id="relationships">
                     <table class="relationship-table">
                         <tr>

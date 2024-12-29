@@ -332,4 +332,79 @@ class MemberModel  extends AppModel
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $relationshipId]);
     }
+
+    public function getSpouseFamilies($memberId) {
+        // First get the families
+        $query = "SELECT f.*, 
+                         h.first_name as husband_name, h.last_name as husband_lastname,
+                         w.first_name as wife_name, w.last_name as wife_lastname,
+                         f.marriage_date, f.divorce_date,
+                         h.id as husband_id, w.id as wife_id
+                  FROM $this->person_table p
+                  JOIN families f ON (f.husband_id = p.id OR f.wife_id = p.id)
+                  LEFT JOIN $this->person_table h ON f.husband_id = h.id
+                  LEFT JOIN $this->person_table w ON f.wife_id = w.id
+                  WHERE p.id = :member_id 
+                  AND f.tree_id = p.family_tree_id";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':member_id', $memberId);
+        $stmt->execute();
+        
+        $families = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // For each family, get the children
+        foreach ($families as &$family) {
+            if ($family['husband_name'] && $family['husband_lastname']) {
+                $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
+            }
+            if ($family['wife_name'] && $family['wife_lastname']) {
+                $family['wife_name'] = trim($family['wife_name'] . ' ' . $family['wife_lastname']);
+            }
+
+            // Get children for this family
+            $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.date_of_birth, c.gender_id
+                             FROM family_children fc
+                             JOIN $this->person_table c ON fc.child_id = c.id
+                             WHERE fc.family_id = :family_id
+                             ORDER BY c.date_of_birth";
+            
+            $childrenStmt = $this->db->prepare($childrenQuery);
+            $childrenStmt->bindParam(':family_id', $family['family_id']);
+            $childrenStmt->execute();
+            
+            $family['children'] = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $families;
+    }
+
+    public function getChildFamilies($memberId) {
+        $query = "SELECT f.*, 
+                         h.first_name as husband_name, h.last_name as husband_lastname,
+                         w.first_name as wife_name, w.last_name as wife_lastname,
+                         h.id as husband_id, w.id as wife_id
+                  FROM $this->person_table p
+                  JOIN family_children fc ON fc.child_id = p.id
+                  JOIN families f ON fc.family_id = f.family_id
+                  LEFT JOIN $this->person_table h ON f.husband_id = h.id
+                  LEFT JOIN $this->person_table w ON f.wife_id = w.id
+                  WHERE p.id = :member_id 
+                  AND f.tree_id = p.family_tree_id";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':member_id', $memberId);
+        $stmt->execute();
+        
+        $families = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($families as &$family) {
+            if ($family['husband_name'] && $family['husband_lastname']) {
+                $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
+            }
+            if ($family['wife_name'] && $family['wife_lastname']) {
+                $family['wife_name'] = trim($family['wife_name'] . ' ' . $family['wife_lastname']);
+            }
+        }
+        return $families;
+    }
 }
