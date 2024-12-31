@@ -706,15 +706,16 @@ class MemberModel  extends AppModel
             $spouseId = ($person['gender_id'] == 1) ? $family['wife_id'] : $family['husband_id'];
             $spouseName = ($person['gender_id'] == 1) ? $family['wife_name'] : $family['husband_name'];
             
+            // Add spouse information if exists
             $marriage = [
                 'id' => $family['family_id'],
                 'spouse' => $spouseId ? [
                     'id' => $spouseId,
                     'name' => $spouseName,
                     'data' => [
-                        'birth' => null,  // Add spouse birth date if available
-                        'death' => null,  // Add spouse death date if available
-                        'gender' => $person['gender_id'] == 1 ? 2 : 1
+                        'gender' => ($person['gender_id'] == 1) ? 2 : 1, // Set opposite gender
+                        'birth' => null,  // Add if available
+                        'death' => null   // Add if available
                     ]
                 ] : null,
                 'children' => []
