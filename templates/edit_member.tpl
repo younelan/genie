@@ -178,6 +178,12 @@
                                                         <a href="index.php?action=edit_member&member_id={{ child.id }}">
                                                             {{ child.first_name }} {{ child.last_name }}
                                                         </a>
+                                                    </td>
+                                                    <td>{{ child.date_of_birth ? child.date_of_birth|date("M d, Y") : '-' }}
+                                                    
+                                                    </td>
+                                                    <td>
+
                                                         <button type="button" class="btn btn-danger btn-sm delete-child-btn" 
                                                                 data-child-id="{{ child.id }}"
                                                                 data-family-id="{{ family.family_id }}"
@@ -185,7 +191,6 @@
                                                             🗑️
                                                         </button>
                                                     </td>
-                                                    <td>{{ child.date_of_birth ? child.date_of_birth|date("M d, Y") : '-' }}</td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>
