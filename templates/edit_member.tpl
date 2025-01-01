@@ -73,6 +73,47 @@
                 </form>
             </div>
         </div>
+
+                <!-- Families where person is a child -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        {{ get_translation("Parents") }}
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ get_translation("Father") }}</th>
+                                    <th>{{ get_translation("Mother") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for family in child_families %}
+                                    <tr>
+                                        <td>
+                                            {% if family.husband_id %}
+                                                <a href="index.php?action=edit_member&member_id={{ family.husband_id }}">
+                                                    {{ family.husband_name }}
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if family.wife_id %}
+                                                <a href="index.php?action=edit_member&member_id={{ family.wife_id }}">
+                                                    {{ family.wife_name }}
+                                                </a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
     </div>
 
     <div class="col-lg-4 mb-4">
@@ -190,46 +231,6 @@
                     {% endfor %}
                 </div>
 
-                <!-- Families where person is a child -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        {{ get_translation("Parents") }}
-                    </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ get_translation("Father") }}</th>
-                                    <th>{{ get_translation("Mother") }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for family in child_families %}
-                                    <tr>
-                                        <td>
-                                            {% if family.husband_id %}
-                                                <a href="index.php?action=edit_member&member_id={{ family.husband_id }}">
-                                                    {{ family.husband_name }}
-                                                </a>
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if family.wife_id %}
-                                                <a href="index.php?action=edit_member&member_id={{ family.wife_id }}">
-                                                    {{ family.wife_name }}
-                                                </a>
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
                 <!-- Other relationships section -->
                 <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
