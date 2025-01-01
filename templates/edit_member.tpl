@@ -81,12 +81,14 @@
                     </div>
                     <div class="card-body">
                         <table class="table">
+                        <!--
                             <thead>
                                 <tr>
                                     <th>{{ get_translation("Father") }}</th>
                                     <th>{{ get_translation("Mother") }}</th>
                                 </tr>
                             </thead>
+-->
                             <tbody>
                                 {% for family in child_families %}
                                     <tr>
@@ -119,12 +121,11 @@
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
-                {{ get_translation("Family Relationships") }}
+                {{ get_translation("Families") }}
             </div>
             <div class="card-body">
                 <!-- Families where person is a spouse -->
-                <h5>{{ get_translation("Families") }}</h5>
-                
+
                 <!-- Tabs for spouses -->
                 <ul class="nav nav-tabs" id="familyTabs" role="tablist">
                     {% for family in spouse_families %}
@@ -165,12 +166,14 @@
                                 </div>
                                 <div class="card-body">
                                     <table class="table">
+                                    <!--
                                         <thead>
                                             <tr>
                                                 <th>{{ get_translation("Name") }}</th>
                                                 <th>{{ get_translation("Birth Date") }}</th>
                                             </tr>
                                         </thead>
+                                        -->
                                         <tbody>
                                             {% for child in family.children|default([]) %}
                                                 <tr>
@@ -197,7 +200,6 @@
                                     </table>
                                 </div>
                             </div>
-                        </div>
                             <!-- Marriage Details -->
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -233,6 +235,8 @@
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
                     {% endfor %}
                 </div>
 
