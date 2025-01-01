@@ -156,42 +156,7 @@
                              id="family-{{ family.family_id }}" 
                              role="tabpanel" 
                              aria-labelledby="family-tab-{{ family.family_id }}">
-                            
-                            <!-- Marriage Details -->
-                            <div class="card mt-3">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    {{ get_translation("Marriage Details") }}
-                                    {% if (member.gender_id == 1 and not family.wife_id) or (member.gender_id == 2 and not family.husband_id) %}
-                                        <div>
-                                            <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
-                                                    data-family-id="{{ family.family_id }}">
-                                                {{ get_translation("Replace Unknown Spouse") }}
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                    data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
-                                                    data-family-id="{{ family.family_id }}"
-                                                    onclick="event.stopPropagation();">
-                                                🗑️ {{ get_translation("Delete Spouse") }}
-                                            </button>
-                                        </div>
-                                    {% else %}
-                                        <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
-                                                data-family-id="{{ family.family_id }}"
-                                                onclick="event.stopPropagation();">
-                                            🗑️ {{ get_translation("Delete Spouse") }}
-                                        </button>
-                                    {% endif %}
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
-                                        {{ family.marriage_date ? family.marriage_date|date("M d, Y") : '-' }}
-                                    </p>
-                                    <p><strong>{{ get_translation("Divorce Date") }}:</strong> 
-                                        {{ family.divorce_date ? family.divorce_date|date("M d, Y") : '-' }}
-                                    </p>
-                                </div>
-                            </div>
+                    
 
                             <!-- Children from this family -->
                             <div class="card mt-3">
@@ -228,6 +193,41 @@
                                 </div>
                             </div>
                         </div>
+                            <!-- Marriage Details -->
+                            <div class="card mt-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    {{ get_translation("Marriage Details") }}
+                                    {% if (member.gender_id == 1 and not family.wife_id) or (member.gender_id == 2 and not family.husband_id) %}
+                                        <div>
+                                            <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
+                                                    data-family-id="{{ family.family_id }}">
+                                                {{ get_translation("Replace Unknown Spouse") }}
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                                                    data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                    data-family-id="{{ family.family_id }}"
+                                                    onclick="event.stopPropagation();">
+                                                🗑️ {{ get_translation("Delete Spouse") }}
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                                                data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                data-family-id="{{ family.family_id }}"
+                                                onclick="event.stopPropagation();">
+                                            🗑️ {{ get_translation("Delete Spouse") }}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
+                                        {{ family.marriage_date ? family.marriage_date|date("M d, Y") : '-' }}
+                                    </p>
+                                    <p><strong>{{ get_translation("Divorce Date") }}:</strong> 
+                                        {{ family.divorce_date ? family.divorce_date|date("M d, Y") : '-' }}
+                                    </p>
+                                </div>
+                            </div>
                     {% endfor %}
                 </div>
 
