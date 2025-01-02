@@ -35,31 +35,38 @@ input[type="date"] {
                 <form id="edit-member-form" method="post" action="">
                     <input type="hidden" name="member_id" value="{{ member.id|e }}">
 
-                    <label size=10 for="first_name">{{ get_translation("Name") }}:</label>
-                    <input size=10 placeholder="{{ get_translation("First Name") }}" type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required>
-
-                    <input size=10 placeholder="{{ get_translation("Last Name") }}" type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
-
-                    <label for="date_of_birth">{{ get_translation("Birth") }}:</label>
-                    <input  type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}">
-
-                    <input placeholder="{{ get_translation("Place of Birth") }}" size=10 type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}"><br>
-
-                    <label for="alive">{{ get_translation("Alive") }}:</label>
-                    <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}><br>
-
-                    <div id="death-fields" style="display: none;">
-                    <label for="date_of_death">{{ get_translation("Death") }}:</label>
-                    <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}">
-                    <input size=10 placeholder="{{ get_translation("Place of Death") }}" type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label for="first_name">{{ get_translation("Name") }}:</label>
+                        <input class="form-control" placeholder="{{ get_translation("First Name") }}" type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required>
+                        <input class="form-control" placeholder="{{ get_translation("Last Name") }}" type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}">
                     </div>
 
-                    <label for="gender_id">{{ get_translation("Gender") }}:</label>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label for="date_of_birth">{{ get_translation("Birth") }}:</label>
+                        <input class="form-control" type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}">
+                        <input class="form-control" placeholder="{{ get_translation("Place of Birth") }}" type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}">
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-2">
+<label for="gender_id">{{ get_translation("Gender") }}:</label>
                     <select name="gender_id" id="gender_id">
                         <option value="1" {% if member.gender_id == 1 %}selected{% endif %}>{{ get_translation("Man") }}</option>
                         <option value="2" {% if member.gender_id == 2 %}selected{% endif %}>{{ get_translation("Woman") }}</option>
                         <!-- Add more options as needed -->
-                    </select><br>
+                    </select>
+                        <label for="alive">{{ get_translation("Alive") }}:</label>
+                        <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}>
+                    </div>
+
+                    <div id="death-fields" style="display: none;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label for="date_of_death">{{ get_translation("Death") }}:</label>
+                            <input class="form-control" type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}">
+                            <input class="form-control" placeholder="{{ get_translation("Place of Death") }}" type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}">
+                        </div>
+                    </div>
+
+                    <br>
                     <div id="taxonomy-tags">
                         <div class="tag-label">{{ get_translation("Tags") }}: 
                             <button style='float:right;margin-right:30px;' id="copyTagsButton1">{{ get_translation("Copy") }}</button>
