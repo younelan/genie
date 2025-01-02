@@ -49,9 +49,27 @@
                         <label for="date_of_death">{{ get_translation("Date of Death") }}:</label>
                         <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}"><br>
                         <label for="place_of_death">{{ get_translation("Place of Death") }}:</label>
+                        <input type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
+
                     <div id="additional-fields" style="display: none;">
 
-                        <input type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
+                <!-- Other relationships section -->
+                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
+                <div id="relationships">
+                    <table class="relationship-table">
+                        <tr>
+                            <th>{{ get_translation("Person 1") }}</th>
+                            <th>{{ get_translation("Person 2") }}</th>
+                            <th>{{ get_translation("Type") }}</th>
+                            <th>{{ get_translation("Start") }}</th>
+                            <th>{{ get_translation("End") }}</th>
+                            <th>{{ get_translation("Actions") }}</th>
+                        </tr>
+                        <tbody id="relationships-table-body">
+                            <!-- Relationships will be dynamically filled via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
                     </div>
                     <br />
 
@@ -228,23 +246,6 @@
                 </div>
 
 
-                <!-- Other relationships section -->
-                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
-                <div id="relationships">
-                    <table class="relationship-table">
-                        <tr>
-                            <th>{{ get_translation("Person 1") }}</th>
-                            <th>{{ get_translation("Person 2") }}</th>
-                            <th>{{ get_translation("Type") }}</th>
-                            <th>{{ get_translation("Start") }}</th>
-                            <th>{{ get_translation("End") }}</th>
-                            <th>{{ get_translation("Actions") }}</th>
-                        </tr>
-                        <tbody id="relationships-table-body">
-                            <!-- Relationships will be dynamically filled via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
