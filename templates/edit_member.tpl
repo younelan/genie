@@ -1,5 +1,4 @@
 <!-- Main content -->
-<div class="row mt-5">
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
@@ -575,7 +574,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script>
     var memberId = {{memberId}}; // Pass member ID to JavaScript
