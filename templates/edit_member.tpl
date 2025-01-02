@@ -1,3 +1,21 @@
+<style>
+input[type="date"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+  padding-left: 0px;
+  padding-right:0px;
+  margin: 0;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: inherit;
+  font-family: inherit;
+  height: auto;
+  /* Add overflow hidden */
+    overflow: hidden;
+}
+</style>
 <!-- Main content -->
     <div class="col-lg-4 mb-4">
         <div class="card">
@@ -17,10 +35,10 @@
                 <form id="edit-member-form" method="post" action="">
                     <input type="hidden" name="member_id" value="{{ member.id|e }}">
 
-                    <label size=10 for="first_name">{{ get_translation("First Name") }}:</label>
+                    <label size=10 for="first_name">{{ get_translation("Name") }}:</label>
                     <input size=10 placeholder="{{ get_translation("First Name") }}" type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required>
 
-                    <input size=15 placeholder="{{ get_translation("Last Name") }}" type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
+                    <input size=10 placeholder="{{ get_translation("Last Name") }}" type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
 
                     <label for="date_of_birth">{{ get_translation("Birth") }}:</label>
                     <input  type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}">
