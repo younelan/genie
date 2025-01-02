@@ -64,7 +64,7 @@ class GEDCOMExporter
         $individuals = [];
         foreach ($people as $person) {
             $individual = $gedcom->createIndividual($person['id']);
-            $fullName = trim("{$person['title']} {$person['first_name']} {$person['middle_name']} {$person['last_name']}");
+            $fullName = trim("{$person['first_name']}  {$person['last_name']}");
             $individual->setName($fullName);
 
             // Add birth and death events with places
@@ -77,11 +77,12 @@ class GEDCOMExporter
 
             // Add aliases if they exist
             $this->addAliases($individual, $person);
-
-            // Add body text if it exists
+            /*
+            // Add body text if it exists... probably should be tags
             if (!empty($person['body'])) {
                 $individual->addNote($person['body']);
             }
+            */
 
             // Optionally include created_at timestamp
             if (!empty($person['created_at'])) {

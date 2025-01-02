@@ -120,24 +120,20 @@ class GEDCOMImporter
         // Prepare and execute the SQL statement
         $stmt = $this->pdo->prepare("
             INSERT INTO {$this->peopleTable} 
-            (id, family_tree_id, first_name, last_name, date_of_birth, place_of_birth, date_of_death, title, middle_name, body, created_at, updated_at, alive)
-            VALUES (:id, :family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :date_of_death, :title, :middle_name, :body, NOW(), NOW(), TRUE)
+            (id, family_tree_id, first_name, last_name, date_of_birth, place_of_birth, date_of_death, created_at, updated_at, alive)
+            VALUES (:id, :family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :date_of_death, NOW(), NOW(), TRUE)
             ON DUPLICATE KEY UPDATE 
                 first_name = VALUES(first_name),
                 last_name = VALUES(last_name),
                 date_of_birth = VALUES(date_of_birth),
                 place_of_birth = VALUES(place_of_birth),
-                date_of_death = VALUES(date_of_death),
-                title = VALUES(title),
-                middle_name = VALUES(middle_name),
-                body = VALUES(body)
+                date_of_death = VALUES(date_of_death)
         ");
 
         // Split the name into parts
         $nameParts = explode(' ', trim($name));
         $firstName = array_shift($nameParts);
         $lastName = implode(' ', $nameParts);
-        $middleName = implode(' ', array_slice($nameParts, 1)); // Everything after the first name
 
         $stmt->execute([
             'id' => $id,
@@ -147,9 +143,6 @@ class GEDCOMImporter
             'date_of_birth' => $dateOfBirth,
             'place_of_birth' => $placeOfBirth,
             'date_of_death' => $dateOfDeath,
-            'title' => '', // You can add logic to extract title if needed
-            'middle_name' => $middleName,
-            'body' => $individual->getNotes() ? implode("\n", $individual->getNotes()) : '',
         ]);
 
         // Save tags associated with the individual

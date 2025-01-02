@@ -225,11 +225,9 @@ class MemberModel  extends AppModel
         $placeOfDeath = $member['placeOfDeath'];
         $memberId = $member['memberId'];
         $genderId = $member['genderId'];
-        $title = $member['title'];
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
                     date_of_birth = :date_of_birth,
-                  title = :title, 
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
                   gender_id = :gender_id, source = :source, alive = :alive WHERE id = :id";
         if (!$dateOfDeath) $dateOfDeath = null;
@@ -245,7 +243,6 @@ class MemberModel  extends AppModel
         $stmt->bindParam(':id', $memberId);
         $stmt->bindParam(':source', $source);
         $stmt->bindParam(':alive', $alive);
-        $stmt->bindParam(':title', $title);
         return $stmt->execute();
     }
 
