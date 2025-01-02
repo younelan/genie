@@ -46,12 +46,11 @@
                     <label for="alive">{{ get_translation("Alive") }}:</label>
                     <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}><br>
 
-                    <div id="additional-fields" style="display: none;">
-                        <label for="title">{{ get_translation("Title") }}:</label>
-                        <input type="text" name="title" id="title" value="{{ member.title|e }}"><br>
                         <label for="date_of_death">{{ get_translation("Date of Death") }}:</label>
                         <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}"><br>
                         <label for="place_of_death">{{ get_translation("Place of Death") }}:</label>
+                    <div id="additional-fields" style="display: none;">
+
                         <input type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
                     </div>
                     <br />
