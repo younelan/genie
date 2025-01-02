@@ -20,9 +20,6 @@
                     <label for="first_name">{{ get_translation("First Name") }}:</label>
                     <input type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required><br>
 
-                    <label for="middle_name">{{ get_translation("Middle Name") }}:</label>
-                    <input type="text" name="middle_name" id="middle_name" value="{{ member.middle_name|e }}"><br>
-
                     <label for="last_name">{{ get_translation("Last Name") }}:</label>
                     <input type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
 

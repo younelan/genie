@@ -82,7 +82,6 @@ class MemberController extends AppController
             $updatedMember = [
                 'memberId' => $memberId,
                 'firstName' => $_POST['first_name'],
-                'middleName' => $_POST['middle_name'],
                 'lastName' => $_POST['last_name'],
                 'dateOfBirth' => $_POST['date_of_birth'],
                 'placeOfBirth' => $_POST['place_of_birth'],

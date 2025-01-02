@@ -211,7 +211,6 @@ class MemberModel  extends AppModel
         //$memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId
         $memberId = $member['memberId'] ?? "";
         $firstName = $member['firstName'] ?? "";
-        $middleName = $member['middleName'] ?? "";
         $lastName = $member['lastName'];
         $source = $member['source'];
         $alive = intval($member['alive']);
@@ -229,7 +228,7 @@ class MemberModel  extends AppModel
         $title = $member['title'];
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
-                    middle_name = :middle_name, date_of_birth = :date_of_birth,
+                    date_of_birth = :date_of_birth,
                   title = :title, 
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
                   gender_id = :gender_id, source = :source, alive = :alive WHERE id = :id";
@@ -238,7 +237,6 @@ class MemberModel  extends AppModel
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':first_name', $firstName);
         $stmt->bindParam(':last_name', $lastName);
-        $stmt->bindParam(':middle_name', $middleName);
         $stmt->bindParam(':date_of_birth', $dateOfBirth);
         $stmt->bindParam(':place_of_birth', $placeOfBirth);
         $stmt->bindParam(':date_of_death', $dateOfDeath);

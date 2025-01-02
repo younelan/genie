@@ -118,7 +118,6 @@ CREATE TABLE `person` (
   `family_tree_id` int NOT NULL,
   `title` varchar(20) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
-  `middle_name` varchar(150) CHARACTER DEFAULT NULL,
   `last_name` varchar(100) NOT NULL,
   `source` varchar(100) DEFAULT NULL,
   `alive` tinyint(1) NOT NULL DEFAULT '1',
