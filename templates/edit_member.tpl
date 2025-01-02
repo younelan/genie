@@ -52,14 +52,6 @@
                     <div id="additional-fields" style="display: none;">
                         <label for="title">{{ get_translation("Title") }}:</label>
                         <input type="text" name="title" id="title" value="{{ member.title|e }}"><br>
-                        <label for="alias1">{{ get_translation("Alias 1") }}:</label>
-                        <input type="text" name="alias1" id="alias1" value="{{ member.alias1|e }}"><br>
-                        <label for="alias2">{{ get_translation("Alias 2") }}:</label>
-                        <input type="text" name="alias2" id="alias2" value="{{ member.alias2|e }}"><br>
-                        <label for="alias3">{{ get_translation("Alias 3") }}:</label>
-                        <input type="text" name="alias3" id="alias3" value="{{ member.alias3|e }}"><br>
-                        <label for="body">{{ get_translation("Details") }}</label>
-                        <textarea id="body" name="body" cols="50" rows="10">{{ member.body|e }}</textarea><br>
                         <label for="date_of_death">{{ get_translation("Date of Death") }}:</label>
                         <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}"><br>
                         <label for="place_of_death">{{ get_translation("Place of Death") }}:</label>

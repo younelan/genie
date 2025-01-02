@@ -213,9 +213,6 @@ class MemberModel  extends AppModel
         $firstName = $member['firstName'] ?? "";
         $middleName = $member['middleName'] ?? "";
         $lastName = $member['lastName'];
-        $alias1 = $member['alias1'];
-        $alias2 = $member['alias2'];
-        $alias3 = $member['alias3'];
         $source = $member['source'];
         $alive = intval($member['alive']);
         foreach ($member as $key => $value) {
@@ -229,12 +226,11 @@ class MemberModel  extends AppModel
         $placeOfDeath = $member['placeOfDeath'];
         $memberId = $member['memberId'];
         $genderId = $member['genderId'];
-        $body = $member['body'];
         $title = $member['title'];
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
                     middle_name = :middle_name, date_of_birth = :date_of_birth,
-                  alias1 = :alias1, alias2 = :alias2, alias3 = :alias3, title = :title, body = :body,
+                  title = :title, 
                   place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
                   gender_id = :gender_id, source = :source, alive = :alive WHERE id = :id";
         if (!$dateOfDeath) $dateOfDeath = null;
@@ -249,11 +245,7 @@ class MemberModel  extends AppModel
         $stmt->bindParam(':place_of_death', $placeOfDeath);
         $stmt->bindParam(':gender_id', $genderId);
         $stmt->bindParam(':id', $memberId);
-        $stmt->bindParam(':alias1', $alias1);
-        $stmt->bindParam(':alias2', $alias2);
-        $stmt->bindParam(':alias3', $alias3);
         $stmt->bindParam(':source', $source);
-        $stmt->bindParam(':body', $body);
         $stmt->bindParam(':alive', $alive);
         $stmt->bindParam(':title', $title);
         return $stmt->execute();

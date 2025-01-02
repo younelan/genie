@@ -89,11 +89,7 @@ class MemberController extends AppController
                 'dateOfDeath' => $_POST['date_of_death'],
                 'placeOfDeath' => $_POST['place_of_death'],
                 'genderId' => $_POST['gender_id'],
-                'alias1' => $_POST['alias1'],
-                'alias2' => $_POST['alias2'],
-                'alias3' => $_POST['alias3'],
                 'source' => $_POST['source'],
-                'body' => $_POST['body'],
                 'title' => $_POST['title'],
             ];
             $updatedMember['alive'] = isset($_POST['alive']) ? 1 : 0;  
