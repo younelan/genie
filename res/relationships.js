@@ -53,7 +53,7 @@ function initializeRelationships(memberId) {
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Server response:', response);
+                    //console.log('Server response:', response);
                     $('#deleteChildModal').modal('hide');
                     if (response.success) {
                         window.location.reload();
@@ -77,7 +77,7 @@ function initializeRelationships(memberId) {
             const spouseId = $(this).data('spouse-id');
             const familyId = $(this).data('family-id');
             
-            console.log('Delete spouse clicked:', spouseId, familyId);
+            //console.log('Delete spouse clicked:', spouseId, familyId);
             
             $('#deleteSpouseId').val(spouseId);
             $('#deleteFamilyId').val(familyId);
@@ -106,7 +106,7 @@ function initializeRelationships(memberId) {
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Server response:', response);
+                    //console.log('Server response:', response);
                     $('#deleteSpouseModal').modal('hide');
                     if (response.success) {
                         window.location.reload();
@@ -117,7 +117,7 @@ function initializeRelationships(memberId) {
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', error);
                     console.error('Response:', xhr.responseText);
-                    alert('Failed to delete spouse. Please try again.');
+                    //alert('Failed to delete spouse. Please try again.');
                 }
             });
         });
@@ -177,7 +177,7 @@ function initializeRelationships(memberId) {
                             $('#relationship_type_new').val());
             }
 
-            console.log('Sending form data:', formData);
+            //console.log('Sending form data:', formData);
 
             $.post('index.php?action=add_relationship', formData, function(response) {
                 console.log('Server response:', response);
@@ -372,7 +372,7 @@ function initializeRelationships(memberId) {
         // Handle relationship category selection
         $('input[name="relation_category"]').on('change', function() {
             const category = $(this).val();
-            console.log('Category changed to:', category);
+            //console.log('Category changed to:', category);
             
             // Hide all special sections first
             $('#other-relationship-section').hide();
@@ -397,7 +397,7 @@ function initializeRelationships(memberId) {
             }
             
             // Log visibility status after changes
-            logVisibility();
+            //logVisibility();
         });
 
         // Function to reload family section
