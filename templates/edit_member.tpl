@@ -17,17 +17,24 @@
                 <form id="edit-member-form" method="post" action="">
                     <input type="hidden" name="member_id" value="{{ member.id|e }}">
 
-                    <label for="first_name">{{ get_translation("First Name") }}:</label>
-                    <input type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required><br>
+                    <label size=10 for="first_name">{{ get_translation("First Name") }}:</label>
+                    <input size=10 placeholder="{{ get_translation("First Name") }}" type="text" name="first_name" id="first_name" value="{{ member.first_name|e }}" required>
 
-                    <label for="last_name">{{ get_translation("Last Name") }}:</label>
-                    <input type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
+                    <input size=15 placeholder="{{ get_translation("Last Name") }}" type="text" name="last_name" id="last_name" value="{{ member.last_name|e }}"><br>
 
-                    <label for="date_of_birth">{{ get_translation("Date of Birth") }}:</label>
-                    <input type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}"><br>
+                    <label for="date_of_birth">{{ get_translation("Birth") }}:</label>
+                    <input  type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}">
 
-                    <label for="place_of_birth">{{ get_translation("Place of Birth") }}:</label>
-                    <input type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}"><br>
+                    <input placeholder="{{ get_translation("Place of Birth") }}" size=10 type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}"><br>
+
+                    <label for="alive">{{ get_translation("Alive") }}:</label>
+                    <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}><br>
+
+                    <div id="death-fields" style="display: none;">
+                    <label for="date_of_death">{{ get_translation("Death") }}:</label>
+                    <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}">
+                    <input size=10 placeholder="{{ get_translation("Place of Death") }}" type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
+                    </div>
 
                     <label for="gender_id">{{ get_translation("Gender") }}:</label>
                     <select name="gender_id" id="gender_id">
@@ -43,13 +50,6 @@
                     </div>
                     <label for="source">{{ get_translation("Source") }}:</label>
                     <input type="text" name="source" id="source" value="{{ member.source|e }}"><br>
-                    <label for="alive">{{ get_translation("Alive") }}:</label>
-                    <input type="checkbox" name="alive" id="alive" value="1" {% if member.alive %}checked{% endif %}><br>
-
-                        <label for="date_of_death">{{ get_translation("Date of Death") }}:</label>
-                        <input type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}"><br>
-                        <label for="place_of_death">{{ get_translation("Place of Death") }}:</label>
-                        <input type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}"><br>
 
                     <div id="additional-fields" style="display: none;">
 
@@ -584,7 +584,15 @@
     function get_translation(key) {
         return translations[key] || key;
     }
-
+    function showHideDeath() {
+        var deathFields = document.getElementById('death-fields');
+        const alive = document.getElementById('alive');
+        if (alive.checked!=true) {
+            deathFields.style.display = 'block';
+        } else {
+            deathFields.style.display = 'none';
+        }        
+    }
     document.addEventListener('DOMContentLoaded', function() {
         var script = document.createElement('script');
         script.src = 'res/relationships.js?ver=1.4'; // Increment version number
@@ -602,7 +610,12 @@
                 event.preventDefault();
             }
         });
+        showHideDeath();
     });
+    document.getElementById('alive').addEventListener('click', function() {
+        showHideDeath()
+    });
+
 
     document.getElementById('toggle-fields-btn').addEventListener('click', function() {
         var additionalFields = document.getElementById('additional-fields');
