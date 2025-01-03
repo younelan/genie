@@ -15,6 +15,19 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
+## 20250101
+    - Breaking change: switched to individuals table which is more gedcom compliant
+        - no more middle_name, body, alias1, alias2, alias3 - not gedcom fields
+        - date_of_birth, place_of_birth, date_of_death become birth_place,birth_date
+        - place_of_death and deate_of_death become death_place,death_date
+        - title is now stored in tags as notes, not a gedcom field
+        - middle name, body are now notes to be more gedcom compliant
+        - would have liked to keep old structure but I prefer doing it now when no one using it, data has been migrated using Migrate.php which allows to migrate from old to new structure
+    - updated edit person form
+        - form edited to add children, parents, spouses rather than individual relationships
+        - legacy person_relationship hidden in the "more fields"
+        - optimized person info to display better on mobile
+        - updated form to remove removed fields (middle name, body, title,  
 ## 20241203
     - Gedcom Migration to the menu
     - Migrate Class that exports gedcom
