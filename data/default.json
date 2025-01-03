@@ -17,7 +17,7 @@
         "height": 4560
     },
     "tables": {
-        "person": "person",
+        "person": "individuals",
         "relation": "person_relationship",
         "synonyms": "synonyms",
         "tree": "family_tree",
