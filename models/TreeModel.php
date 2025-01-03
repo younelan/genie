@@ -17,7 +17,7 @@ function getGenderSymbol($gender)
 class TreeModel extends AppModel
 {
     private $db,$config;
-    private $tree_table = 'family_tree';
+    private $tree_table = 'trees';
     private $person_table = 'individuals';
     private $relation_table = 'person_relationship';
     private $synonym_table = 'synonyms';

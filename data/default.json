@@ -20,7 +20,7 @@
         "person": "individuals",
         "relation": "person_relationship",
         "synonyms": "synonyms",
-        "tree": "family_tree",
+        "tree": "trees",
         "relation_type": "relationship_type",
         "users": "users",
         "tags": "people_tags"
