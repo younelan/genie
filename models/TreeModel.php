@@ -18,14 +18,15 @@ class TreeModel extends AppModel
 {
     private $db,$config;
     private $tree_table = 'family_tree';
-    private $person_table = 'person';
+    private $person_table = 'individuals';
     private $relation_table = 'person_relationship';
     private $synonym_table = 'synonyms';
+    private $tree_field = 'tree_id';
     public function __construct($config)
     {
         $this->config = $config;
         $this->db = $config['connection'];
-        $this->person_table = $config['tables']['person']??'person';
+        $this->person_table = $config['tables']['person']??'individuals';
         $this->tree_table = $config['tables']['tree']??'family_tree';
         $this->relation_table = $config['tables']['relation']??'person_relationship';
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
@@ -51,7 +52,7 @@ class TreeModel extends AppModel
     public function searchMembers($treeId, $query)
     {
         $query = "%$query%";
-        $sql = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id AND (first_name LIKE :query OR last_name LIKE :query)";
+        $sql = "SELECT * FROM $this->person_table  WHERE $this->tree_field = :tree_id AND (first_name LIKE :query OR last_name LIKE :query)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['tree_id' => $treeId, 'query' => $query]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -72,9 +73,9 @@ class TreeModel extends AppModel
             $orderby = '';
         }
 
-        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id $orderby LIMIT :offset, :limit";
+        $query = "SELECT * FROM $this->person_table  WHERE $this->tree_field = :tree_id $orderby LIMIT :offset, :limit";
         
-        apachelog($query."\nlimit $limit offset $offset\n");
+        //apachelog($query."\nlimit $limit offset $offset\n");
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -85,7 +86,7 @@ class TreeModel extends AppModel
 
     public function getLastUpdatesByTreeId($treeId, $offset=0, $limit=15)
     {
-        $query = "SELECT * FROM $this->person_table  WHERE family_tree_id = :tree_id LIMIT :offset, :limit";
+        $query = "SELECT * FROM $this->person_table  WHERE $this->tree_field = :tree_id LIMIT :offset, :limit";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tree_id', $treeId, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -96,14 +97,14 @@ class TreeModel extends AppModel
     public function getTreeData($familyTreeId)
     {
         // Fetching nodes
-        $nodesSql = "SELECT id, first_name, last_name FROM $this->person_table  WHERE family_tree_id = :tree_id";
+        $nodesSql = "SELECT id, first_name, last_name FROM $this->person_table  WHERE $this->tree_field = :tree_id";
         $nodesStmt = $this->db->prepare($nodesSql);
         $nodesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
         $nodesStmt->execute();
         $nodes = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Fetching links
-        $linksSql = "SELECT person_id1 AS source, person_id2 AS target FROM person_relationship WHERE family_tree_id = :tree_id";
+        $linksSql = "SELECT person_id1 AS source, person_id2 AS target FROM person_relationship WHERE $this->tree_field = :tree_id";
         $linksStmt = $this->db->prepare($linksSql);
         $linksStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
         $linksStmt->execute();
@@ -130,9 +131,9 @@ class TreeModel extends AppModel
     }
     public function countMembersByTreeId($treeId)
     {
-        $query = "SELECT COUNT(*) FROM $this->person_table  WHERE family_tree_id = :tree_id";
-        $query = "SELECT gender_id, count(*) as total FROM `person` 
-        WHERE family_tree_id = :tree_id
+        $query = "SELECT COUNT(*) FROM $this->person_table  WHERE $this->tree_field = :tree_id";
+        $query = "SELECT gender_id, count(*) as total FROM `$this->person_table` 
+        WHERE $this->tree_field = :tree_id
         GROUP BY gender_id";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tree_id' => $treeId]);
@@ -157,7 +158,7 @@ class TreeModel extends AppModel
     public function countTreeMembersByField($treeId, $field,$synonyms=null,$limit=15)
     {
         $query = "SELECT $field, count(*) as total FROM `$this->person_table` 
-                    WHERE family_tree_id = ? 
+                    WHERE $this->tree_field = ? 
                     GROUP BY $field
                     ORDER BY total desc
                     ";
@@ -184,7 +185,7 @@ class TreeModel extends AppModel
         return $vals;
     }
     public function getSynonymsByTreeId($treeId) {
-        $sql = "SELECT * from $this->synonym_table where family_tree_id = ? ";
+        $sql = "SELECT * from $this->synonym_table where $this->tree_field = ? ";
         $result = $this->db->prepare($sql);
         $result->execute([$treeId]);
         $vals = [];
@@ -195,7 +196,7 @@ class TreeModel extends AppModel
     }
     public function getPersonCount($treeId)
     {
-        $sql = "SELECT count(*) FROM `$this->person_table` WHERE family_tree_id = ?";
+        $sql = "SELECT count(*) FROM `$this->person_table` WHERE $this->tree_field = ?";
         $result = $this->db->prepare($sql);
         $result->execute([$treeId]);
         return $result->fetchColumn();
@@ -203,7 +204,7 @@ class TreeModel extends AppModel
     
     public function countRelationshipsByTreeId($treeId)
     {
-        $sql = "SELECT count(*) FROM `$this->relation_table` WHERE family_tree_id = ?";
+        $sql = "SELECT count(*) FROM `$this->relation_table` WHERE $this->tree_field = ?";
         $result = $this->db->prepare($sql);
         $result->execute([$treeId]);
         return $result->fetchColumn();

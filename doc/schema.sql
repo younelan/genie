@@ -103,7 +103,7 @@ CREATE TABLE `people_tags` (
   `tag_id` int NOT NULL AUTO_INCREMENT,
   `tag` varchar(100) NOT NULL,
   `person_id` int DEFAULT NULL,
-  `family_tree_id` int NOT NULL,
+  `tree_id` int NOT NULL,
   PRIMARY KEY (`tag_id`)
 )
 
@@ -115,7 +115,7 @@ DROP TABLE IF EXISTS `person`;
 CREATE TABLE `person` (
   `id` int NOT NULL AUTO_INCREMENT,
   `gedcom_id` varchar(100) DEFAULT NULL,
-  `family_tree_id` int NOT NULL,
+  `tree_id` int NOT NULL,
   `title` varchar(20) DEFAULT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
@@ -123,10 +123,10 @@ CREATE TABLE `person` (
   `alive` tinyint(1) NOT NULL DEFAULT '1',
   `preferred_name` varchar(100) DEFAULT NULL,
   `native_name` varchar(100) DEFAULT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `place_of_birth` varchar(255) DEFAULT NULL,
-  `date_of_death` date DEFAULT NULL,
-  `place_of_death` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `birth_place` varchar(255) DEFAULT NULL,
+  `death_date` date DEFAULT NULL,
+  `death_place` varchar(255) DEFAULT NULL,
   `gender_id` int DEFAULT NULL,
   `optional_fields` json DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -143,7 +143,7 @@ DROP TABLE IF EXISTS `person_relationship`;
 CREATE TABLE `person_relationship` (
   `id` int NOT NULL AUTO_INCREMENT,
   `gedcom_id` varchar(100) DEFAULT NULL,
-  `family_tree_id` int NOT NULL,
+  `tree_id` int NOT NULL,
   `person_id1` int NOT NULL,
   `person_id2` int NOT NULL,
   `relationship_type_id` int NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE `person_relationship` (
 DROP TABLE IF EXISTS `relationship_type`;
 CREATE TABLE `relationship_type` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `family_tree_id` int NOT NULL,
+  `tree_id` int NOT NULL,
   `code` varchar(32) NOT NULL,
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
@@ -207,7 +207,7 @@ CREATE TABLE `sources` (
 DROP TABLE IF EXISTS `synonyms`;
 CREATE TABLE `synonyms` (
   `syn_id` int NOT NULL AUTO_INCREMENT,
-  `family_tree_id` int NOT NULL,
+  `tree_id` int NOT NULL,
   `key` varchar(100) NOT NULL,
   `value` varchar(100) NOT NULL,
   PRIMARY KEY (`syn_id`)

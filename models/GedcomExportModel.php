@@ -52,7 +52,7 @@ class GedcomExportModel extends AppModel
 
     private function getIndividuals($treeId)
     {
-        $query = "SELECT * FROM {$this->person_table} WHERE family_tree_id = :treeId";
+        $query = "SELECT * FROM {$this->person_table} WHERE tree_id = :treeId";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['treeId' => $treeId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,17 +64,17 @@ class GedcomExportModel extends AppModel
         $record .= "1 NAME {$individual['first_name']} /{$individual['last_name']}/\n";
         $record .= "1 SEX {$this->mapGender($individual['gender_id'])}\n";
         
-        if ($individual['date_of_birth']) {
-            $record .= "1 BIRT\n2 DATE {$individual['date_of_birth']}\n";
-            if ($individual['place_of_birth']) {
-                $record .= "2 PLAC {$individual['place_of_birth']}\n";
+        if ($individual['birth_date']) {
+            $record .= "1 BIRT\n2 DATE {$individual['birth_date']}\n";
+            if ($individual['birth_place']) {
+                $record .= "2 PLAC {$individual['birth_place']}\n";
             }
         }
         
-        if ($individual['date_of_death']) {
-            $record .= "1 DEAT\n2 DATE {$individual['date_of_death']}\n";
-            if ($individual['place_of_death']) {
-                $record .= "2 PLAC {$individual['place_of_death']}\n";
+        if ($individual['death_date']) {
+            $record .= "1 DEAT\n2 DATE {$individual['death_date']}\n";
+            if ($individual['death_place']) {
+                $record .= "2 PLAC {$individual['death_place']}\n";
             }
         }
 
@@ -86,7 +86,7 @@ class GedcomExportModel extends AppModel
         $query = "SELECT pr.*, rt.description as relationship_type 
                   FROM {$this->relation_table} pr
                   JOIN {$this->relation_type_table} rt ON pr.relationship_type_id = rt.id
-                  WHERE pr.family_tree_id = :treeId";
+                  WHERE pr.tree_id = :treeId";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['treeId' => $treeId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

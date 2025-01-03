@@ -120,7 +120,7 @@ switch ($action) {
         $memberId = isset($_POST['member_id']) ? $_POST['member_id'] : null;
         $treeId = isset($_POST['treeId']) ? $_POST['treeId'] : null;
         $member = $memberController->getMemberById($memberId);
-        $treeId=$member['family_tree_id']??false;
+        $treeId=$member['tree_id']??false;
         if($memberId) {
             $success = $memberController->deleteMember($memberId);
             if($treeId){

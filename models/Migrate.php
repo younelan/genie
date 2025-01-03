@@ -92,12 +92,12 @@ class RelationshipMigrator {
                 $safeFamilyId = $this->sanitizeGedcomString("n$id"); 
                 $gedcom .= "1 FAMS @{$safeFamilyId}@\n";
             }
-            if ($individual['date_of_death']) {
+            if ($individual['death_date']) {
                 // Convert date to GEDCOM format (DD MMM YYYY)
-                $deathDate = $this->convertToGedcomDate($individual['date_of_death']);
+                $deathDate = $this->convertToGedcomDate($individual['death_date']);
                 $gedcom .= "1 DEAT\n";
                 $gedcom .= "2 DATE {$deathDate}\n";
-                $gedcom .= "2 PLAC " . $individual['place_of_death'] . "\n";
+                $gedcom .= "2 PLAC " . $individual['death_place'] . "\n";
             } elseif (!$individual['alive']) {
                 $gedcom .= "1 DEAT Y\n";
             }
@@ -152,10 +152,10 @@ class RelationshipMigrator {
         foreach ($this->people as $id => $individual) {
             $firstName = str_replace(['@', '/'], ['', ''], $individual['first_name']);
             $lastName = str_replace(['@', '/'], ['', ''], $individual['last_name']);
-            $deathPlace = $individual['place_of_death'];
-            $deathDate = $individual['date_of_death'];
-            $birthPlace = $individual['place_of_birth'];
-            $birthDate = $individual['date_of_birth'];
+            $deathPlace = $individual['death_place'];
+            $deathDate = $individual['death_date'];
+            $birthPlace = $individual['birth_place'];
+            $birthDate = $individual['birth_date'];
     
             if ($individual['gender_id'] == 1) {
                 $gender="M";
@@ -172,7 +172,7 @@ VALUES
 (:id,:first_name,:last_name,:tree_id,:birth_place,:birth_date,:death_place,:death_date,:gender)
 
             ";
-            //print_r($individual["date_of_birth"]);
+            //print_r($individual["birth_date"]);
             //print $sql;exit;
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindParam(':id',$id);

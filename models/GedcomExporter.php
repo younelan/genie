@@ -54,8 +54,8 @@ class GEDCOMExporter
 
     private function fetchPeople($familyTreeId)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$this->peopleTable} WHERE family_tree_id = :family_tree_id");
-        $stmt->execute(['family_tree_id' => $familyTreeId]);
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->peopleTable} WHERE tree_id = :tree_id");
+        $stmt->execute(['tree_id' => $familyTreeId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -68,11 +68,11 @@ class GEDCOMExporter
             $individual->setName($fullName);
 
             // Add birth and death events with places
-            if ($person['date_of_birth']) {
-                $individual->addEvent('BIRT', ['DATE' => $person['date_of_birth'], 'PLAC' => $person['place_of_birth']]);
+            if ($person['birth_date']) {
+                $individual->addEvent('BIRT', ['DATE' => $person['birth_date'], 'PLAC' => $person['birth_place']]);
             }
-            if ($person['date_of_death']) {
-                $individual->addEvent('DEAT', ['DATE' => $person['date_of_death'], 'PLAC' => $person['place_of_death']]);
+            if ($person['death_date']) {
+                $individual->addEvent('DEAT', ['DATE' => $person['death_date'], 'PLAC' => $person['death_place']]);
             }
 
             // Add aliases if they exist
@@ -121,8 +121,8 @@ class GEDCOMExporter
 
     private function createRelationships(array $individuals, $familyTreeId)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$this->relationshipsTable} WHERE family_tree_id = :family_tree_id");
-        $stmt->execute(['family_tree_id' => $familyTreeId]);
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->relationshipsTable} WHERE tree_id = :tree_id");
+        $stmt->execute(['tree_id' => $familyTreeId]);
         $relationships = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($relationships as $relation) {
@@ -142,8 +142,8 @@ class GEDCOMExporter
 
     private function fetchRelationshipType($relationshipTypeId, $familyTreeId)
     {
-        $stmt = $this->pdo->prepare("SELECT description FROM {$this->relationshipTypesTable} WHERE id = :id AND family_tree_id = :family_tree_id");
-        $stmt->execute(['id' => $relationshipTypeId, 'family_tree_id' => $familyTreeId]);
+        $stmt = $this->pdo->prepare("SELECT description FROM {$this->relationshipTypesTable} WHERE id = :id AND tree_id = :tree_id");
+        $stmt->execute(['id' => $relationshipTypeId, 'tree_id' => $familyTreeId]);
         return $stmt->fetchColumn();
     }
 }

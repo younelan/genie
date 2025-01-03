@@ -120,14 +120,14 @@ class GEDCOMImporter
         // Prepare and execute the SQL statement
         $stmt = $this->pdo->prepare("
             INSERT INTO {$this->peopleTable} 
-            (id, family_tree_id, first_name, last_name, date_of_birth, place_of_birth, date_of_death, created_at, updated_at, alive)
-            VALUES (:id, :family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :date_of_death, NOW(), NOW(), TRUE)
+            (id, tree_id, first_name, last_name, birth_date, birth_place, death_date, created_at, updated_at, alive)
+            VALUES (:id, :tree_id, :first_name, :last_name, :birth_date, :birth_place, :death_date, NOW(), NOW(), TRUE)
             ON DUPLICATE KEY UPDATE 
                 first_name = VALUES(first_name),
                 last_name = VALUES(last_name),
-                date_of_birth = VALUES(date_of_birth),
-                place_of_birth = VALUES(place_of_birth),
-                date_of_death = VALUES(date_of_death)
+                birth_date = VALUES(birth_date),
+                birth_place = VALUES(birth_place),
+                death_date = VALUES(death_date)
         ");
 
         // Split the name into parts
@@ -137,12 +137,12 @@ class GEDCOMImporter
 
         $stmt->execute([
             'id' => $id,
-            'family_tree_id' => $familyTreeId,
+            'tree_id' => $familyTreeId,
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'date_of_birth' => $dateOfBirth,
-            'place_of_birth' => $placeOfBirth,
-            'date_of_death' => $dateOfDeath,
+            'birth_date' => $dateOfBirth,
+            'birth_place' => $placeOfBirth,
+            'death_date' => $dateOfDeath,
         ]);
 
         // Save tags associated with the individual
@@ -153,13 +153,13 @@ class GEDCOMImporter
     {
         foreach ($individual->getTags() as $tag) {
             $stmt = $this->pdo->prepare("
-                INSERT INTO {$this->tagsTable} (tag, person_id, family_tree_id) 
-                VALUES (:tag, :person_id, :family_tree_id)
+                INSERT INTO {$this->tagsTable} (tag, person_id, tree_id) 
+                VALUES (:tag, :person_id, :tree_id)
             ");
             $stmt->execute([
                 'tag' => $tag,
                 'person_id' => $personId,
-                'family_tree_id' => $individual->getFamilyTreeId(), // Assuming individual has a family tree ID
+                'tree_id' => $individual->getFamilyTreeId(), // Assuming individual has a family tree ID
             ]);
         }
     }
@@ -183,13 +183,13 @@ class GEDCOMImporter
     private function saveRelationship($personId1, $personId2, $familyTreeId, $relationshipTypeId)
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO {$this->relationshipsTable} (family_tree_id, person_id1, person_id2, relationship_type_id)
-            VALUES (:family_tree_id, :person_id1, :person_id2, :relationship_type_id)
+            INSERT INTO {$this->relationshipsTable} (tree_id, person_id1, person_id2, relationship_type_id)
+            VALUES (:tree_id, :person_id1, :person_id2, :relationship_type_id)
             ON DUPLICATE KEY UPDATE person_id1 = VALUES(person_id1), person_id2 = VALUES(person_id2)
         ");
 
         $stmt->execute([
-            'family_tree_id' => $familyTreeId,
+            'tree_id' => $familyTreeId,
             'person_id1' => $personId1,
             'person_id2' => $personId2,
             'relationship_type_id' => $relationshipTypeId,

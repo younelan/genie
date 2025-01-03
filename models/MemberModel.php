@@ -4,7 +4,7 @@ class MemberModel  extends AppModel
     private $db;
     private $config;
 
-    private $person_table = 'person';
+    private $person_table = 'individuals';
     private $relation_table = 'person_relationship';
     private $relation_type_table = 'relationship_type';
     private $people_tag_table = 'people_tags';
@@ -15,7 +15,7 @@ class MemberModel  extends AppModel
     {
         $this->config = $config;
         $this->db = $config['connection'];
-        $this->person_table = $config['tables']['person']??'person';
+        $this->person_table = $config['tables']['person']??'individuals';
         $this->tree_table = $config['tables']['tree']??'family_tree';
         $this->relation_table = $config['tables']['relation']??'person_relationship';
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
@@ -32,14 +32,14 @@ class MemberModel  extends AppModel
         $placeOfBirth = $new_member['placeOfBirth'] ?? null;
         $genderId = $new_member['genderId'] ?? null;
 
-        $query = "INSERT INTO $this->person_table  (family_tree_id, first_name, last_name, date_of_birth, place_of_birth, gender_id) VALUES (:family_tree_id, :first_name, :last_name, :date_of_birth, :place_of_birth, :gender_id)";
+        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender_id) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender_id)";
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([
-            'family_tree_id' => $treeId,
+            'tree_id' => $treeId,
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'date_of_birth' => $dateOfBirth ? $dateOfBirth : null,
-            'place_of_birth' => $placeOfBirth ? $placeOfBirth : null,
+            'birth_date' => $dateOfBirth ? $dateOfBirth : null,
+            'birth_place' => $placeOfBirth ? $placeOfBirth : null,
             'gender_id' => $genderId
         ]);
         //apachelog("Inserted member " . $this->db->lastInsertId());
@@ -58,7 +58,9 @@ class MemberModel  extends AppModel
 
     public function getMemberById($memberId)
     {
+
         $query = "SELECT * FROM $this->person_table  WHERE id = :member_id";
+       // print $query;
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
         $stmt->execute();
@@ -98,7 +100,7 @@ class MemberModel  extends AppModel
         if(!$tree_id || !$person_id || !$tag) {
             return false;
         };
-        $query = "INSERT INTO $this->people_tag_table (tag,family_tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
+        $query = "INSERT INTO $this->people_tag_table (tag,tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':person_id', $person_id);
@@ -114,7 +116,7 @@ class MemberModel  extends AppModel
         if(!$tree_id || !$member_id || !$tag) {
             return false;
         };
-        $query = "DELETE FROM $this->people_tag_table where tag=:tag_name and family_tree_id=:tree_id and person_id=:member_id";
+        $query = "DELETE FROM $this->people_tag_table where tag=:tag_name and tree_id=:tree_id and person_id=:member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':member_id', $member_id);
@@ -175,8 +177,8 @@ class MemberModel  extends AppModel
                          p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
                          rt.description AS relationship_description
                   FROM $this->relation_table  pr
-                  INNER JOIN person p1 ON pr.person_id1 = p1.id
-                  INNER JOIN person p2 ON pr.person_id2 = p2.id
+                  INNER JOIN $this->person_table p1 ON pr.person_id1 = p1.id
+                  INNER JOIN $this->person_table p2 ON pr.person_id2 = p2.id
                   INNER JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
                   WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
         $stmt = $this->db->prepare($query);
@@ -227,18 +229,18 @@ class MemberModel  extends AppModel
         $genderId = $member['genderId'];
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
-                    date_of_birth = :date_of_birth,
-                  place_of_birth = :place_of_birth, date_of_death = :date_of_death, place_of_death = :place_of_death,
+                    birth_date = :birth_date,
+                  birth_place = :birth_place, death_date = :death_date, death_place = :death_place,
                   gender_id = :gender_id, source = :source, alive = :alive WHERE id = :id";
         if (!$dateOfDeath) $dateOfDeath = null;
         if (!$dateOfBirth) $dateOfBirth = null;
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':first_name', $firstName);
         $stmt->bindParam(':last_name', $lastName);
-        $stmt->bindParam(':date_of_birth', $dateOfBirth);
-        $stmt->bindParam(':place_of_birth', $placeOfBirth);
-        $stmt->bindParam(':date_of_death', $dateOfDeath);
-        $stmt->bindParam(':place_of_death', $placeOfDeath);
+        $stmt->bindParam(':birth_date', $dateOfBirth);
+        $stmt->bindParam(':birth_place', $placeOfBirth);
+        $stmt->bindParam(':death_date', $dateOfDeath);
+        $stmt->bindParam(':death_place', $placeOfDeath);
         $stmt->bindParam(':gender_id', $genderId);
         $stmt->bindParam(':id', $memberId);
         $stmt->bindParam(':source', $source);
@@ -263,13 +265,13 @@ class MemberModel  extends AppModel
 
     public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId)
     {
-        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,family_tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:family_tree_id)";
+        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:tree_id)";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'person_id1' => $personId1,
             'person_id2' => $personId2,
             'relationship_type_id' => $relationshipTypeId,
-            'family_tree_id' => $treeId
+            'tree_id' => $treeId
         ]);
     }
     public function swapRelationship($relationshipId)
@@ -332,7 +334,7 @@ class MemberModel  extends AppModel
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 
-                  AND f.tree_id = p.family_tree_id";
+                  AND f.tree_id = p.tree_id";
         
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
@@ -350,11 +352,11 @@ class MemberModel  extends AppModel
             }
 
             // Get children for this family
-            $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.date_of_birth, c.gender_id
+            $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender_id
                              FROM family_children fc
                              JOIN $this->person_table c ON fc.child_id = c.id
                              WHERE fc.family_id = :family_id
-                             ORDER BY c.date_of_birth";
+                             ORDER BY c.birth_date";
             
             $childrenStmt = $this->db->prepare($childrenQuery);
             $childrenStmt->bindParam(':family_id', $family['family_id']);
@@ -377,7 +379,7 @@ class MemberModel  extends AppModel
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 
-                  AND f.tree_id = p.family_tree_id";
+                  AND f.tree_id = p.tree_id";
         
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
@@ -681,8 +683,8 @@ class MemberModel  extends AppModel
             'id' => $person['id'],
             'name' => trim($person['first_name'] . ' ' . $person['last_name']),
             'data' => [
-                'birth' => $person['date_of_birth'],
-                'death' => $person['date_of_death'],
+                'birth' => $person['birth_date'],
+                'death' => $person['death_date'],
                 'gender' => $person['gender_id']
             ],
             'marriages' => []

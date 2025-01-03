@@ -10,11 +10,11 @@
         <label for="last_name">{{get_translation("Last Name")}}:</label>
         <input type="text" name="last_name" id="last_name" required><br>
 
-        <label for="date_of_birth">{{get_translation("Date of Birth")}}:</label>
-        <input type="date" name="date_of_birth" id="date_of_birth"><br>
+        <label for="birth_date">{{get_translation("Date of Birth")}}:</label>
+        <input type="date" name="birth_date" id="birth_date"><br>
 
-        <label for="place_of_birth">{{get_translation("Place of Birth")}}:</label>
-        <input type="text" name="place_of_birth" id="place_of_birth"><br>
+        <label for="birth_place">{{get_translation("Place of Birth")}}:</label>
+        <input type="text" name="birth_place" id="birth_place"><br>
 
         <label for="gender_id">{{get_translation("Gender")}}:</label>
         <select name="gender_id" id="gender_id" required>

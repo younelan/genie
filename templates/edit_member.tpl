@@ -42,9 +42,9 @@ input[type="date"] {
                     </div>
 
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <label for="date_of_birth">{{ get_translation("Birth") }}:</label>
-                        <input class="form-control" type="date" name="date_of_birth" id="date_of_birth" value="{{ member.date_of_birth|e }}">
-                        <input class="form-control" placeholder="{{ get_translation("Place of Birth") }}" type="text" name="place_of_birth" id="place_of_birth" value="{{ member.place_of_birth|e }}">
+                        <label for="birth_date">{{ get_translation("Birth") }}:</label>
+                        <input class="form-control" type="date" name="birth_date" id="birth_date" value="{{ member.birth_date|e }}">
+                        <input class="form-control" placeholder="{{ get_translation("Place of Birth") }}" type="text" name="birth_place" id="birth_place" value="{{ member.birth_place|e }}">
                     </div>
 
                     <div class="d-flex align-items-center gap-2 mb-2">
@@ -60,9 +60,9 @@ input[type="date"] {
 
                     <div id="death-fields" style="display: none;">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <label for="date_of_death">{{ get_translation("Death") }}:</label>
-                            <input class="form-control" type="date" name="date_of_death" id="date_of_death" value="{{ member.date_of_death|e }}">
-                            <input class="form-control" placeholder="{{ get_translation("Place of Death") }}" type="text" name="place_of_death" id="place_of_death" value="{{ member.place_of_death|e }}">
+                            <label for="death_date">{{ get_translation("Death") }}:</label>
+                            <input class="form-control" type="date" name="death_date" id="death_date" value="{{ member.death_date|e }}">
+                            <input class="form-control" placeholder="{{ get_translation("Place of Death") }}" type="text" name="death_place" id="death_place" value="{{ member.death_place|e }}">
                         </div>
                     </div>
 
@@ -212,7 +212,7 @@ input[type="date"] {
                                                             {{ child.first_name }} {{ child.last_name }}
                                                         </a>
                                                     </td>
-                                                    <td>{{ child.date_of_birth ? child.date_of_birth|date("M d, Y") : '-' }}
+                                                    <td>{{ child.birth_date ? child.birth_date|date("M d, Y") : '-' }}
                                                     
                                                     </td>
                                                     <td>
@@ -284,7 +284,7 @@ input[type="date"] {
                 <h2>{{ get_translation("Add Relationship") }}</h2>
                 <form id="add-relationship-form">
                     <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
-                    <input type="hidden" name="family_tree_id" value="{{ member.family_tree_id|e }}">
+                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
                     <input type="hidden" name="member_gender" value="{{ member.gender_id|e }}">
 
                     <!-- Relationship type selection -->
@@ -452,7 +452,7 @@ input[type="date"] {
                         <input type="hidden" id="edit_relationship_id" name="relationship_id">
                         <input type="hidden" id="edit_member_id" name="member_id" value="{{ member.id|e }}">
                         <input type="hidden" name="edit_member2_id" value="{{ member.id|e }}">
-                        <input type="hidden" name="edit_family_tree_id" value="{{ member.family_tree_id|e }}">
+                        <input type="hidden" name="edit_tree_id" value="{{ member.tree_id|e }}">
 
                         <label for="edit_relationship_person1">{{ get_translation("Person 1") }}:</label>
                         <input type="text" id="edit_relationship_person1" name="person1" readonly><br>

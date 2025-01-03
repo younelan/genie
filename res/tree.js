@@ -1,7 +1,7 @@
 // public/tree.js
 
 document.addEventListener('DOMContentLoaded', function () {
-    fetch(`index.php?action=get_tree_data&family_tree_id=${familyTreeId}`)
+    fetch(`index.php?action=get_tree_data&tree_id=${familyTreeId}`)
         .then(response => response.json())
         .then(data => {
             displayTree(data);

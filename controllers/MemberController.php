@@ -32,13 +32,13 @@ class MemberController extends AppController
         if (!$member) {
             exit('Member not found.');
         }
-        $treeId = $member['family_tree_id']??$_GET['tree_id'] ?? $_GET['family_tree_id']??0;
+        $treeId = $member['tree_id']??$_GET['tree_id'] ?? $_GET['tree_id']??0;
 
         $data = [
             "tagString" => $tagString,
             "member" => $member,
             "memberId"=> $member['id']??0,
-            "treeId" => $member['family_tree_id'] ?? 0,
+            "treeId" => $member['tree_id'] ?? 0,
             "template" => "edit_member.tpl",
             "relationships" => $relationships,
             "relationship_types" => $relationship_types,
@@ -83,10 +83,10 @@ class MemberController extends AppController
                 'memberId' => $memberId,
                 'firstName' => $_POST['first_name'],
                 'lastName' => $_POST['last_name'],
-                'dateOfBirth' => $_POST['date_of_birth'],
-                'placeOfBirth' => $_POST['place_of_birth'],
-                'dateOfDeath' => $_POST['date_of_death'],
-                'placeOfDeath' => $_POST['place_of_death'],
+                'dateOfBirth' => $_POST['birth_date'],
+                'placeOfBirth' => $_POST['birth_place'],
+                'dateOfDeath' => $_POST['death_date'],
+                'placeOfDeath' => $_POST['death_place'],
                 'genderId' => $_POST['gender_id'],
                 'source' => $_POST['source'],
             ];
@@ -100,10 +100,10 @@ class MemberController extends AppController
             //     $memberId,
             //     $_POST['first_name'],
             //     $_POST['last_name'],
-            //     $_POST['date_of_birth'],
-            //     $_POST['place_of_birth'],
-            //     $_POST['date_of_death'],
-            //     $_POST['place_of_death'],
+            //     $_POST['birth_date'],
+            //     $_POST['birth_place'],
+            //     $_POST['death_date'],
+            //     $_POST['death_place'],
             //     $_POST['gender_id']
             // );
             if ($success) {
@@ -126,11 +126,11 @@ class MemberController extends AppController
             "tree_description" => get_translation("Description"),
             "go_back" => get_translation("Back to List"),            
             "error" => "",
-            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "tree_id" => $_GET['tree_id'] ?? $_GET['tree_id'],
             "graph" => $this->config['graph']
         ];
 
-        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $treeId = $_GET['tree_id'] ?? $_GET['tree_id']; // Get tree_id from the request
         $data["menu"] = [
             [
                 "link" => "index.php?action=export_tree&tree_id=$treeId",
@@ -154,8 +154,8 @@ class MemberController extends AppController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $firstName = $_POST['first_name'];
             $lastName = $_POST['last_name'];
-            $dateOfBirth = $_POST['date_of_birth'];
-            $placeOfBirth = $_POST['place_of_birth'];
+            $dateOfBirth = $_POST['birth_date'];
+            $placeOfBirth = $_POST['birth_place'];
             $genderId = $_POST['gender_id'];
             $new_member = [
                 'treeId' => $treeId,
@@ -233,11 +233,11 @@ class MemberController extends AppController
     {
         try {
             $memberId = $_POST['member_id'] ?? null;
-            $familyTreeId = $_POST['family_tree_id'] ?? null;
+            $familyTreeId = $_POST['tree_id'] ?? null;
             $relationCategory = $_POST['relation_category'] ?? 'other';
 
             if (!$memberId || !$familyTreeId) {
-                throw new Exception('Missing required member_id or family_tree_id');
+                throw new Exception('Missing required member_id or tree_id');
             }
 
             if ($relationCategory === 'parent') {
@@ -353,11 +353,11 @@ class MemberController extends AppController
     }
     public function updateRelationship($postData)
     {
-        // Example: Assuming $_POST contains 'relationship_id', 'member_id', 'member2_id', 'family_tree_id', and 'relationship_type'
+        // Example: Assuming $_POST contains 'relationship_id', 'member_id', 'member2_id', 'tree_id', and 'relationship_type'
         $relationshipId = isset($postData['relationship_id']) ? $postData['relationship_id'] : null;
         $personId1 = isset($postData['member_id']) ? $postData['member_id'] : null;
         $personId2 = isset($postData['member2_id']) ? $postData['member2_id'] : null;
-        $familyTreeId = isset($postData['family_tree_id']) ? $postData['family_tree_id'] : null;
+        $familyTreeId = isset($postData['tree_id']) ? $postData['tree_id'] : null;
         $relationStart = isset($postData['relation_start']) ? $postData['relation_start'] : null;
         $relationEnd = isset($postData['relation_start']) ? $postData['relation_end'] : null;
         $relationshipType = isset($postData['relationship_type']) ? $postData['relationship_type'] : null;
@@ -507,7 +507,7 @@ class MemberController extends AppController
             $spouseType = $_POST['spouse_type'] ?? null;
             $memberGender = $_POST['member_gender'] ?? null;
             $spouseId = $_POST['spouse_id'] ?? null;
-            $treeId = $_POST['family_tree_id'] ?? null;
+            $treeId = $_POST['tree_id'] ?? null;
 
             error_log("Processing replace spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender, Tree: $treeId");
 
@@ -576,7 +576,7 @@ class MemberController extends AppController
             "template" => "visualize_descendants.tpl",
             "section" => get_translation("Visualize Descendants"),
             "memberId" => $memberId,
-            "treeId" => $member['family_tree_id'],
+            "treeId" => $member['tree_id'],
         ];
 
         echo $this->render_master($data);

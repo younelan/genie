@@ -467,7 +467,7 @@ function initializeRelationships(memberId) {
                                                             ${child.first_name} ${child.last_name}
                                                         </a>
                                                     </td>
-                                                    <td>${child.date_of_birth ? formatBrowserDate(child.date_of_birth) : '-'}</td>
+                                                    <td>${child.birth_date ? formatBrowserDate(child.birth_date) : '-'}</td>
                                                 </tr>
                                             `).join('') : ''}
                                         </tbody>
@@ -557,7 +557,7 @@ function initializeRelationships(memberId) {
         $('#confirmReplaceSpouse').click(function() {
             const formData = new FormData($('#replace-spouse-form')[0]);
             formData.append('action', 'replace_spouse');
-            formData.append('family_tree_id', treeId); // Add tree ID
+            formData.append('tree_id', treeId); // Add tree ID
             
             // If existing spouse, get the ID from the hidden input
             if ($('input[name="spouse_type"]:checked').val() === 'existing') {
@@ -574,7 +574,7 @@ function initializeRelationships(memberId) {
                 spouse_type: formData.get('spouse_type'),
                 spouse_id: formData.get('spouse_id'),
                 member_gender: formData.get('member_gender'),
-                tree_id: formData.get('family_tree_id')
+                tree_id: formData.get('tree_id')
             });
 
             $.ajax({

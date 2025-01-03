@@ -61,7 +61,7 @@ WHERE t.code IN ("HUSB","WIFE");
 
 ## restore deleted husband wife from family in case you still need it
 ```
-INSERT INTO person_relationship (person_id1,person_id2,created_at,updated_at,RELCODE,relationship_type_id,family_tree_id)
+INSERT INTO person_relationship (person_id1,person_id2,created_at,updated_at,RELCODE,relationship_type_id,tree_id)
 SELECT  `husband_id`,`wife_id`,f.`created_at`,f.`updated_at`, 'HUSB',5,1
 FROM families f
 ```

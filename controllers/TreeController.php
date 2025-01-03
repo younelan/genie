@@ -131,11 +131,11 @@ class TreeController extends AppController
             "tree_description" => get_translation("Description"),
             "go_back" => get_translation("Back to List"),            
             "error" => "",
-            "tree_id" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "tree_id" => $_GET['tree_id'] ?? $_GET['tree_id'],
             "graph" => $this->config['graph']
         ];
 
-        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $treeId = $_GET['tree_id'] ?? $_GET['tree_id']; // Get tree_id from the request
         $data["menu"] = [
             [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
@@ -158,7 +158,7 @@ class TreeController extends AppController
 
     public function getTreeData()
     {
-        $familyTreeId = $_GET['family_tree_id']; // Get family_tree_id from the request
+        $familyTreeId = $_GET['tree_id']; // Get tree_id from the request
         //$treeModel = new Tree();
         $treeData = $this->tree->getTreeData($familyTreeId);
         header('Content-Type: application/json');
@@ -223,11 +223,11 @@ class TreeController extends AppController
             "stats" => $stats,
             "events"=> $events,
             "activities" => $activities,
-            "treeId" => $_GET['tree_id'] ?? $_GET['family_tree_id'],
+            "treeId" => $_GET['tree_id'] ?? $_GET['tree_id'],
             "graph" => $this->config['graph']
         ];
         $data["countByGender"]['Total']=$totalMembers;
-        $treeId = $_GET['tree_id'] ?? $_GET['family_tree_id']; // Get family_tree_id from the request
+        $treeId = $_GET['tree_id'] ?? $_GET['tree_id']; // Get tree_id from the request
         $data["menu"] = [
             [
                 "link" => "index.php?action=add_member&tree_id=$treeId",
