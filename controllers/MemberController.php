@@ -5,6 +5,7 @@ class MemberController extends AppController
 {
     private $member;
     private $config;
+    private $familyIdField = 'id'; // Class variable for family ID field
 
     public function __construct($config)
     {

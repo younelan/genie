@@ -7,9 +7,10 @@ class MemberModel  extends AppModel
     private $person_table = 'individuals';
     private $relation_table = 'person_relationship';
     private $relation_type_table = 'relationship_type';
-    private $people_tag_table = 'people_tags';
+    private $people_tag_table = 'tags';
     private $tree_table = 'family_tree';
     private $synonym_table;
+    private $familyIdField = 'id'; // Class variable for family ID field
 
     public function __construct($config)
     {
@@ -362,7 +363,7 @@ class MemberModel  extends AppModel
                              ORDER BY c.birth_date";
             
             $childrenStmt = $this->db->prepare($childrenQuery);
-            $childrenStmt->bindParam(':family_id', $family['family_id']);
+            $childrenStmt->bindParam(':family_id', $family[$this->familyIdField]);
             $childrenStmt->execute();
             
             $family['children'] = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -378,7 +379,7 @@ class MemberModel  extends AppModel
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
                   JOIN family_children fc ON fc.child_id = p.id
-                  JOIN families f ON fc.family_id = f.family_id
+                  JOIN families f ON fc.family_id = f.$this->familyIdField
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 

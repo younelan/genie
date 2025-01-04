@@ -161,12 +161,12 @@ input[type="date"] {
                     {% for family in spouse_families %}
                         <li class="nav-item" role="presentation">
                             <button class="nav-link {% if loop.first %}active{% endif %}" 
-                                    id="family-tab-{{ family.family_id }}" 
+                                    id="family-tab-{{ family.id }}" 
                                     data-toggle="tab" 
-                                    data-target="#family-{{ family.family_id }}" 
+                                    data-target="#family-{{ family.id }}" 
                                     type="button" 
                                     role="tab" 
-                                    aria-controls="family-{{ family.family_id }}" 
+                                    aria-controls="family-{{ family.id }}" 
                                     aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
                                 {% if member.gender == 'M' and family.wife_id %}
                                     {{ family.wife_name }}
@@ -184,11 +184,10 @@ input[type="date"] {
                 <div class="tab-content" id="familyTabsContent">
                     {% for family in spouse_families %}
                         <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
-                             id="family-{{ family.family_id }}" 
+                             id="family-{{ family.id }}" 
                              role="tabpanel" 
-                             aria-labelledby="family-tab-{{ family.family_id }}">
+                             aria-labelledby="family-tab-{{ family.id }}">
                     
-
                             <!-- Children from this family -->
                             <div class="card mt-3">
                                 <div class="card-header">
@@ -196,14 +195,6 @@ input[type="date"] {
                                 </div>
                                 <div class="card-body">
                                     <table class="table">
-                                    <!--
-                                        <thead>
-                                            <tr>
-                                                <th>{{ get_translation("Name") }}</th>
-                                                <th>{{ get_translation("Birth Date") }}</th>
-                                            </tr>
-                                        </thead>
-                                        -->
                                         <tbody>
                                             {% for child in family.children|default([]) %}
                                                 <tr>
@@ -212,14 +203,11 @@ input[type="date"] {
                                                             {{ child.first_name }} {{ child.last_name }}
                                                         </a>
                                                     </td>
-                                                    <td>{{ child.birth_date ? child.birth_date|date("M d, Y") : '-' }}
-                                                    
-                                                    </td>
+                                                    <td>{{ child.birth_date ? child.birth_date|date("M d, Y") : '-' }}</td>
                                                     <td>
-
                                                         <button type="button" class="btn btn-danger btn-sm delete-child-btn" 
                                                                 data-child-id="{{ child.id }}"
-                                                                data-family-id="{{ family.family_id }}"
+                                                                data-family-id="{{ family.id }}"
                                                                 onclick="event.stopPropagation();">
                                                             🗑️
                                                         </button>
@@ -230,6 +218,7 @@ input[type="date"] {
                                     </table>
                                 </div>
                             </div>
+
                             <!-- Marriage Details -->
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -237,12 +226,12 @@ input[type="date"] {
                                     {% if (member.gender == 'M' and not family.wife_id) or (member.gender == 'F' and not family.husband_id) %}
                                         <div>
                                             <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
-                                                    data-family-id="{{ family.family_id }}">
+                                                    data-family-id="{{ family.id }}">
                                                 {{ get_translation("Replace Unknown Spouse") }}
                                             </button>
                                             <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
                                                     data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
-                                                    data-family-id="{{ family.family_id }}"
+                                                    data-family-id="{{ family.id }}"
                                                     onclick="event.stopPropagation();">
                                                 🗑️ {{ get_translation("Delete Spouse") }}
                                             </button>
@@ -250,7 +239,7 @@ input[type="date"] {
                                     {% else %}
                                         <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
                                                 data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
-                                                data-family-id="{{ family.family_id }}"
+                                                data-family-id="{{ family.id }}"
                                                 onclick="event.stopPropagation();">
                                             🗑️ {{ get_translation("Delete Spouse") }}
                                         </button>
