@@ -2,7 +2,7 @@
 
 Genie is a rudimentary php web app to track ancestors, genealogy tree and relationships.
 
-**WARNING**: This app is being rewritten so that it is more gedcom compliant (Relations are stored as families and children are children of a family). As such, it will require a serious migration and in preparation, it is strongly recommended to export to gedcom and test the data in another gedcom compatible app
+**WARNING**: This app is being rewritten so that it is more gedcom compliant (Relations are stored as families and children are children of a family). As such, it will require a serious migration and in preparation, it is strongly recommended to export to gedcom and test the data in another gedcom compatible app. Use Export Tree menu entry (see migration)
 
 As is, no warranties. This is being rewritten to be more gedcom compliant and as a result
 
@@ -15,7 +15,7 @@ Until I have vetted the app more carefully, I have removed auth.
 checkout [The history file](history.md) for changes
 
 ## Latest stable version
-- the latest stable version: v0.1.0 (git tag)
+- the latest stable version: v0.1.1 (git tag)
 - current version is in doc/version
 
 ## Migration

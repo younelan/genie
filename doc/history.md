@@ -22,6 +22,10 @@ Check out [The README file](README.md) for more info
         - place_of_death and deate_of_death become death_place,death_date
         - title is now stored in tags as notes, not a gedcom field
         - middle name, body are now notes to be more gedcom compliant
+        - gender is now M/F vs 1/2 to be gedcom compliant. using gender field vs gender_id. 
+           - create a varchar(1) gender field;
+           - update individuals set gender="M" where gender_id=1;
+           - update individuals set gender="F" where gender_id=1;
         - would have liked to keep old structure but I prefer doing it now when no one using it, data has been migrated using Migrate.php which allows to migrate from old to new structure
     - updated edit person form
         - form edited to add children, parents, spouses rather than individual relationships
