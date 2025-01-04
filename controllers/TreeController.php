@@ -164,6 +164,70 @@ class TreeController extends AppController
         header('Content-Type: application/json');
         echo json_encode($treeData);
     }
+
+    public function getDescendantsData($memberId) {
+        header('Content-Type: application/json');
+        $descendants = $this->member->getDescendantsHierarchy($memberId);
+        echo json_encode($descendants);
+        exit;
+    }
+
+    public function getDescendantsHierarchy($memberId) {
+        $person = $this->getMemberById($memberId);
+        if (!$person) {
+            return null;
+        }
+
+        // Get all families where this person is a spouse
+        $spouseFamilies = $this->getSpouseFamilies($memberId);
+        
+        $result = [
+            'id' => $person['id'],
+            'name' => trim($person['first_name'] . ' ' . $person['last_name']),
+            'data' => [
+                'birth' => $person['birth_date'],
+                'death' => $person['death_date'],
+                'gender' => $person['gender']
+            ],
+            'marriages' => []
+        ];
+
+        // Process each family
+        foreach ($spouseFamilies as $family) {
+            $spouseId = ($person['gender'] == 'M') ? $family['wife_id'] : $family['husband_id'];
+            $spouseName = ($person['gender'] == 'M') ? $family['wife_name'] : $family['husband_name'];
+            
+            // Add spouse information if exists
+            $marriage = [
+                'id' => $family['family_id'],
+                'spouse' => $spouseId ? [
+                    'id' => $spouseId,
+                    'name' => $spouseName,
+                    'data' => [
+                        'gender' => ($person['gender'] == 'M') ? 'F' : 'M', // Set opposite gender
+                        'birth' => null,  // Add if available
+                        'death' => null   // Add if available
+                    ]
+                ] : null,
+                'children' => []
+            ];
+
+            // Add children for this marriage
+            if (isset($family['children'])) {
+                foreach ($family['children'] as $child) {
+                    $childDescendants = $this->getDescendantsHierarchy($child['id']);
+                    if ($childDescendants) {
+                        $marriage['children'][] = $childDescendants;
+                    }
+                }
+            }
+            
+            $result['marriages'][] = $marriage;
+        }
+
+        return $result;
+    }
+
     public function deleteTree()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

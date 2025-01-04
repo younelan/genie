@@ -1,6 +1,3 @@
-
-
-
 <!-- People list -->
 <div class="col-lg-4 mb-4">
     <div class="card">
@@ -32,7 +29,7 @@
             <div class="list-group" id="memberslist">
                 {% for member in members %}
                     <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id={{ member.id }}">
-                        {{ getGenderSymbol(member.gender_id) }}
+                        {{ getGenderSymbol(member.gender) }}
                         {{ member.first_name|e }} {{ member.last_name|e }}
                     </a>
                 {% endfor %}
@@ -102,7 +99,7 @@
 
                 {% for member in lastUpdates %}
                     <a class="list-group-item list-group-item-action" href="index.php?action=edit_member&member_id={{ member.id }}">
-                        {{ getGenderSymbol(member.gender_id) }}
+                        {{ getGenderSymbol(member.gender) }}
                         {{ member.first_name|e }} {{ member.last_name|e }}
                     </a>
                 {% endfor %}
@@ -139,11 +136,11 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         var searchInput = document.getElementById('search');
-        function getGenderSymbol(genderId) {
-            switch (genderId) {
-                case 1:
+        function getGenderSymbol(gender) {
+            switch (gender) {
+                case 'M':
                     return '♂️';
-                case 2:
+                case 'F':
                     return '♀️';
                 default:
                     return '';
@@ -163,7 +160,7 @@
                 membersList.innerHTML = ''; // Clear existing content
                 
                 members.forEach(function(member) {
-                    genderSymbol = getGenderSymbol(member.gender_id);
+                    genderSymbol = getGenderSymbol(member.gender);
                     var listItem = document.createElement('span');
                     listItem.innerHTML = `<a href="index.php?action=edit_member&member_id=${member.id}" class="list-group-item list-group-item-action">
                     ${genderSymbol} ${member.first_name} ${member.last_name}</a>`;

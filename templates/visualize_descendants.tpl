@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add circles for nodes
             node.append('circle')
                 .attr('r', 6)
-                .attr('fill', d => d.data.data.gender === 1 ? '#7cbade' : '#de7c99');
+                .attr('fill', d => d.data.data.gender === 'M' ? '#7cbade' : '#de7c99');
 
             // Add labels
             node.append('text')
@@ -226,5 +226,15 @@ document.addEventListener('DOMContentLoaded', function() {
 .card-body {
     overflow: hidden;
     padding: 0;
+}
+
+.card.male {
+    fill: #e6f3ff;
+    stroke: #99ccff;
+}
+
+.card.female {
+    fill: #ffe6f3;
+    stroke: #ff99cc;
 }
 </style>

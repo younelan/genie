@@ -87,31 +87,23 @@ class MemberController extends AppController
                 'placeOfBirth' => $_POST['birth_place'],
                 'dateOfDeath' => $_POST['death_date'],
                 'placeOfDeath' => $_POST['death_place'],
-                'genderId' => $_POST['gender_id'],
+                'gender' => $_POST['gender'] ?? null,  // Ensure gender is set
                 'source' => $_POST['source'],
             ];
             $updatedMember['alive'] = isset($_POST['alive']) ? 1 : 0;  
             ///apachelog("++++++++++++++++");
             //apachelog($updatedMember);
             // Handle member update logic
-            $success = $this->member->updateMember($updatedMember);
-
-            // $success = $this->member->updateMember(
-            //     $memberId,
-            //     $_POST['first_name'],
-            //     $_POST['last_name'],
-            //     $_POST['birth_date'],
-            //     $_POST['birth_place'],
-            //     $_POST['death_date'],
-            //     $_POST['death_place'],
-            //     $_POST['gender_id']
-            // );
-            if ($success) {
-                header("Location: index.php?action=edit_member&member_id=$memberId");
-                exit();
+            if ($updatedMember['gender'] === null) {
+                $data["error"] = "Gender is required.";
             } else {
-                $error = "Failed to update member.";
-                $data["error"] = $error;
+                $success = $this->member->updateMember($updatedMember);
+                if ($success) {
+                    header("Location: index.php?action=edit_member&member_id=$memberId");
+                    exit();
+                } else {
+                    $data["error"] = "Failed to update member.";
+                }
             }
         }
 
@@ -156,14 +148,14 @@ class MemberController extends AppController
             $lastName = $_POST['last_name'];
             $dateOfBirth = $_POST['birth_date'];
             $placeOfBirth = $_POST['birth_place'];
-            $genderId = $_POST['gender_id'];
+            $gender = $_POST['gender'];  // Changed from gender_id to gender
             $new_member = [
                 'treeId' => $treeId,
                 'firstName' => $firstName,
                 'lastName' => $lastName,
                 'dateOfBirth' => $dateOfBirth,
                 'placeOfBirth' => $placeOfBirth,
-                'genderId' => $genderId,
+                'gender' => $gender,
                 'dateOfDeath' => null,
             ];
             //$treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId
@@ -274,7 +266,7 @@ class MemberController extends AppController
                     'firstName' => $_POST['first_parent_first_name'],
                     'lastName' => $_POST['first_parent_last_name'],
                     'dateOfBirth' => $_POST['first_parent_birth_date'] ?? null,
-                    'genderId' => $_POST['first_parent_gender'] ?? null
+                    'gender' => $_POST['first_parent_gender'] ?? null  // Changed from gender_id to gender
                 ];
                 $firstParentId = $this->member->addMember($firstParent);
             }
@@ -300,15 +292,15 @@ class MemberController extends AppController
                         'firstName' => $_POST['second_parent_first_name'],
                         'lastName' => $_POST['second_parent_last_name'],
                         'dateOfBirth' => $_POST['second_parent_birth_date'] ?? null,
-                        'genderId' => ($_POST['first_parent_gender'] == 1) ? 2 : 1 // Opposite gender
+                        'gender' => ($_POST['first_parent_gender'] == 'M') ? 'F' : 'M'  // Changed from gender_id to gender
                     ];
                     $secondParentId = $this->member->addMember($secondParent);
                     
                     // Create new family
                     $familyData = [
                         'tree_id' => $familyTreeId,
-                        'husband_id' => $_POST['first_parent_gender'] == 1 ? $firstParentId : $secondParentId,
-                        'wife_id' => $_POST['first_parent_gender'] == 2 ? $firstParentId : $secondParentId
+                        'husband_id' => $_POST['first_parent_gender'] == 'M' ? $firstParentId : $secondParentId,
+                        'wife_id' => $_POST['first_parent_gender'] == 'F' ? $firstParentId : $secondParentId
                     ];
                     $familyId = $this->member->createFamily($familyData);
                     break;
@@ -322,8 +314,8 @@ class MemberController extends AppController
                     // Create new family with both parents
                     $familyData = [
                         'tree_id' => $familyTreeId,
-                        'husband_id' => $_POST['first_parent_gender'] == 1 ? $firstParentId : $secondParentId,
-                        'wife_id' => $_POST['first_parent_gender'] == 2 ? $firstParentId : $secondParentId
+                        'husband_id' => $_POST['first_parent_gender'] == 'M' ? $firstParentId : $secondParentId,
+                        'wife_id' => $_POST['first_parent_gender'] == 'F' ? $firstParentId : $secondParentId
                     ];
                     $familyId = $this->member->createFamily($familyData);
                     break;
@@ -534,7 +526,7 @@ class MemberController extends AppController
                     'firstName' => $_POST['new_first_name'],
                     'lastName' => $_POST['new_last_name'],
                     'dateOfBirth' => $_POST['new_birth_date'] ?? null,
-                    'genderId' => $memberGender == 1 ? 2 : 1, // Opposite gender
+                    'gender' => $memberGender == 'M' ? 'F' : 'M',  // Changed from gender_id to gender
                 ];
                 $spouseId = $this->member->addMember($new_member);
                 if (!$spouseId) {
@@ -587,5 +579,61 @@ class MemberController extends AppController
         $descendants = $this->member->getDescendantsHierarchy($memberId);
         echo json_encode($descendants);
         exit;
+    }
+
+    public function getDescendantsHierarchy($memberId) {
+        $person = $this->getMemberById($memberId);
+        if (!$person) {
+            return null;
+        }
+
+        // Get all families where this person is a spouse
+        $spouseFamilies = $this->getSpouseFamilies($memberId);
+        
+        $result = [
+            'id' => $person['id'],
+            'name' => trim($person['first_name'] . ' ' . $person['last_name']),
+            'data' => [
+                'birth' => $person['birth_date'],
+                'death' => $person['death_date'],
+                'gender' => $person['gender']
+            ],
+            'marriages' => []
+        ];
+
+        // Process each family
+        foreach ($spouseFamilies as $family) {
+            $spouseId = ($person['gender'] == 'M') ? $family['wife_id'] : $family['husband_id'];
+            $spouseName = ($person['gender'] == 'M') ? $family['wife_name'] : $family['husband_name'];
+            
+            // Add spouse information if exists
+            $marriage = [
+                'id' => $family['family_id'],
+                'spouse' => $spouseId ? [
+                    'id' => $spouseId,
+                    'name' => $spouseName,
+                    'data' => [
+                        'gender' => ($person['gender'] == 'M') ? 'F' : 'M', // Set opposite gender
+                        'birth' => null,  // Add if available
+                        'death' => null   // Add if available
+                    ]
+                ] : null,
+                'children' => []
+            ];
+
+            // Add children for this marriage
+            if (isset($family['children'])) {
+                foreach ($family['children'] as $child) {
+                    $childDescendants = $this->getDescendantsHierarchy($child['id']);
+                    if ($childDescendants) {
+                        $marriage['children'][] = $childDescendants;
+                    }
+                }
+            }
+            
+            $result['marriages'][] = $marriage;
+        }
+
+        return $result;
     }
 }

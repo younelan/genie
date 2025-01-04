@@ -1,5 +1,4 @@
-
-    <h1>{{get_translation("Add New Member")}}</h1>
+<h1>{{get_translation("Add New Member")}}</h1>
     {% if error is defined %}
         <p class='error'>{{ error }}</p>
     {% endif %}
@@ -16,8 +15,8 @@
         <label for="birth_place">{{get_translation("Place of Birth")}}:</label>
         <input type="text" name="birth_place" id="birth_place"><br>
 
-        <label for="gender_id">{{get_translation("Gender")}}:</label>
-        <select name="gender_id" id="gender_id" required>
+        <label for="gender">{{get_translation("Gender")}}:</label>
+        <select name="gender" id="gender" required>
             <option value="1">{{get_translation("Man")}}</option>
             <option value="2">{{get_translation("Woman")}}</option>
             <!-- Add more genders as needed -->

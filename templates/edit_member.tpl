@@ -48,10 +48,10 @@ input[type="date"] {
                     </div>
 
                     <div class="d-flex align-items-center gap-2 mb-2">
-<label for="gender_id">{{ get_translation("Gender") }}:</label>
-                    <select name="gender_id" id="gender_id">
-                        <option value="1" {% if member.gender_id == 1 %}selected{% endif %}>{{ get_translation("Man") }}</option>
-                        <option value="2" {% if member.gender_id == 2 %}selected{% endif %}>{{ get_translation("Woman") }}</option>
+<label for="gender">{{ get_translation("Gender") }}:</label>
+                    <select name="gender" id="gender">
+                        <option value="M" {% if member.gender == 'M' %}selected{% endif %}>{{ get_translation("Male") }}</option>
+                        <option value="F" {% if member.gender == 'F' %}selected{% endif %}>{{ get_translation("Female") }}</option>
                         <!-- Add more options as needed -->
                     </select>
                         <label for="alive">{{ get_translation("Alive") }}:</label>
@@ -168,9 +168,9 @@ input[type="date"] {
                                     role="tab" 
                                     aria-controls="family-{{ family.family_id }}" 
                                     aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                                {% if member.gender_id == 1 and family.wife_id %}
+                                {% if member.gender == 'M' and family.wife_id %}
                                     {{ family.wife_name }}
-                                {% elseif member.gender_id == 2 and family.husband_id %}
+                                {% elseif member.gender == 'F' and family.husband_id %}
                                     {{ family.husband_name }}
                                 {% else %}
                                     {{ get_translation("Unknown Spouse") }}
@@ -234,14 +234,14 @@ input[type="date"] {
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     {{ get_translation("Marriage Details") }}
-                                    {% if (member.gender_id == 1 and not family.wife_id) or (member.gender_id == 2 and not family.husband_id) %}
+                                    {% if (member.gender == 'M' and not family.wife_id) or (member.gender == 'F' and not family.husband_id) %}
                                         <div>
                                             <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
                                                     data-family-id="{{ family.family_id }}">
                                                 {{ get_translation("Replace Unknown Spouse") }}
                                             </button>
                                             <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                    data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                    data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
                                                     data-family-id="{{ family.family_id }}"
                                                     onclick="event.stopPropagation();">
                                                 🗑️ {{ get_translation("Delete Spouse") }}
@@ -249,7 +249,7 @@ input[type="date"] {
                                         </div>
                                     {% else %}
                                         <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                data-spouse-id="{{ member.gender_id == 1 ? family.wife_id : family.husband_id }}"
+                                                data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
                                                 data-family-id="{{ family.family_id }}"
                                                 onclick="event.stopPropagation();">
                                             🗑️ {{ get_translation("Delete Spouse") }}
@@ -285,7 +285,7 @@ input[type="date"] {
                 <form id="add-relationship-form">
                     <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
                     <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
-                    <input type="hidden" name="member_gender" value="{{ member.gender_id|e }}">
+                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
 
                     <!-- Relationship type selection -->
                     <div class="form-group">
@@ -302,9 +302,9 @@ input[type="date"] {
                         <select name="family_id" id="family_id" class="form-control">
                             {% for family in spouse_families %}
                                 <option value="{{ family.family_id }}">
-                                    {% if member.gender_id == 1 and family.wife_name %}
+                                    {% if member.gender == 'M' and family.wife_name %}
                                         {{ get_translation("With") }} {{ family.wife_name }}
-                                    {% elseif member.gender_id == 2 and family.husband_name %}
+                                    {% elseif member.gender == 'F' and family.husband_name %}
                                         {{ get_translation("With") }} {{ family.husband_name }}
                                     {% else %}
                                         {{ get_translation("Unknown Spouse") }}
@@ -339,8 +339,8 @@ input[type="date"] {
 
                         <label for="new_gender">{{ get_translation("Gender") }}:</label>
                         <select name="new_gender" id="new_gender">
-                            <option value="1">{{ get_translation("Man") }}</option>
-                            <option value="2">{{ get_translation("Woman") }}</option>
+                            <option value="M">{{ get_translation("Male") }}</option>
+                            <option value="F">{{ get_translation("Female") }}</option>
                         </select><br>
 
                         <label for="new_birth_date">{{ get_translation("Birth Date") }}:</label>
@@ -394,8 +394,8 @@ input[type="date"] {
                                 <input type="text" name="first_parent_last_name" class="form-control">
                                 <label>{{ get_translation("Gender") }}:</label>
                                 <select name="first_parent_gender" class="form-control">
-                                    <option value="1">{{ get_translation("Man") }}</option>
-                                    <option value="2">{{ get_translation("Woman") }}</option>
+                                    <option value="M">{{ get_translation("Male") }}</option>
+                                    <option value="F">{{ get_translation("Female") }}</option>
                                 </select>
                                 <label>{{ get_translation("Birth Date") }}:</label>
                                 <input type="date" name="first_parent_birth_date" class="form-control">
@@ -550,7 +550,7 @@ input[type="date"] {
             <div class="modal-body">
                 <form id="replace-spouse-form">
                     <input type="hidden" id="replace_family_id" name="family_id">
-                    <input type="hidden" name="member_gender" value="{{ member.gender_id }}">
+                    <input type="hidden" name="member_gender" value="{{ member.gender }}">
 
                     <!-- Person selection type -->
                     <div class="form-group">

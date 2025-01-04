@@ -30,9 +30,9 @@ class MemberModel  extends AppModel
         $lastName = $new_member['lastName'] ?? null;
         $dateOfBirth = $new_member['dateOfBirth'] ?? null;
         $placeOfBirth = $new_member['placeOfBirth'] ?? null;
-        $genderId = $new_member['genderId'] ?? null;
+        $gender = $new_member['gender'] ?? null;  // Changed from gender_id to gender
 
-        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender_id) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender_id)";
+        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender)";
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([
             'tree_id' => $treeId,
@@ -40,7 +40,7 @@ class MemberModel  extends AppModel
             'last_name' => $lastName,
             'birth_date' => $dateOfBirth ? $dateOfBirth : null,
             'birth_place' => $placeOfBirth ? $placeOfBirth : null,
-            'gender_id' => $genderId
+            'gender' => $gender
         ]);
         //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
@@ -225,13 +225,16 @@ class MemberModel  extends AppModel
         $placeOfBirth = $member['placeOfBirth'];
         $dateOfDeath = $member['dateOfDeath'];
         $placeOfDeath = $member['placeOfDeath'];
-        $memberId = $member['memberId'];
-        $genderId = $member['genderId'];
+        $gender = $member['gender'] ?? null;  // Ensure gender is set
+
+        if ($gender === null) {
+            throw new Exception("Gender is required.");
+        }
 
         $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
                     birth_date = :birth_date,
                   birth_place = :birth_place, death_date = :death_date, death_place = :death_place,
-                  gender_id = :gender_id, source = :source, alive = :alive WHERE id = :id";
+                  gender = :gender, source = :source, alive = :alive WHERE id = :id";
         if (!$dateOfDeath) $dateOfDeath = null;
         if (!$dateOfBirth) $dateOfBirth = null;
         $stmt = $this->db->prepare($query);
@@ -241,7 +244,7 @@ class MemberModel  extends AppModel
         $stmt->bindParam(':birth_place', $placeOfBirth);
         $stmt->bindParam(':death_date', $dateOfDeath);
         $stmt->bindParam(':death_place', $placeOfDeath);
-        $stmt->bindParam(':gender_id', $genderId);
+        $stmt->bindParam(':gender', $gender);
         $stmt->bindParam(':id', $memberId);
         $stmt->bindParam(':source', $source);
         $stmt->bindParam(':alive', $alive);
@@ -352,7 +355,7 @@ class MemberModel  extends AppModel
             }
 
             // Get children for this family
-            $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender_id
+            $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
                              FROM family_children fc
                              JOIN $this->person_table c ON fc.child_id = c.id
                              WHERE fc.family_id = :family_id
@@ -685,15 +688,15 @@ class MemberModel  extends AppModel
             'data' => [
                 'birth' => $person['birth_date'],
                 'death' => $person['death_date'],
-                'gender' => $person['gender_id']
+                'gender' => $person['gender']
             ],
             'marriages' => []
         ];
 
         // Process each family
         foreach ($spouseFamilies as $family) {
-            $spouseId = ($person['gender_id'] == 1) ? $family['wife_id'] : $family['husband_id'];
-            $spouseName = ($person['gender_id'] == 1) ? $family['wife_name'] : $family['husband_name'];
+            $spouseId = ($person['gender'] == 'M') ? $family['wife_id'] : $family['husband_id'];
+            $spouseName = ($person['gender'] == 'M') ? $family['wife_name'] : $family['husband_name'];
             
             // Add spouse information if exists
             $marriage = [
@@ -702,7 +705,7 @@ class MemberModel  extends AppModel
                     'id' => $spouseId,
                     'name' => $spouseName,
                     'data' => [
-                        'gender' => ($person['gender_id'] == 1) ? 2 : 1, // Set opposite gender
+                        'gender' => ($person['gender'] == 'M') ? 'F' : 'M', // Set opposite gender
                         'birth' => null,  // Add if available
                         'death' => null   // Add if available
                     ]

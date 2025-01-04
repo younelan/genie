@@ -3,10 +3,8 @@ function getGenderSymbol($gender)
 {
     switch ($gender) {
         case 'M':
-        case 1:
             return '♂️'; // Male sign
         case 'F':
-        case 2:
             return '♀️'; // Female sign
         case 'U':
             return '⚲'; // Neuter (unspecified) sign
@@ -131,20 +129,19 @@ class TreeModel extends AppModel
     }
     public function countMembersByTreeId($treeId)
     {
-        $query = "SELECT COUNT(*) FROM $this->person_table  WHERE $this->tree_field = :tree_id";
-        $query = "SELECT gender_id, count(*) as total FROM `$this->person_table` 
+        $query = "SELECT gender, count(*) as total FROM `$this->person_table` 
         WHERE $this->tree_field = :tree_id
-        GROUP BY gender_id";
+        GROUP BY gender";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tree_id' => $treeId]);
         $vals = [];
         $counts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($counts as $idx => $row) {
-            switch ($row['gender_id']) {
-                case 1:
+            switch ($row['gender']) {
+                case 'M':
                     $vals['Men'] = $row['total'];
                     break;
-                case 2:
+                case 'F':
                     $vals['Women'] = $row['total'];
                     break;
                 case null:
@@ -153,7 +150,6 @@ class TreeModel extends AppModel
             }
         }
         return $vals;
-        //return $stmt->fetchColumn();
     }
     public function countTreeMembersByField($treeId, $field,$synonyms=null,$limit=15)
     {
