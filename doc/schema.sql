@@ -1,4 +1,12 @@
+-- MySQL dump 10.13  Distrib 8.0.40, for Linux (x86_64)
+--
+--
+-- Table structure for table `events`
+--
+
 DROP TABLE IF EXISTS `events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `events` (
   `event_id` int NOT NULL AUTO_INCREMENT,
   `event_type` varchar(50) DEFAULT NULL,
@@ -11,7 +19,7 @@ CREATE TABLE `events` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`event_id`)
-)
+) 
 
 --
 -- Table structure for table `families`
@@ -41,7 +49,7 @@ CREATE TABLE `families` (
 
 DROP TABLE IF EXISTS `family_children`;
 CREATE TABLE `family_children` (
-  `family_relation_id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `tree_id` int NOT NULL,
   `gedcom_id` varchar(100) DEFAULT NULL,
   `family_id` int DEFAULT NULL,
@@ -49,20 +57,6 @@ CREATE TABLE `family_children` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `RELCODE` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`family_relation_id`)
-)
-
---
--- Table structure for table `family_tree`
---
-
-DROP TABLE IF EXISTS `family_tree`;
-CREATE TABLE `family_tree` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `owner_id` int NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `description` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 )
 
@@ -74,6 +68,32 @@ DROP TABLE IF EXISTS `gender`;
 CREATE TABLE `gender` (
   `id` int NOT NULL AUTO_INCREMENT,
   `description` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+)
+
+--
+-- Table structure for table `individuals`
+--
+
+DROP TABLE IF EXISTS `individuals`;
+CREATE TABLE `individuals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gedcom_id` varchar(100) DEFAULT NULL,
+  `tree_id` int NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `source` varchar(100) DEFAULT NULL,
+  `alive` tinyint(1) NOT NULL DEFAULT '1',
+  `preferred_name` varchar(100) DEFAULT NULL,
+  `native_name` varchar(100) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `birth_place` varchar(255) DEFAULT NULL,
+  `death_date` date DEFAULT NULL,
+  `death_place` varchar(255) DEFAULT NULL,
+  `gender` varchar(1) NOT NULL,
+  `data` json DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 )
 
@@ -105,35 +125,7 @@ CREATE TABLE `people_tags` (
   `person_id` int DEFAULT NULL,
   `tree_id` int NOT NULL,
   PRIMARY KEY (`tag_id`)
-)
-
---
--- Table structure for table `person`
---
-
-DROP TABLE IF EXISTS `person`;
-CREATE TABLE `person` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `gedcom_id` varchar(100) DEFAULT NULL,
-  `tree_id` int NOT NULL,
-  `title` varchar(20) DEFAULT NULL,
-  `first_name` varchar(100) NOT NULL,
-  `last_name` varchar(100) NOT NULL,
-  `source` varchar(100) DEFAULT NULL,
-  `alive` tinyint(1) NOT NULL DEFAULT '1',
-  `preferred_name` varchar(100) DEFAULT NULL,
-  `native_name` varchar(100) DEFAULT NULL,
-  `birth_date` date DEFAULT NULL,
-  `birth_place` varchar(255) DEFAULT NULL,
-  `death_date` date DEFAULT NULL,
-  `death_place` varchar(255) DEFAULT NULL,
-  `gender_id` int DEFAULT NULL,
-  `optional_fields` json DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `passed` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-)
+) 
 
 --
 -- Table structure for table `person_relationship`
@@ -190,6 +182,8 @@ CREATE TABLE `source_links` (
 --
 
 DROP TABLE IF EXISTS `sources`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sources` (
   `source_id` int NOT NULL AUTO_INCREMENT,
   `source_title` varchar(255) DEFAULT NULL,
@@ -205,6 +199,8 @@ CREATE TABLE `sources` (
 --
 
 DROP TABLE IF EXISTS `synonyms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `synonyms` (
   `syn_id` int NOT NULL AUTO_INCREMENT,
   `tree_id` int NOT NULL,
@@ -226,6 +222,22 @@ CREATE TABLE `taxonomy_terms` (
 )
 
 --
+-- Table structure for table `trees`
+--
+
+DROP TABLE IF EXISTS `trees`;
+CREATE TABLE `trees` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `owner_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_public` tinyint NOT NULL,
+  PRIMARY KEY (`id`)
+)
+
+--
 -- Table structure for table `users`
 --
 
@@ -239,4 +251,3 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 )
-
