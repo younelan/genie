@@ -9,8 +9,8 @@ class MemberModel  extends AppModel
     private $relation_type_table = 'relationship_type';
     private $people_tag_table = 'tags';
     private $tree_table = 'family_tree';
+    private $family_id_field = "id";
     private $synonym_table;
-    private $familyIdField = 'id'; // Class variable for family ID field
 
     public function __construct($config)
     {
@@ -20,6 +20,7 @@ class MemberModel  extends AppModel
         $this->tree_table = $config['tables']['tree']??'family_tree';
         $this->relation_table = $config['tables']['relation']??'person_relationship';
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
+        
         
     }
 
@@ -347,7 +348,7 @@ class MemberModel  extends AppModel
         $families = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // For each family, get the children
-        foreach ($families as &$family) {
+        foreach ($families as &$family) { 
             if ($family['husband_name'] && $family['husband_lastname']) {
                 $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
             }
@@ -359,11 +360,11 @@ class MemberModel  extends AppModel
             $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
                              FROM family_children fc
                              JOIN $this->person_table c ON fc.child_id = c.id
-                             WHERE fc.family_id = :family_id
+                             WHERE fc.$this->family_id_field = :family_id_field
                              ORDER BY c.birth_date";
             
             $childrenStmt = $this->db->prepare($childrenQuery);
-            $childrenStmt->bindParam(':family_id', $family[$this->familyIdField]);
+            $childrenStmt->bindParam(':family_id_field', $family['$this->family_id_field']);
             $childrenStmt->execute();
             
             $family['children'] = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -379,7 +380,7 @@ class MemberModel  extends AppModel
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
                   JOIN family_children fc ON fc.child_id = p.id
-                  JOIN families f ON fc.family_id = f.$this->familyIdField
+                  JOIN families f ON fc.$this->family_id_field = f.$this->family_id_field
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 
@@ -432,11 +433,11 @@ class MemberModel  extends AppModel
 
     public function addChildToFamily($familyId, $childId, $treeId)
     {
-        $query = "INSERT INTO family_children (family_id, child_id, tree_id) 
-                  VALUES (:family_id, :child_id, :tree_id)";
+        $query = "INSERT INTO family_children ($this->family_id_field, child_id, tree_id) 
+                  VALUES (:$this->family_id_field, :child_id, :tree_id)";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
-            'family_id' => $familyId,
+            '$this->family_id_field' => $familyId,
             'child_id' => $childId,
             'tree_id' => $treeId
         ]);
@@ -444,11 +445,11 @@ class MemberModel  extends AppModel
 
     public function removeChildFromFamily($childId, $familyId)
     {
-        $query = "DELETE FROM family_children WHERE child_id = :child_id AND family_id = :family_id";
+        $query = "DELETE FROM family_children WHERE child_id = :child_id AND $this->family_id_field = :$this->family_id_field";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'child_id' => $childId,
-            'family_id' => $familyId
+            '$this->family_id_field' => $familyId
         ]);
     }
 
@@ -459,9 +460,9 @@ class MemberModel  extends AppModel
             error_log("Starting removeSpouseFromFamily - spouseId: $spouseId, familyId: $familyId");
 
             // Check if family has children
-            $query = "SELECT COUNT(*) FROM family_children WHERE family_id = :family_id";
+            $query = "SELECT COUNT(*) FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
             error_log("Has children: " . ($hasChildren ? 'yes' : 'no'));
 
@@ -470,20 +471,20 @@ class MemberModel  extends AppModel
                 $query = "UPDATE families 
                           SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
                               wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
-                          WHERE family_id = :family_id";
+                          WHERE $this->family_id_field = :$this->family_id_field";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute([
                     'spouse_id' => $spouseId,
-                    'family_id' => $familyId
+                    '$this->family_id_field' => $familyId
                 ]);
             }
 
             // If no children, delete the family
             if (!$hasChildren) {
                 error_log("No children, deleting family $familyId");
-                $query = "DELETE FROM families WHERE family_id = :family_id";
+                $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
                 $stmt = $this->db->prepare($query);
-                $result = $stmt->execute(['family_id' => $familyId]);
+                $result = $stmt->execute(['$this->family_id_field' => $familyId]);
                 error_log("Delete result: " . ($result ? 'success' : 'failed'));
             } else {
                 error_log("Has children, keeping family");
@@ -506,11 +507,11 @@ class MemberModel  extends AppModel
             $query = "UPDATE families 
                       SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
                           wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
-                      WHERE family_id = :family_id";
+                      WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 'spouse_id' => $spouseId,
-                'family_id' => $familyId
+                '$this->family_id_field' => $familyId
             ]);
 
             // Delete the spouse if one was specified
@@ -519,16 +520,16 @@ class MemberModel  extends AppModel
             }
 
             // Check if family has children
-            $query = "SELECT COUNT(*) FROM family_children WHERE family_id = :family_id";
+            $query = "SELECT COUNT(*) FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
 
             // If no children, delete the family
             if (!$hasChildren) {
-                $query = "DELETE FROM families WHERE family_id = :family_id";
+                $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['family_id' => $familyId]);
+                $stmt->execute(['$this->family_id_field' => $familyId]);
             }
 
             $this->db->commit();
@@ -545,9 +546,9 @@ class MemberModel  extends AppModel
         $this->db->beginTransaction();
         try {
             // Delete all children first
-            $query = "SELECT child_id FROM family_children WHERE family_id = :family_id";
+            $query = "SELECT child_id FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
             $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             foreach ($children as $childId) {
@@ -560,9 +561,9 @@ class MemberModel  extends AppModel
             }
 
             // Delete the family
-            $query = "DELETE FROM families WHERE family_id = :family_id";
+            $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
 
             $this->db->commit();
             return true;
@@ -580,9 +581,9 @@ class MemberModel  extends AppModel
             error_log("Starting deleteFamilyAndChildren for familyId: $familyId");
 
             // Get all children from this family
-            $query = "SELECT child_id FROM family_children WHERE family_id = :family_id";
+            $query = "SELECT child_id FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
             $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
             error_log("Found children: " . print_r($children, true));
 
@@ -594,15 +595,15 @@ class MemberModel  extends AppModel
 
             // Delete family_children records first
             error_log("Deleting family_children records");
-            $query = "DELETE FROM family_children WHERE family_id = :family_id";
+            $query = "DELETE FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
 
             // Delete the family record
             error_log("Deleting family record");
-            $query = "DELETE FROM families WHERE family_id = :family_id";
+            $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $result = $stmt->execute(['family_id' => $familyId]);
+            $result = $stmt->execute(['$this->family_id_field' => $familyId]);
             error_log("Family delete result: " . ($result ? 'success' : 'failed'));
             if (!$result) {
                 error_log("Family delete error: " . print_r($stmt->errorInfo(), true));
@@ -625,9 +626,9 @@ class MemberModel  extends AppModel
             error_log("Updating family spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender");
 
             // First verify the family exists
-            $query = "SELECT * FROM families WHERE family_id = :family_id";
+            $query = "SELECT * FROM families WHERE $this->family_id_field = :$this->family_id_field";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['family_id' => $familyId]);
+            $stmt->execute(['$this->family_id_field' => $familyId]);
             $family = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$family) {
@@ -643,19 +644,19 @@ class MemberModel  extends AppModel
             $query = "UPDATE families 
                       SET " . ($memberGender == 1 ? "wife_id" : "husband_id") . " = :spouse_id,
                           marriage_date = :marriage_date
-                      WHERE family_id = :family_id";
+                      WHERE $this->family_id_field = :$this->family_id_field";
             
             error_log("Update query: $query");
             error_log("Parameters: " . print_r([
                 'spouse_id' => $spouseId,
-                'family_id' => $familyId,
+                '$this->family_id_field' => $familyId,
                 'marriage_date' => $marriageDate
             ], true));
             
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
                 'spouse_id' => $spouseId,
-                'family_id' => $familyId,
+                '$this->family_id_field' => $familyId,
                 'marriage_date' => $marriageDate  // Will be NULL if empty
             ]);
 
@@ -701,7 +702,7 @@ class MemberModel  extends AppModel
             
             // Add spouse information if exists
             $marriage = [
-                'id' => $family['family_id'],
+                'id' => $family['$this->family_id_field'],
                 'spouse' => $spouseId ? [
                     'id' => $spouseId,
                     'name' => $spouseName,
