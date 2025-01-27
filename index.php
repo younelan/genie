@@ -29,6 +29,7 @@ function apachelog($foo) {
     if(is_array($foo)) {
         $foo = print_r($foo,true);
     }
+    $foo .= "\n";
     file_put_contents('php://stderr', print_r($foo, TRUE)) ;
 }
 $action = $_GET['action'] ?? $_POST['action']??'';
@@ -43,6 +44,8 @@ if (!$userId) {
 $page = $_GET['page'] ?? 1;
 $treeController = new TreeController($config);
 $memberController = new MemberController($config);
+$familyController = new FamilyController($config);
+
 switch ($action) {
     case 'get_spouse_families':
         $memberController->getSpouseFamilies();
@@ -146,12 +149,16 @@ switch ($action) {
     case 'search_members':
         $treeController->searchMembers();
         break;
+    case 'add_relationship':
+        $familyController->addRelationship();
+        exit;
+        break;
     case 'swap_relationship':
         //apachelog($_POST['relationship_id']);
         $memberController->swapRelationshipAction();
         // /apachelog("hello world");
         break;
-    case 'add_relationship':
+    case 'old_add_relationship':
         $memberId = $_POST['member_id'] ?? '';
         $personId2 = $_POST['member2_id'] ?? '';
         $relationshipTypeId = $_POST['relationship_type'] ?? '';
