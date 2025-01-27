@@ -36,7 +36,7 @@ class FamilyController extends AppController
         */
         $data = $_POST['relationship']['data']??[];
         $assocData = $this->convertToAssociativeArray($data);
-        $assocData['tree_id'] = $_POST['tree_id']??null;
+        // $assocData['tree_id'] = $_POST['tree_id']??null;
         $assocData['type'] = $_POST['relationship']['type']??null;
         $this->data = $assocData;
         apachelog($assocData);
@@ -59,6 +59,8 @@ class FamilyController extends AppController
             default:
                 error_log("Invalid relationship type: $reltype");
         }
+        apachelog($_POST);
+
     }
 
     public function addSpouse() {
