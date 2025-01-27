@@ -1,5 +1,5 @@
 <?php
-class MemberModel  extends AppModel
+class MemberModel extends AppModel
 {
     private $db;
     private $config;
@@ -9,32 +9,35 @@ class MemberModel  extends AppModel
     private $relation_type_table = 'relationship_type';
     private $people_tag_table = 'tags';
     private $tree_table = 'family_tree';
-    private $family_id_field = "id";
     private $synonym_table;
+    private $families_table = 'families';
+    private $family_children_table = 'family_children';
+
 
     public function __construct($config)
     {
         $this->config = $config;
         $this->db = $config['connection'];
-        $this->person_table = $config['tables']['person']??'individuals';
-        $this->tree_table = $config['tables']['tree']??'family_tree';
-        $this->relation_table = $config['tables']['relation']??'person_relationship';
-        $this->synonym_table = $config['tables']['synonyms']??'synonyms';
-        
-        
+        $this->person_table = $config['tables']['person'] ?? 'individuals';
+        $this->tree_table = $config['tables']['tree'] ?? 'family_tree';
+        $this->relation_table = $config['tables']['relation'] ?? 'person_relationship';
+        $this->synonym_table = $config['tables']['synonyms'] ?? 'synonyms';
+        $this->families_table = $config['tables']['families'] ?? 'families';
+        $this->family_children_table = $config['tables']['family_children']??'family_children';
     }
+
 
     public function addMember($new_member)
     {
-        //$treeId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $genderId
         $treeId = $new_member['treeId'] ?? null;
         $firstName = $new_member['firstName'] ?? null;
         $lastName = $new_member['lastName'] ?? null;
         $dateOfBirth = $new_member['dateOfBirth'] ?? null;
         $placeOfBirth = $new_member['placeOfBirth'] ?? null;
         $gender = $new_member['gender'] ?? null;  // Changed from gender_id to gender
+        $alive = $new_member['alive'] ?? 1;
 
-        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender)";
+        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender, alive, created_at, updated_at) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender, :alive, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([
             'tree_id' => $treeId,
@@ -42,27 +45,64 @@ class MemberModel  extends AppModel
             'last_name' => $lastName,
             'birth_date' => $dateOfBirth ? $dateOfBirth : null,
             'birth_place' => $placeOfBirth ? $placeOfBirth : null,
-            'gender' => $gender
+            'gender' => $gender,
+            'alive' => $alive,
         ]);
-        //apachelog("Inserted member " . $this->db->lastInsertId());
         return $this->db->lastInsertId();
     }
-    
 
-    // Fetch relationship types from the database
+    public function updateMember($member)
+    {
+        $memberId = $member['memberId'] ?? "";
+        $firstName = $member['firstName'] ?? "";
+        $lastName = $member['lastName'];
+        $source = $member['source'];
+        $alive = intval($member['alive']);
+        foreach ($member as $key => $value) {
+            if (!$value) {
+                $member[$key] = null;
+            }
+        }
+        $dateOfBirth = $member['dateOfBirth'];
+        $placeOfBirth = $member['placeOfBirth'];
+        $dateOfDeath = $member['dateOfDeath'];
+        $placeOfDeath = $member['placeOfDeath'];
+        $gender = $member['gender'] ?? null;  // Ensure gender is set
+
+        if ($gender === null) {
+            throw new Exception("Gender is required.");
+        }
+
+        $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
+                    birth_date = :birth_date,
+                  birth_place = :birth_place, death_date = :death_date, death_place = :death_place,
+                  gender = :gender, source = :source, alive = :alive, updated_at = NOW() WHERE id = :id";
+        if (!$dateOfDeath) $dateOfDeath = null;
+        if (!$dateOfBirth) $dateOfBirth = null;
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':first_name', $firstName);
+        $stmt->bindParam(':last_name', $lastName);
+        $stmt->bindParam(':birth_date', $dateOfBirth);
+        $stmt->bindParam(':birth_place', $placeOfBirth);
+        $stmt->bindParam(':death_date', $dateOfDeath);
+        $stmt->bindParam(':death_place', $placeOfDeath);
+        $stmt->bindParam(':gender', $gender);
+        $stmt->bindParam(':id', $memberId);
+        $stmt->bindParam(':source', $source);
+        $stmt->bindParam(':alive', $alive);
+        return $stmt->execute();
+    }
     public function getRelationshipTypes($tree_id = 1)
     {
-        $query = "SELECT id, description FROM $this->relation_type_table ";
+        $query = "SELECT id, description FROM $this->relation_type_table WHERE tree_id = :tree_id";
         $stmt = $this->db->prepare($query);
-        $stmt->execute();
+        $stmt->execute(['tree_id' => $tree_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getMemberById($memberId)
     {
-
         $query = "SELECT * FROM $this->person_table  WHERE id = :member_id";
-       // print $query;
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
         $stmt->execute();
@@ -130,20 +170,14 @@ class MemberModel  extends AppModel
     public function autocompleteMember($term, $memberId, $tree_id = 1)
     {
         $query = "SELECT id, first_name, last_name FROM $this->person_table  WHERE 
-        (first_name LIKE :term1 OR last_name like :term2) and id != :member_id";
-        $query2 = str_replace(":tree_id", $tree_id, $query);
-        $query2 = str_replace(":term1", '%' . $term . '%', $query2);
-        $query2 = str_replace(":term2", '%' . $term . '%', $query2);
-        $query2 = str_replace(":member_id", $memberId, $query2);
-        //print($query2);
+        (first_name LIKE :term1 OR last_name like :term2) and id != :member_id AND tree_id = :tree_id";
         $stmt = $this->db->prepare($query);
-        //$stmt->bindValue(':tree_id', '%' . $tree_id . '%');
+        $stmt->bindValue(':tree_id', $tree_id);
         $stmt->bindValue(':term1', '%' . $term . '%');
         $stmt->bindValue(':term2', '%' . $term . '%');
         $stmt->bindParam(':member_id', $memberId);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        //apachelog($results);
         $labels = [];
         foreach ($results as $result) {
             $labels[] = [
@@ -154,17 +188,6 @@ class MemberModel  extends AppModel
 
         return $labels;
     }
-    // public function deleteMember($memberId) {
-    //     $query = "DELETE FROM person WHERE id = :member_id";
-    //     $stmt = $this->db->prepare($query);
-    //     $stmt->bindParam(':member_id', $memberId);
-    //     $status = $stmt->execute();
-    //     if($status) {
-    //         print "failed";
-    //     } else {
-    //         print "success";
-    //     }
-    // }
 
     public function deleteMember($memberId)
     {
@@ -209,50 +232,6 @@ class MemberModel  extends AppModel
         $stmt->bindParam(':id', $relationshipId);
         return $stmt->execute();
     }
-
-    public function updateMember($member)
-    {
-        //$memberId, $firstName, $lastName, $dateOfBirth, $placeOfBirth, $dateOfDeath, $placeOfDeath, $genderId
-        $memberId = $member['memberId'] ?? "";
-        $firstName = $member['firstName'] ?? "";
-        $lastName = $member['lastName'];
-        $source = $member['source'];
-        $alive = intval($member['alive']);
-        foreach ($member as $key => $value) {
-            if (!$value) {
-                $member[$key] = null;
-            }
-        }
-        $dateOfBirth = $member['dateOfBirth'];
-        $placeOfBirth = $member['placeOfBirth'];
-        $dateOfDeath = $member['dateOfDeath'];
-        $placeOfDeath = $member['placeOfDeath'];
-        $gender = $member['gender'] ?? null;  // Ensure gender is set
-
-        if ($gender === null) {
-            throw new Exception("Gender is required.");
-        }
-
-        $query = "UPDATE $this->person_table  SET first_name = :first_name, last_name = :last_name, 
-                    birth_date = :birth_date,
-                  birth_place = :birth_place, death_date = :death_date, death_place = :death_place,
-                  gender = :gender, source = :source, alive = :alive WHERE id = :id";
-        if (!$dateOfDeath) $dateOfDeath = null;
-        if (!$dateOfBirth) $dateOfBirth = null;
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':first_name', $firstName);
-        $stmt->bindParam(':last_name', $lastName);
-        $stmt->bindParam(':birth_date', $dateOfBirth);
-        $stmt->bindParam(':birth_place', $placeOfBirth);
-        $stmt->bindParam(':death_date', $dateOfDeath);
-        $stmt->bindParam(':death_place', $placeOfDeath);
-        $stmt->bindParam(':gender', $gender);
-        $stmt->bindParam(':id', $memberId);
-        $stmt->bindParam(':source', $source);
-        $stmt->bindParam(':alive', $alive);
-        return $stmt->execute();
-    }
-
     public function getRelationships($memberId)
     {
         $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
@@ -267,10 +246,9 @@ class MemberModel  extends AppModel
         $stmt->execute(['memberId' => $memberId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId)
     {
-        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,tree_id) VALUES (:person_id1, :person_id2, :relationship_type_id,:tree_id)";
+        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,tree_id,created_at, updated_at) VALUES (:person_id1, :person_id2, :relationship_type_id,:tree_id, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'person_id1' => $personId1,
@@ -279,7 +257,7 @@ class MemberModel  extends AppModel
             'tree_id' => $treeId
         ]);
     }
-    public function swapRelationship($relationshipId)
+      public function swapRelationship($relationshipId)
     {
         // Start transaction
         $this->db->beginTransaction();
@@ -335,7 +313,7 @@ class MemberModel  extends AppModel
                          f.marriage_date, f.divorce_date,
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
-                  JOIN families f ON (f.husband_id = p.id OR f.wife_id = p.id)
+                  JOIN $this->families_table f ON (f.husband_id = p.id OR f.wife_id = p.id)
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 
@@ -348,7 +326,7 @@ class MemberModel  extends AppModel
         $families = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // For each family, get the children
-        foreach ($families as &$family) { 
+        foreach ($families as &$family) {
             if ($family['husband_name'] && $family['husband_lastname']) {
                 $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
             }
@@ -358,13 +336,13 @@ class MemberModel  extends AppModel
 
             // Get children for this family
             $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
-                             FROM family_children fc
+                             FROM $this->family_children_table fc
                              JOIN $this->person_table c ON fc.child_id = c.id
-                             WHERE fc.$this->family_id_field = :family_id_field
+                             WHERE fc.family_id = :family_id
                              ORDER BY c.birth_date";
             
             $childrenStmt = $this->db->prepare($childrenQuery);
-            $childrenStmt->bindParam(':family_id_field', $family['$this->family_id_field']);
+            $childrenStmt->bindParam(':family_id', $family['id']);
             $childrenStmt->execute();
             
             $family['children'] = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -379,8 +357,8 @@ class MemberModel  extends AppModel
                          w.first_name as wife_name, w.last_name as wife_lastname,
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
-                  JOIN family_children fc ON fc.child_id = p.id
-                  JOIN families f ON fc.$this->family_id_field = f.$this->family_id_field
+                  JOIN $this->family_children_table fc ON fc.child_id = p.id
+                  JOIN $this->families_table f ON fc.family_id = f.id
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
                   WHERE p.id = :member_id 
@@ -402,16 +380,14 @@ class MemberModel  extends AppModel
         return $families;
     }
 
-    public function createFamily($familyData)
+        public function createFamily($familyData)
     {
         try {
-            error_log("Creating family with data: " . print_r($familyData, true));
-            
-            // Handle empty marriage date
             $marriage_date = !empty($familyData['marriage_date']) ? $familyData['marriage_date'] : null;
-            
-            $query = "INSERT INTO families (tree_id, husband_id, wife_id, marriage_date) 
-                      VALUES (:tree_id, :husband_id, :wife_id, :marriage_date)";
+
+            $query = "INSERT INTO $this->families_table (tree_id, husband_id, wife_id, marriage_date, created_at, updated_at) 
+                    VALUES (:tree_id, :husband_id, :wife_id, :marriage_date, NOW(), NOW())";
+
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
                 'tree_id' => $familyData['tree_id'],
@@ -419,25 +395,42 @@ class MemberModel  extends AppModel
                 'wife_id' => $familyData['wife_id'],
                 'marriage_date' => $marriage_date
             ]);
-            
             if (!$result) {
-                error_log("Database error: " . print_r($stmt->errorInfo(), true));
-            }
-            
-            return $result;
+                 error_log("Database error: " . print_r($stmt->errorInfo(), true));
+             }
+
+            return $this->db->lastInsertId();
         } catch (Exception $e) {
             error_log("Error creating family: " . $e->getMessage());
             return false;
         }
     }
-
-    public function addChildToFamily($familyId, $childId, $treeId)
+     public function updateFamily($familyData)
     {
-        $query = "INSERT INTO family_children ($this->family_id_field, child_id, tree_id) 
-                  VALUES (:$this->family_id_field, :child_id, :tree_id)";
+          try {
+              $query = "UPDATE $this->families_table SET updated_at = NOW() WHERE id = :family_id";
+             $stmt = $this->db->prepare($query);
+           $result = $stmt->execute([
+             'family_id' => $familyData['family_id']
+           ]);
+             if (!$result) {
+                 error_log("Database error: " . print_r($stmt->errorInfo(), true));
+            }
+            return $result;
+
+          } catch (Exception $e) {
+             error_log("Error updating family: " . $e->getMessage());
+            return false;
+          }
+
+    }
+     public function addChildToFamily($familyId, $childId, $treeId)
+    {
+        $query = "INSERT INTO $this->family_children_table (family_id, child_id, tree_id, created_at, updated_at) 
+                  VALUES (:family_id, :child_id, :tree_id, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
-            '$this->family_id_field' => $familyId,
+            'family_id' => $familyId,
             'child_id' => $childId,
             'tree_id' => $treeId
         ]);
@@ -445,50 +438,42 @@ class MemberModel  extends AppModel
 
     public function removeChildFromFamily($childId, $familyId)
     {
-        $query = "DELETE FROM family_children WHERE child_id = :child_id AND $this->family_id_field = :$this->family_id_field";
+        $query = "DELETE FROM $this->family_children_table WHERE child_id = :child_id AND family_id = :family_id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'child_id' => $childId,
-            '$this->family_id_field' => $familyId
+            'family_id' => $familyId
         ]);
     }
-
     public function removeSpouseFromFamily($spouseId, $familyId)
     {
         $this->db->beginTransaction();
         try {
-            error_log("Starting removeSpouseFromFamily - spouseId: $spouseId, familyId: $familyId");
-
             // Check if family has children
-            $query = "SELECT COUNT(*) FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "SELECT COUNT(*) FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
-            error_log("Has children: " . ($hasChildren ? 'yes' : 'no'));
 
-            if ($spouseId) {
-                // Update the family to remove the specific spouse
-                $query = "UPDATE families 
-                          SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
-                              wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
-                          WHERE $this->family_id_field = :$this->family_id_field";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([
-                    'spouse_id' => $spouseId,
-                    '$this->family_id_field' => $familyId
-                ]);
-            }
-
+             // Update the family to remove the specific spouse
+             if ($spouseId) {
+                 $query = "UPDATE $this->families_table 
+                           SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
+                               wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END,
+                               updated_at=NOW()
+                           WHERE id = :family_id";
+                 $stmt = $this->db->prepare($query);
+                 $stmt->execute([
+                     'spouse_id' => $spouseId,
+                     'family_id' => $familyId
+                 ]);
+             }
             // If no children, delete the family
             if (!$hasChildren) {
-                error_log("No children, deleting family $familyId");
-                $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
+                $query = "DELETE FROM $this->families_table WHERE id = :family_id";
                 $stmt = $this->db->prepare($query);
-                $result = $stmt->execute(['$this->family_id_field' => $familyId]);
-                error_log("Delete result: " . ($result ? 'success' : 'failed'));
-            } else {
-                error_log("Has children, keeping family");
-            }
+                $result = $stmt->execute(['family_id' => $familyId]);
+             }
 
             $this->db->commit();
             return true;
@@ -498,20 +483,19 @@ class MemberModel  extends AppModel
             return false;
         }
     }
-
     public function deleteSpouseKeepChildren($spouseId, $familyId)
     {
         $this->db->beginTransaction();
         try {
             // First set spouse to null in family
-            $query = "UPDATE families 
+            $query = "UPDATE $this->families_table 
                       SET husband_id = CASE WHEN husband_id = :spouse_id THEN NULL ELSE husband_id END,
-                          wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END
-                      WHERE $this->family_id_field = :$this->family_id_field";
+                          wife_id = CASE WHEN wife_id = :spouse_id THEN NULL ELSE wife_id END, updated_at = NOW()
+                      WHERE id = :family_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute([
                 'spouse_id' => $spouseId,
-                '$this->family_id_field' => $familyId
+                'family_id' => $familyId
             ]);
 
             // Delete the spouse if one was specified
@@ -520,16 +504,16 @@ class MemberModel  extends AppModel
             }
 
             // Check if family has children
-            $query = "SELECT COUNT(*) FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "SELECT COUNT(*) FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
 
             // If no children, delete the family
             if (!$hasChildren) {
-                $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
+                $query = "DELETE FROM $this->families_table WHERE id = :family_id";
                 $stmt = $this->db->prepare($query);
-                $stmt->execute(['$this->family_id_field' => $familyId]);
+                $stmt->execute(['family_id' => $familyId]);
             }
 
             $this->db->commit();
@@ -546,9 +530,9 @@ class MemberModel  extends AppModel
         $this->db->beginTransaction();
         try {
             // Delete all children first
-            $query = "SELECT child_id FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "SELECT child_id FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
             $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             foreach ($children as $childId) {
@@ -561,9 +545,9 @@ class MemberModel  extends AppModel
             }
 
             // Delete the family
-            $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "DELETE FROM $this->families_table WHERE id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
 
             $this->db->commit();
             return true;
@@ -573,40 +557,32 @@ class MemberModel  extends AppModel
             return false;
         }
     }
-
     public function deleteFamilyAndChildren($familyId)
     {
         $this->db->beginTransaction();
         try {
-            error_log("Starting deleteFamilyAndChildren for familyId: $familyId");
-
             // Get all children from this family
-            $query = "SELECT child_id FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "SELECT child_id FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
             $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            error_log("Found children: " . print_r($children, true));
 
             // Delete all children
             foreach ($children as $childId) {
-                error_log("Deleting child: $childId");
                 $this->deleteMember($childId);
             }
 
             // Delete family_children records first
-            error_log("Deleting family_children records");
-            $query = "DELETE FROM family_children WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "DELETE FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
 
             // Delete the family record
-            error_log("Deleting family record");
-            $query = "DELETE FROM families WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "DELETE FROM $this->families_table WHERE id = :family_id";
             $stmt = $this->db->prepare($query);
-            $result = $stmt->execute(['$this->family_id_field' => $familyId]);
-            error_log("Family delete result: " . ($result ? 'success' : 'failed'));
-            if (!$result) {
-                error_log("Family delete error: " . print_r($stmt->errorInfo(), true));
+            $result = $stmt->execute(['family_id' => $familyId]);
+             if (!$result) {
+                 error_log("Database error: " . print_r($stmt->errorInfo(), true));
             }
 
             $this->db->commit();
@@ -623,40 +599,30 @@ class MemberModel  extends AppModel
     {
         $this->db->beginTransaction();
         try {
-            error_log("Updating family spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender");
 
             // First verify the family exists
-            $query = "SELECT * FROM families WHERE $this->family_id_field = :$this->family_id_field";
+            $query = "SELECT * FROM $this->families_table WHERE id = :family_id";
             $stmt = $this->db->prepare($query);
-            $stmt->execute(['$this->family_id_field' => $familyId]);
+            $stmt->execute(['family_id' => $familyId]);
             $family = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$family) {
                 throw new Exception("Family not found");
             }
 
-            error_log("Current family data: " . print_r($family, true));
-
             // Handle empty marriage date
             $marriageDate = !empty($marriageDate) ? $marriageDate : null;
 
             // Update the appropriate spouse field based on gender
-            $query = "UPDATE families 
+            $query = "UPDATE $this->families_table 
                       SET " . ($memberGender == 1 ? "wife_id" : "husband_id") . " = :spouse_id,
-                          marriage_date = :marriage_date
-                      WHERE $this->family_id_field = :$this->family_id_field";
-            
-            error_log("Update query: $query");
-            error_log("Parameters: " . print_r([
-                'spouse_id' => $spouseId,
-                '$this->family_id_field' => $familyId,
-                'marriage_date' => $marriageDate
-            ], true));
+                          marriage_date = :marriage_date, updated_at = NOW()
+                      WHERE id = :family_id";
             
             $stmt = $this->db->prepare($query);
             $result = $stmt->execute([
                 'spouse_id' => $spouseId,
-                '$this->family_id_field' => $familyId,
+                'family_id' => $familyId,
                 'marriage_date' => $marriageDate  // Will be NULL if empty
             ]);
 
@@ -674,16 +640,60 @@ class MemberModel  extends AppModel
             throw $e;
         }
     }
+       public function getExistingFamily($husbandId, $wifeId, $treeId) {
+        $query = "SELECT id FROM $this->families_table
+        WHERE (husband_id = :husband_id AND wife_id = :wife_id OR husband_id = :wife_id AND wife_id = :husband_id ) and tree_id = :tree_id";
+           $stmt = $this->db->prepare($query);
+           $stmt->execute([
+               'husband_id' => $husbandId,
+                'wife_id' => $wifeId,
+               'tree_id' => $treeId
+           ]);
+           $result = $stmt->fetch(PDO::FETCH_ASSOC);
+           if ($result) {
+             return $result['id'];
+           }
+           return null;
+    }
 
+     public function createFamilyWithChild($familyData, $childId) {
+        $this->db->beginTransaction();
+        try {
+            $familyId = $this->createFamily($familyData);
+
+            if (!$familyId) {
+                throw new Exception("Failed to create family");
+             }
+
+            $result = $this->addChildToFamily($familyId, $childId, $familyData['tree_id']);
+
+           if (!$result) {
+                throw new Exception("Failed to add child to family");
+           }
+
+           $this->db->commit();
+
+            return $familyId;
+         } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error creating family with child: " . $e->getMessage());
+            return false;
+        }
+    }
     public function getDescendantsHierarchy($memberId) {
         $person = $this->getMemberById($memberId);
         if (!$person) {
+            error_log("getDescendantsHierarchy: Person not found for memberId: " . $memberId);
             return null;
         }
 
         // Get all families where this person is a spouse
         $spouseFamilies = $this->getSpouseFamilies($memberId);
-        
+        if (!$spouseFamilies) {
+            error_log("getDescendantsHierarchy: No spouse families found for memberId: " . $memberId);
+            return null;
+        }
+
         $result = [
             'id' => $person['id'],
             'name' => trim($person['first_name'] . ' ' . $person['last_name']),
@@ -694,7 +704,7 @@ class MemberModel  extends AppModel
             ],
             'marriages' => []
         ];
-
+        
         // Process each family
         foreach ($spouseFamilies as $family) {
             $spouseId = ($person['gender'] == 'M') ? $family['wife_id'] : $family['husband_id'];
@@ -702,7 +712,7 @@ class MemberModel  extends AppModel
             
             // Add spouse information if exists
             $marriage = [
-                'id' => $family['$this->family_id_field'],
+                'id' => $family['id'],
                 'spouse' => $spouseId ? [
                     'id' => $spouseId,
                     'name' => $spouseName,
@@ -714,15 +724,21 @@ class MemberModel  extends AppModel
                 ] : null,
                 'children' => []
             ];
-
+            
             // Add children for this marriage
             if (isset($family['children'])) {
-                foreach ($family['children'] as $child) {
-                    $childDescendants = $this->getDescendantsHierarchy($child['id']);
-                    if ($childDescendants) {
-                        $marriage['children'][] = $childDescendants;
-                    }
-                }
+                 foreach ($family['children'] as $child) {
+                    if (!isset($child['id']) || !is_numeric($child['id'])) {
+                            error_log("getDescendantsHierarchy: Invalid child ID for memberId: " . $memberId . " and child: " . print_r($child,true));
+                            continue;
+                     }
+
+                        $childDescendants = $this->getDescendantsHierarchy($child['id']);
+                        if ($childDescendants) {
+                            $marriage['children'][] = $childDescendants;
+                        }
+
+                  }
             }
             
             $result['marriages'][] = $marriage;
