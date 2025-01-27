@@ -57,10 +57,32 @@ export class RelationshipManager {
 
     initializeSaveButton() {
         $('#saveRelationship').click(() => this.saveRelationship());
+        alert("hi");
     }
 
     saveRelationship() {
-        // ... (save relationship implementation)
+        alert("hi");
+        const activeTab = $('.nav-link.active').attr('id').replace('-tab', '');
+        const formData = $(`#${activeTab}-form-content :input`).serializeArray();
+        const relationshipData = {
+            type: activeTab, // Relationship type (spouse, child, parent, other)
+            data: formData,  // Form data
+        };
+    
+        $.ajax({
+            url: 'index.php',
+            method: 'POST',
+            data: {
+                action: 'add_relationship',
+                relationship: relationshipData,
+            },
+            success: (response) => {
+                console.log('Relationship saved:', response);
+            },
+            error: (xhr, status, error) => {
+                console.error('Error saving relationship:', error);
+            },
+        });
     }
 
     loadInitialForm() {

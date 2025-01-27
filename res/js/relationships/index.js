@@ -93,7 +93,13 @@ class RelationshipManager {
     initializeSaveButton() {
         const saveButton = document.getElementById('saveRelationship');
         if (saveButton) {
-            saveButton.addEventListener('click', () => this.saveRelationship());
+            saveButton.addEventListener('click', (event) => {
+                try {
+                     this.saveRelationship(event);
+                 } catch (error) {
+                     console.error('Error on initializeSaveButton', error);
+                 }
+            });
             console.log('Save button handler initialized'); // Debug
         }
     }
@@ -112,12 +118,40 @@ class RelationshipManager {
     }
 
     async saveRelationship() {
+        const activeTab = $('.nav-link.active').attr('id').replace('-tab', '');
+        const formData = $(`#${activeTab}-form-content :input`).serializeArray();
+        const relationshipData = {
+            type: activeTab, // Relationship type (spouse, child, parent, other)
+            data: formData,  // Form data
+        };
+    
+        $.ajax({
+            url: 'index.php',
+            method: 'POST',
+            data: {
+                action: 'add_relationship',
+                relationship: relationshipData,
+            },
+            success: (response) => {
+                console.log('Relationship saved:', response);
+            },
+            error: (xhr, status, error) => {
+                console.error('Error saving relationship:', error);
+            },
+        });
+    }
+    
+    async oldsaveRelationship(event) {
         console.log('Saving relationship...'); // Debug
-        const form = document.getElementById('add-relationship-form');
-        const formData = new FormData(form);
-        formData.append('relationship_type', this.activeTab);
+        alert("hi");
+         try {
+             event.preventDefault();
+            const form = document.getElementById('add-relationship-form');
+             const formData = new FormData(form);
+             const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab','');
+            formData.append('relationship_type', activeTab);
 
-        try {
+
             const response = await fetch('index.php?action=add_relationship', {
                 method: 'POST',
                 body: formData
@@ -130,11 +164,12 @@ class RelationshipManager {
             } else {
                 alert(data.message || 'Failed to add relationship');
             }
-        } catch (error) {
-            console.error('Error:', error);
+         } catch (error) {
+              console.error('Error saving relationship', error)
             alert('Failed to add relationship. Please try again.');
         }
-    }
+     }
+    
 }
 
 // Initialize when the DOM is ready
@@ -153,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Add at the top of the file
 const resizeObserverError = error => {
-    if (error.message.includes('ResizeObserver')) {
+    if (error && error.message && error.message.includes('ResizeObserver')) {
         // Ignore ResizeObserver errors
         return;
     }
