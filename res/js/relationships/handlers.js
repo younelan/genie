@@ -97,6 +97,7 @@ export class RelationshipHandlers {
     }
 
     initializeOtherHandlers() {
+        console.log(this.member);
         const typeRadios = document.querySelectorAll('input[name="other_type"]');
         typeRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
@@ -119,11 +120,10 @@ export class RelationshipHandlers {
     async initializeAutocomplete(selector, type) {
         const input = document.querySelector(selector);
         if (!input) return;
-
+        console.log(this.member)
         // Remove any existing event listeners
         const newInput = input.cloneNode(true);
         input.parentNode.replaceChild(newInput, input);
-
         // Initialize autocomplete on input
         newInput.addEventListener('input', async (e) => {
             const value = e.target.value;
@@ -141,7 +141,7 @@ export class RelationshipHandlers {
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const data = await response.json();
-                console.log('Autocomplete data:', data); // Debug
+                //console.log('Autocomplete data:', data); // Debug
 
                 const datalist = document.getElementById(`${type}-options`);
                 if (!datalist) {

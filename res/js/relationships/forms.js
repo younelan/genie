@@ -1,19 +1,22 @@
 import { PersonType } from './types.js';
 
 export class FormGenerator {
-    constructor(member, spouseFamilies) {
+    constructor(member, spouseFamilies, translations) {
         this.member = member;
         this.spouseFamilies = spouseFamilies;
+        this.translations = translations;
     }
-
+    translate(key) {
+        return translations[key] || key;
+    }
     getPersonTypeSelector(type) {
         return `
             <div class="mb-3">
                 <div class="btn-group w-100" role="group">
                     <input type="radio" class="btn-check" name="${type}_type" id="existing_${type}" value="${PersonType.EXISTING}" checked>
-                    <label class="btn btn-outline-primary" for="existing_${type}">Existing Person</label>
+                    <label class="btn btn-outline-primary" for="existing_${type}">${this.translate("Existing Person")}</label>
                     <input type="radio" class="btn-check" name="${type}_type" id="new_${type}" value="${PersonType.NEW}">
-                    <label class="btn btn-outline-primary" for="new_${type}">New Person</label>
+                    <label class="btn btn-outline-primary" for="new_${type}">${this.translate("New Person")}</label>
                 </div>
             </div>`;
     }
@@ -22,10 +25,11 @@ export class FormGenerator {
         return `
             <div id="${type}-existing-section">
                 <div class="form-group mb-3">
-                    <label>Select Existing ${type.charAt(0).toUpperCase() + type.slice(1)}:</label>
+                        <label>${this.translate("Select Existing " + type.charAt(0).toUpperCase() + type.slice(1))}:</label>
                     <input type="text" class="form-control" id="${type}_autocomplete" list="${type}-options">
                     <datalist id="${type}-options"></datalist>
                     <input type="hidden" name="${type}_id" id="selected_${type}_id">
+                    <input type="hidden" name="tree_id" value="${this.member.tree_id}">
                 </div>
             </div>`;
     }
@@ -33,14 +37,14 @@ export class FormGenerator {
     getGenderSelector(type, defaultGender = 'M') {
         return `
             <div class="form-group mb-3">
-                <label>Gender:</label>
+                <label>${this.translate("Gender")}:</label>
                 <div class="btn-group w-100" role="group">
                     <input type="radio" class="btn-check" name="${type}_gender" id="${type}_gender_M" value="M" ${defaultGender === 'M' ? 'checked' : ''}>
-                    <label class="btn btn-outline-primary" for="${type}_gender_M">Male</label>
+                    <label class="btn btn-outline-primary" for="${type}_gender_M">${this.translate("Male")}</label>
                     <input type="radio" class="btn-check" name="${type}_gender" id="${type}_gender_F" value="F" ${defaultGender === 'F' ? 'checked' : ''}>
-                    <label class="btn btn-outline-primary" for="${type}_gender_F">Female</label>
+                    <label class="btn btn-outline-primary" for="${type}_gender_F">${this.translate("Female")}</label>
                     <input type="radio" class="btn-check" name="${type}_gender" id="${type}_gender_U" value="U" ${defaultGender === 'U' ? 'checked' : ''}>
-                    <label class="btn btn-outline-primary" for="${type}_gender_U">Unspecified</label>
+                    <label class="btn btn-outline-primary" for="${type}_gender_U">${this.translate("Unspecified")}</label>
                 </div>
             </div>`;
     }
@@ -49,9 +53,9 @@ export class FormGenerator {
         return `
             <div id="${type}-new-section" style="display:none">
                 <div class="form-group mb-3">
-                    <label>New ${type.charAt(0).toUpperCase() + type.slice(1)} Details:</label>
-                    <input type="text" class="form-control mb-2" name="${type}_first_name" placeholder="First Name" required>
-                    <input type="text" class="form-control mb-2" name="${type}_last_name" placeholder="Last Name" required>
+                    <label>${this.translate("New")} ${this.translate(type.charAt(0).toUpperCase() + type.slice(1))} ${this.translate("Details")}:</label>
+                    <input type="text" class="form-control mb-2" name="${type}_first_name" placeholder="${this.translate("First Name")}" required>
+                    <input type="text" class="form-control mb-2" name="${type}_last_name" placeholder="${this.translate("Last Name")}" required>
                     <input type="date" class="form-control mb-2" name="${type}_birth_date">
                     ${includeGender ? this.getGenderSelector(type, defaultGender) : ''}
                 </div>
@@ -64,7 +68,7 @@ export class FormGenerator {
             ${this.getExistingPersonSection('spouse')}
             ${this.getNewPersonSection('spouse', true, this.member.gender === 'M' ? 'F' : 'M')}
             <div class="form-group">
-                <label>Marriage Date:</label>
+                <label>${this.translate("Marriage Date")}:</label>
                 <input type="date" class="form-control" name="marriage_date">
             </div>`;
     }
@@ -72,7 +76,7 @@ export class FormGenerator {
     getChildForm() {
         const familyOptions = this.spouseFamilies.map(family => {
             const spouseName = this.member.gender === 'M' ? family.wife_name : family.husband_name;
-            return `<option value="${family.family_id}">With ${spouseName || 'Unknown Spouse'}</option>`;
+            return `<option value="${family.family_id}">With ${spouseName || '${this.translate("Unknown Spouse")}'}</option>`;
         }).join('');
 
         return `
@@ -80,7 +84,7 @@ export class FormGenerator {
                 <label>Family:</label>
                 <select class="form-control" name="family_id" id="family_select">
                     ${familyOptions}
-                    <option value="new">New Family (No Spouse)</option>
+                    <option value="new">${this.translate("New Family")} (${this.translate("No Spouse")})</option>
                 </select>
             </div>
             ${this.getPersonTypeSelector('child')}
@@ -91,7 +95,7 @@ export class FormGenerator {
     getParentForm() {
         return `
             <div class="mb-3">
-                <h5>First Parent</h5>
+                <h5>${this.translate("First Parent")}</h5>
                 <div class="mb-3">
                     ${this.getPersonTypeSelector('parent1')}
                     ${this.getExistingPersonSection('parent1')}
@@ -99,12 +103,12 @@ export class FormGenerator {
                 </div>
             </div>
             <div class="mb-3">
-                <h5>Second Parent</h5>
+                <h5>${this.translate("Second Parent")}</h5>
                 <div class="form-group mb-3">
                     <select class="form-control" name="second_parent_option" id="second_parent_select">
-                        <option value="none">Single Parent</option>
-                        <option value="existing_family">Existing Family</option>
-                        <option value="new">New Parent</option>
+                        <option value="none">${this.translate("Single Parent")}</option>
+                        <option value="existing_family">${this.translate("Existing Family")}</option>
+                        <option value="new">${this.translate("New Parent")}</option>
                     </select>
                 </div>
                 <div id="existing-family-section" style="display:none">
@@ -117,7 +121,7 @@ export class FormGenerator {
     getOtherForm() {
         return `
             <div class="form-group mb-3">
-                <label>Relationship Type:</label>
+                <label>${this.translate("Relationship Type")}:</label>
                 <select class="form-control" name="relationship_type">
                     <option value="COUSIN">Cousin</option>
                     <option value="SIBLING">Sibling</option>

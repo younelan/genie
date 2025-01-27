@@ -180,7 +180,8 @@ class MemberController extends AppController
 
     public function autocompleteMember($termId, $memberId, $treeId)
     {
-        $results = $this->member->autocompleteMember($termId, $treeId);
+        $results = $this->member->autocompleteMember($termId,  $memberId  , $treeId);
+        //apachelog("--autocompleteMember treeId $treeId termId $termId member_id $memberId");
         echo json_encode($results);
     }
     public function autocompleteMemberGet() {

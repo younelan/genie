@@ -143,9 +143,10 @@ switch ($action) {
         $term = $_GET['term'];
         $memberId = $_GET['member_id']??1;
         $tree = $_GET['tree_id']??1;
-        //apachelog($tree);
+        //apachelog("autocomplete_member $term $memberId $tree");
         $memberController->autocompleteMember($term,$memberId,$tree);
         exit;
+        break;
     case 'search_members':
         $treeController->searchMembers();
         break;

@@ -770,7 +770,8 @@ input[type="date"] {
     window.relationshipData = {
         member: {
             id: {{ member.id|json_encode|raw }},
-            gender: {{ member.gender|json_encode|raw }}
+            gender: {{ member.gender|json_encode|raw }},
+            tree_id: {{member.tree_id}}
         },
         spouseFamilies: {{ spouse_families|json_encode|raw }}
     };

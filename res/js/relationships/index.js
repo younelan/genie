@@ -3,10 +3,11 @@ import { FormGenerator } from './forms.js';
 import { RelationshipHandlers } from './handlers.js';
 
 class RelationshipManager {
-    constructor(member, spouseFamilies) {
+    constructor(member, spouseFamilies,translations) {
         this.member = member;
         this.spouseFamilies = spouseFamilies;
-        this.formGenerator = new FormGenerator(member, spouseFamilies);
+        this.translations = translations;
+        this.formGenerator = new FormGenerator(member, spouseFamilies,translations);
         this.handlers = new RelationshipHandlers(member);
         this.modal = null;
         this.activeTab = RelationshipType.SPOUSE;
@@ -89,8 +90,11 @@ class RelationshipManager {
         console.log('Loading initial form...'); // Debug
         this.loadFormContent(this.activeTab);
     }
-
+    initializeTranslations(translations) {
+        this.translations = translations;
+    }
     initializeButtons() {
+        //console.log(translate('Initializing buttons...')); // Debug
         const saveButton = document.getElementById('saveRelationship');
         if (saveButton) {
             saveButton.addEventListener('click', (event) => {
@@ -211,7 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Required data not found:', { member, spouseFamilies }); // Debug
         return;
     }
-    const manager = new RelationshipManager(member, spouseFamilies);
+    console.log(translations)
+    const manager = new RelationshipManager(member, spouseFamilies,translations);
     manager.initialize();
     const addRelationshipModal = new bootstrap.Modal(document.getElementById('addRelationshipModal'));
 
