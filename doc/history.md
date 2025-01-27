@@ -15,6 +15,21 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
+## 20250128
+     - Rewrote the add relationship as a modal so that it works better on mobile
+         - Spouses to be added as Families, existing or new member
+         - Children to be added to existing families
+         - Possibility to add parents, existing/new
+         - Cousins, Siblings can be added to old relationship table
+     - Titles are now H5
+     - Relationship.js is now broken down into multiple files for easier editing
+     - New Family Controller/ Model... member controller getting to big
+     - translate add relationship form
+     - all translations are now passed to edit_member for better translation
+     - Add Relationship is now at the beginning of the form for mobile support
+     - autocompleteMember passes the tree so that people are part of current tree
+     - Bootstrap is now version 5
+
 ## 20250101
     - Breaking change: switched to individuals table which is more gedcom compliant
         - no more middle_name, body, alias1, alias2, alias3 - not gedcom fields
