@@ -183,6 +183,29 @@ class MemberController extends AppController
         $results = $this->member->autocompleteMember($termId, $treeId);
         echo json_encode($results);
     }
+    public function autocompleteMemberGet() {
+        if (!isset($_GET['term']) || !isset($_GET['member_id']) || !isset($_GET['tree_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Term, member ID, and tree ID are required']);
+            exit;
+        }
+    
+        $term = $_GET['term'];
+        $memberId = $_GET['member_id'];
+        $treeId = $_GET['tree_id'];
+    
+        try {
+            // Fetch matching members from the model
+            $members = $this->memberModel->autocompleteMembers($term, $memberId, $treeId);
+            
+            header('Content-Type: application/json');
+            echo json_encode($members);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
     public function getRelationships($memberId)
     {
         $relationships = $this->member->getMemberRelationships($memberId); // Fetch relationships
@@ -222,127 +245,65 @@ class MemberController extends AppController
         }
         exit;
     }
-    public function addRelationship()
+    public function addRelationship($memberId, $personId2, $relationshipTypeId) 
     {
         try {
-            $memberId = $_POST['member_id'] ?? null;
-            $familyTreeId = $_POST['tree_id'] ?? null;
-            $relationCategory = $_POST['relation_category'] ?? 'other';
+            // Get tree_id and current member's info
+            $member = $this->member->getMemberById($memberId);
+            if (!$member) {
+                throw new Exception("Invalid member ID");
+            }
+            $treeId = $member['tree_id'];
 
-            if (!$memberId || !$familyTreeId) {
-                throw new Exception('Missing required member_id or tree_id');
+            // Handle new person creation
+            if (empty($personId2) && isset($_POST['member_type']) && $_POST['member_type'] === 'new') {
+                $newPersonData = [
+                    'treeId' => $treeId,
+                    'firstName' => $_POST['new_first_name'],
+                    'lastName' => $_POST['new_last_name'],
+                    'gender' => $_POST['new_gender'],
+                    'dateOfBirth' => $_POST['new_birth_date'] ?? null,
+                    'placeOfBirth' => $_POST['new_birth_place'] ?? null,
+                    'alive' => 1
+                ];
+                
+                $personId2 = $this->member->addMember($newPersonData);
+                if (!$personId2) {
+                    throw new Exception("Failed to create new person");
+                }
             }
 
-            if ($relationCategory === 'parent') {
-                return $this->handleAddParents($memberId, $familyTreeId);
-            }
+            // Handle different relationship types
+            if ($relationshipTypeId == 1) { // Spouse relationship
+                $currentMemberGender = $member['gender'];
+                
+                $familyData = [
+                    'tree_id' => $treeId,
+                    'husband_id' => $currentMemberGender === 'M' ? $memberId : $personId2,
+                    'wife_id' => $currentMemberGender === 'F' ? $memberId : $personId2,
+                    'marriage_date' => $_POST['marriage_date'] ?? null
+                ];
 
-            // ... rest of existing addRelationship code ...
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    private function handleAddParents($memberId, $familyTreeId)
-    {
-        try {
-            // Handle first parent
-            $firstParentId = null;
-            if ($_POST['first_parent_type'] === 'existing') {
-                $firstParentId = $_POST['first_parent_id'] ?? null;
-                if (!$firstParentId) {
-                    throw new Exception('No first parent selected');
+                $success = $this->member->createFamily($familyData);
+                if (!$success) {
+                    throw new Exception("Failed to create family");
                 }
             } else {
-                // Create new first parent
-                if (empty($_POST['first_parent_first_name']) || empty($_POST['first_parent_last_name'])) {
-                    throw new Exception('First name and last name are required for new parent');
-                }
-                
-                $firstParent = [
-                    'treeId' => $familyTreeId,
-                    'firstName' => $_POST['first_parent_first_name'],
-                    'lastName' => $_POST['first_parent_last_name'],
-                    'dateOfBirth' => $_POST['first_parent_birth_date'] ?? null,
-                    'gender' => $_POST['first_parent_gender'] ?? null  // Changed from gender_id to gender
-                ];
-                $firstParentId = $this->member->addMember($firstParent);
+                // Handle other relationship types here
+                // For example: parent-child, sibling, etc.
             }
 
-            // Handle second parent based on type
-            $familyId = null;
-            switch ($_POST['second_parent_type']) {
-                case 'existing_family':
-                    $familyId = $_POST['existing_family_id'] ?? null;
-                    if (!$familyId) {
-                        throw new Exception('No family selected');
-                    }
-                    break;
-
-                case 'new_person':
-                    // Create new second parent and family
-                    if (empty($_POST['second_parent_first_name']) || empty($_POST['second_parent_last_name'])) {
-                        throw new Exception('First name and last name are required for second parent');
-                    }
-                    
-                    $secondParent = [
-                        'treeId' => $familyTreeId,
-                        'firstName' => $_POST['second_parent_first_name'],
-                        'lastName' => $_POST['second_parent_last_name'],
-                        'dateOfBirth' => $_POST['second_parent_birth_date'] ?? null,
-                        'gender' => ($_POST['first_parent_gender'] == 'M') ? 'F' : 'M'  // Changed from gender_id to gender
-                    ];
-                    $secondParentId = $this->member->addMember($secondParent);
-                    
-                    // Create new family
-                    $familyData = [
-                        'tree_id' => $familyTreeId,
-                        'husband_id' => $_POST['first_parent_gender'] == 'M' ? $firstParentId : $secondParentId,
-                        'wife_id' => $_POST['first_parent_gender'] == 'F' ? $firstParentId : $secondParentId
-                    ];
-                    $familyId = $this->member->createFamily($familyData);
-                    break;
-
-                case 'existing_person':
-                    $secondParentId = $_POST['second_parent_id'] ?? null;
-                    if (!$secondParentId) {
-                        throw new Exception('No second parent selected');
-                    }
-                    
-                    // Create new family with both parents
-                    $familyData = [
-                        'tree_id' => $familyTreeId,
-                        'husband_id' => $_POST['first_parent_gender'] == 'M' ? $firstParentId : $secondParentId,
-                        'wife_id' => $_POST['first_parent_gender'] == 'F' ? $firstParentId : $secondParentId
-                    ];
-                    $familyId = $this->member->createFamily($familyData);
-                    break;
-
-                default:
-                    throw new Exception('Invalid second parent type');
-            }
-
-            // Add child to family
-            if (!$familyId) {
-                throw new Exception('Failed to create or find family');
-            }
-            
-            $success = $this->member->addChildToFamily($familyId, $memberId, $familyTreeId);
-            if (!$success) {
-                throw new Exception('Failed to add child to family');
-            }
-
+            header('Content-Type: application/json');
             echo json_encode(['success' => true]);
+
         } catch (Exception $e) {
+            error_log("Error in addRelationship: " . $e->getMessage());
+            header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
-        exit;
     }
     public function updateRelationship($postData)
     {
@@ -435,6 +396,34 @@ class MemberController extends AppController
         ]);
         exit;
     }
+    public function getSpouseFamilies() {
+        if (!isset($_GET['member_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Member ID is required']);
+            exit;
+        }
+    
+        $memberId = $_GET['member_id'];
+        
+        try {
+            // Fetch spouse families from the model
+            $families = $this->member->getSpouseFamilies($memberId);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'spouse_families' => $families
+            ]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
+    
     public function deleteFamilyMember()
     {
         header('Content-Type: application/json');
