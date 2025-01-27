@@ -51,9 +51,9 @@ class MemberController extends AppController
             "go_back" => get_translation("Back to List"),            
             "error" => "",
             "tree_id" => $treeId,
+            "translations"=>json_encode($this->config['translations'][$this->config['lang']]),
             "graph" => $this->config['graph']
         ];
-
 
         $data["menu"] = [
             [

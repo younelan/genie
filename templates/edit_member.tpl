@@ -484,16 +484,7 @@ input[type="date"] {
     const treeId = {{treeId}}; // Pass member ID to JavaScript
     
     // Add translations object
-    const translations = {
-        "Choose action for child": "{{ get_translation("Choose action for child") }}",
-        "Remove from family only": "{{ get_translation("Remove from family only") }}",
-        "Delete child completely": "{{ get_translation("Delete child completely") }}",
-        "Press OK to remove from family only, Cancel to delete completely": "{{ get_translation("Press OK to remove from family only, Cancel to delete completely") }}",
-        "Choose delete option (enter number)": "{{ get_translation("Choose delete option (enter number)") }}",
-        "Remove relationship only": "{{ get_translation("Remove relationship only") }}",
-        "Delete spouse (keeps children)": "{{ get_translation("Delete spouse (keeps children)") }}",
-        "Delete spouse and all children": "{{ get_translation("Delete spouse and all children") }}"
-    };
+    const translations = {{translations|raw}};
 
     // Add translation function
     function get_translation(key) {
