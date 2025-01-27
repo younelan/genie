@@ -286,7 +286,7 @@ input[type="date"] {
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="addRelationshipModalLabel">{{ get_translation("Add Relationship") }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" id="closeRelModalX" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <form id="add-relationship-form">
@@ -350,7 +350,7 @@ input[type="date"] {
                                 </form>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
+                                <button type="button" class="btn btn-secondary" id="dismissRelModal" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
                                 <button type="button" class="btn btn-primary" id="saveRelationship">{{ get_translation("Save") }}</button>
                             </div>
                         </div>

@@ -16,7 +16,7 @@ class RelationshipManager {
         console.log('Initializing relationship manager...'); // Debug
         this.initializeModal();
         this.initializeTabs();
-        this.initializeSaveButton();
+        this.initializeButtons();
         this.loadInitialForm();
         this.initializeAddButton();
     }
@@ -90,7 +90,7 @@ class RelationshipManager {
         this.loadFormContent(this.activeTab);
     }
 
-    initializeSaveButton() {
+    initializeButtons() {
         const saveButton = document.getElementById('saveRelationship');
         if (saveButton) {
             saveButton.addEventListener('click', (event) => {
@@ -102,6 +102,19 @@ class RelationshipManager {
             });
             console.log('Save button handler initialized'); // Debug
         }
+        const closeRelModalX = document.getElementById('closeRelModalX');
+        if (closeRelModalX) {
+            closeRelModalX.addEventListener('click', (event) => {
+                this.closeRelModal();
+            });    
+        }
+        const dismissRelModal = document.getElementById('dismissRelModal');
+        if (dismissRelModal) {
+            dismissRelModal.addEventListener('click', (event) => {
+                this.closeRelModal();
+            });
+        }
+
     }
 
     initializeAddButton() {
@@ -117,8 +130,11 @@ class RelationshipManager {
         }
     }
 
+    closeRelModal() {
+        this.modal.hide();
+    }
 
-    async saveRelationship() {
+    saveRelationship(event) {
         const activeTab = $('.nav-link.active').attr('id').replace('-tab', '');
         const formData = $(`#${activeTab}-form-content :input`).serializeArray();
 
@@ -146,6 +162,8 @@ class RelationshipManager {
             },
             success: (response) => {
                 console.log('Relationship saved:', response);
+                this.modal.hide();
+
             },
             error: (xhr, status, error) => {
                 console.error('Error saving relationship:', error);
