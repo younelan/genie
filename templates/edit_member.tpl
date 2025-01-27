@@ -270,194 +270,86 @@ input[type="date"] {
                 {{ get_translation("Changes") }}
             </div>
             <div class="card-body">
-                <h2>{{ get_translation("Add Relationship") }}</h2>
-                <form id="add-relationship-form">
-                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
-                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
-                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
+                <!-- Add Relationship Button -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
+                    {{ get_translation("Add Relationship") }}
+                </button>
 
-                    <!-- Relationship type selection -->
-                    <div class="form-group">
-                        <label>{{ get_translation("Relationship Type") }}:</label><br>
-                        <label><input type="radio" name="relation_category" value="spouse" checked> {{ get_translation("Add Spouse") }}</label><br>
-                        <label><input type="radio" name="relation_category" value="child"> {{ get_translation("Add Child") }}</label><br>
-                        <label><input type="radio" name="relation_category" value="parent"> {{ get_translation("Add Parents") }}</label><br>
-                        <label><input type="radio" name="relation_category" value="other"> {{ get_translation("Add Other Relationship") }}</label><br>
-                    </div>
-
-                    <!-- Family selection for adding child (only shown when adding child) -->
-                    <div id="family-selection-section" style="display:none;">
-                        <label for="family_id">{{ get_translation("Select Family") }}:</label>
-                        <select name="family_id" id="family_id" class="form-control">
-                            {% for family in spouse_families %}
-                                <option value="{{ family.family_id }}">
-                                    {% if member.gender == 'M' and family.wife_name %}
-                                        {{ get_translation("With") }} {{ family.wife_name }}
-                                    {% elseif member.gender == 'F' and family.husband_name %}
-                                        {{ get_translation("With") }} {{ family.husband_name }}
-                                    {% else %}
-                                        {{ get_translation("Unknown Spouse") }}
-                                    {% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Person selection type -->
-                    <div class="form-group mt-3">
-                        <label><input type="radio" name="member_type" value="existing" checked> {{ get_translation("Existing Person") }}</label><br>
-                        <label><input type="radio" name="member_type" value="new"> {{ get_translation("New Person") }}</label>
-                    </div>
-
-                    <!-- Section for existing person selection -->
-                    <div id="existing-member-section">
-                        <label for="autocomplete_member">{{ get_translation("Select Existing Person") }}:</label>
-                        <input type="text" id="autocomplete_member" name="autocomplete_member" list="autocomplete-options" autocomplete="off" required><br>
-                        <datalist id="autocomplete-options"></datalist>
-                        <input type="hidden" name="person_id1" id="person_id1" value="{{ member.id|e }}">
-                        <input type="hidden" name="person_id2" id="person_id2" value="">
-                    </div>
-
-                    <!-- Section for new person -->
-                    <div id="new-member-section" style="display:none;">
-                        <label for="new_first_name">{{ get_translation("First Name") }}:</label>
-                        <input type="text" id="new_first_name" name="new_first_name"><br>
-
-                        <label for="new_last_name">{{ get_translation("Last Name") }}:</label>
-                        <input type="text" id="new_last_name" name="new_last_name"><br>
-
-                        <label for="new_gender">{{ get_translation("Gender") }}:</label>
-                        <select name="new_gender" id="new_gender">
-                            <option value="M">{{ get_translation("Male") }}</option>
-                            <option value="F">{{ get_translation("Female") }}</option>
-                        </select><br>
-
-                        <label for="new_birth_date">{{ get_translation("Birth Date") }}:</label>
-                        <input type="date" id="new_birth_date" name="new_birth_date"><br>
-                    </div>
-
-                    <!-- Other relationship type selection (only shown when "other" is selected) -->
-                    <div id="other-relationship-section" style="display:none;">
-                        <label for="relationship_type_select">{{ get_translation("Relationship Type") }}:</label>
-                        <select name="relationship_type_select" id="relationship_type_select">
-                            {% for rtype in relationship_types %}
-                             <option value="{{rtype.id}}"> {{get_translation(rtype.description)}} </option>
-                            {% endfor %}
-                        </select><br>
-                    </div>
-
-                    <!-- Family details section (only shown for spouse relationships) -->
-                    <div id="family-details-section" style="display:none;">
-                        <label for="marriage_date">{{ get_translation("Marriage Date") }}:</label>
-                        <input type="date" id="marriage_date" name="marriage_date"><br>
-                    </div>
-
-                    <!-- Add this in the "Add Relationship" section, after the existing radio buttons -->
-                    <div class="form-group">
-                        <label><input type="radio" name="relation_category" value="parent"> {{ get_translation("Add Parents") }}</label>
-                    </div>
-
-                    <!-- Add a new section for parent selection -->
-                    <div id="parent-selection-section" style="display:none;">
-                        <!-- First Parent -->
-                        <div class="first-parent-section">
-                            <h5>{{ get_translation("First Parent") }}</h5>
-                            <div class="form-group">
-                                <label><input type="radio" name="first_parent_type" value="existing" checked> {{ get_translation("Existing Person") }}</label>
-                                <label><input type="radio" name="first_parent_type" value="new"> {{ get_translation("New Person") }}</label>
+                <!-- Add Relationship Modal -->
+                <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addRelationshipModalLabel">{{ get_translation("Add Relationship") }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <div class="modal-body">
+                                <form id="add-relationship-form">
+                                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
+                                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
+                                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
 
-                            <!-- Existing First Parent -->
-                            <div id="existing-first-parent-section">
-                                <label for="first_parent_autocomplete">{{ get_translation("Select Person") }}:</label>
-                                <input type="text" id="first_parent_autocomplete" list="first-parent-options" class="form-control">
-                                <datalist id="first-parent-options"></datalist>
-                                <input type="hidden" id="first_parent_id" name="first_parent_id">
+                                    <!-- Relationship Type Tabs -->
+                                    <ul class="nav nav-tabs" id="relationshipTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="spouse-tab" data-bs-toggle="tab" data-bs-target="#spouse-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Spouse") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="child-tab" data-bs-toggle="tab" data-bs-target="#child-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Child") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="parent-tab" data-bs-toggle="tab" data-bs-target="#parent-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Parents") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Other Relationship") }}
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content pt-3" id="relationshipTabContent">
+                                        <!-- Spouse Tab -->
+                                        <div class="tab-pane fade show active" id="spouse-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="spouse-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Child Tab -->
+                                        <div class="tab-pane fade" id="child-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="child-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Parent Tab -->
+                                        <div class="tab-pane fade" id="parent-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="parent-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Other Tab -->
+                                        <div class="tab-pane fade" id="other-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="other-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
-
-                            <!-- New First Parent -->
-                            <div id="new-first-parent-section" style="display:none;">
-                                <label>{{ get_translation("First Name") }}:</label>
-                                <input type="text" name="first_parent_first_name" class="form-control">
-                                <label>{{ get_translation("Last Name") }}:</label>
-                                <input type="text" name="first_parent_last_name" class="form-control">
-                                <label>{{ get_translation("Gender") }}:</label>
-                                <select name="first_parent_gender" class="form-control">
-                                    <option value="M">{{ get_translation("Male") }}</option>
-                                    <option value="F">{{ get_translation("Female") }}</option>
-                                </select>
-                                <label>{{ get_translation("Birth Date") }}:</label>
-                                <input type="date" name="first_parent_birth_date" class="form-control">
-                            </div>
-                        </div>
-
-                        <!-- Second Parent -->
-                        <div class="second-parent-section mt-3">
-                            <h5>{{ get_translation("Second Parent") }}</h5>
-                            <div id="second-parent-options-section">
-                                <div class="form-group">
-                                    <label><input type="radio" name="second_parent_type" value="existing_family" checked> {{ get_translation("From Existing Family") }}</label>
-                                    <label><input type="radio" name="second_parent_type" value="new_person"> {{ get_translation("New Person") }}</label>
-                                    <label><input type="radio" name="second_parent_type" value="existing_person"> {{ get_translation("Other Existing Person") }}</label>
-                                </div>
-
-                                <!-- Existing Family Selection -->
-                                <div id="existing-family-section">
-                                    <select id="existing_family_select" class="form-control" style="display:none;">
-                                        <!-- Will be populated via JavaScript when first parent is selected -->
-                                    </select>
-                                </div>
-
-                                <!-- New Second Parent -->
-                                <div id="new-second-parent-section" style="display:none;">
-                                    <label>{{ get_translation("First Name") }}:</label>
-                                    <input type="text" name="second_parent_first_name" class="form-control">
-                                    <label>{{ get_translation("Last Name") }}:</label>
-                                    <input type="text" name="second_parent_last_name" class="form-control">
-                                    <label>{{ get_translation("Birth Date") }}:</label>
-                                    <input type="date" name="second_parent_birth_date" class="form-control">
-                                </div>
-
-                                <!-- Existing Second Parent -->
-                                <div id="existing-second-parent-section" style="display:none;">
-                                    <label for="second_parent_autocomplete">{{ get_translation("Select Person") }}:</label>
-                                    <input type="text" id="second_parent_autocomplete" list="second-parent-options" class="form-control">
-                                    <datalist id="second-parent-options"></datalist>
-                                    <input type="hidden" id="second_parent_id" name="second_parent_id">
-                                </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
+                                <button type="button" class="btn btn-primary" id="saveRelationship">{{ get_translation("Save") }}</button>
                             </div>
                         </div>
                     </div>
-
-                    <button type="button" id="add-relationship-btn" class="btn btn-primary mt-3">
-                        {{ get_translation("Add Relationship") }}
-                    </button>
-                </form>
-
-                <!-- Form to edit relationship (hidden by default) -->
-                <div id="edit-relationship-modal" style="display: none;">
-                    <h2>{{ get_translation("Edit Relationship") }}</h2>
-                    <form id="edit-relationship-form">
-                        <input type="hidden" id="edit_relationship_id" name="relationship_id">
-                        <input type="hidden" id="edit_member_id" name="member_id" value="{{ member.id|e }}">
-                        <input type="hidden" name="edit_member2_id" value="{{ member.id|e }}">
-                        <input type="hidden" name="edit_tree_id" value="{{ member.tree_id|e }}">
-
-                        <label for="edit_relationship_person1">{{ get_translation("Person 1") }}:</label>
-                        <input type="text" id="edit_relationship_person1" name="person1" readonly><br>
-
-                        <label for="edit_relationship_person2">{{ get_translation("Person 2") }}:</label>
-                        <input type="text" id="edit_relationship_person2" name="person2" readonly><br>
-                        <input type="date" id="edit_relation_start" name="relation_start"><br>
-                        <input type="date" id="edit_relation_end" name="relation_end"><br>
-
-                        <label for="edit_relationship_type">{{ get_translation("Relationship Type") }}:</label>
-                        <select name="relationship_type" id="edit_relationship_type">
-                            <!-- Options will be dynamically filled via AJAX -->
-                        </select><br>
-
-                        <button type="button" id="update-relationship-btn">{{ get_translation("Update Relationship") }}</button>
-                    </form>
                 </div>
                 <hr>
                 <h2>{{ get_translation("Delete Member") }}</h2>
@@ -490,7 +382,7 @@ input[type="date"] {
                 </select>
                 <input type="hidden" id="deleteSpouseId">
                 <input type="hidden" id="deleteFamilyId">
-            </div>/relationships.js?ver=1.1
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteSpouse">{{ get_translation("Delete") }}</button>
@@ -607,16 +499,6 @@ input[type="date"] {
             deathFields.style.display = 'none';
         }        
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        var script = document.createElement('script');
-        script.src = 'res/relationships.js?ver=1.4'; // Increment version number
-
-        script.onload = function() {
-            initializeRelationships(memberId);
-        };
-        document.head.appendChild(script);
-    });
-
     $(document).ready(function() {
         // Handle delete tree form submission with confirmation
         $('.delete-member-form').submit(function(event) {
@@ -881,4 +763,19 @@ input[type="date"] {
 
     });
 </script>
+
+<!-- Initialize data -->
+<script>
+    // Make data available globally
+    window.relationshipData = {
+        member: {
+            id: {{ member.id|json_encode|raw }},
+            gender: {{ member.gender|json_encode|raw }}
+        },
+        spouseFamilies: {{ spouse_families|json_encode|raw }}
+    };
+</script>
+
+<!-- Load the relationship manager -->
+<script type="module" src="res/js/relationships/index.js"></script>
 
