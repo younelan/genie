@@ -36,7 +36,7 @@
         </div>
     </div>
 <div class="navbar fixed-bottom footer">
-    &copy; Opensitez Genie (c) 2024
+    &copy; Opensitez Genie (c) 2025
     </div>
 </body>
 </html>
