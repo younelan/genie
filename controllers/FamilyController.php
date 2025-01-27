@@ -59,7 +59,7 @@ class FamilyController extends AppController
             default:
                 error_log("Invalid relationship type: $reltype");
         }
-        apachelog($_POST);
+        //apachelog($_POST);
 
     }
 
