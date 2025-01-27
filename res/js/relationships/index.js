@@ -42,14 +42,14 @@ class RelationshipManager {
                         pane.classList.remove('show', 'active');
                     }
                 });
-                
+
                 // Activate clicked tab
                 tab.classList.add('active');
                 const targetPane = document.querySelector(tab.dataset.bsTarget);
                 if (targetPane) {
                     targetPane.classList.add('show', 'active');
                 }
-                
+
                 this.activeTab = tab.id.replace('-tab', '');
                 this.loadFormContent(this.activeTab);
                 console.log('Tab changed to:', this.activeTab);
@@ -65,7 +65,7 @@ class RelationshipManager {
             return;
         }
 
-        switch(type) {
+        switch (type) {
             case RelationshipType.SPOUSE:
                 formContent.innerHTML = this.formGenerator.getSpouseForm();
                 this.handlers.initializeSpouseHandlers();
@@ -95,10 +95,10 @@ class RelationshipManager {
         if (saveButton) {
             saveButton.addEventListener('click', (event) => {
                 try {
-                     this.saveRelationship(event);
-                 } catch (error) {
-                     console.error('Error on initializeSaveButton', error);
-                 }
+                    this.saveRelationship(event);
+                } catch (error) {
+                    console.error('Error on initializeSaveButton', error);
+                }
             });
             console.log('Save button handler initialized'); // Debug
         }
@@ -117,14 +117,26 @@ class RelationshipManager {
         }
     }
 
+
     async saveRelationship() {
         const activeTab = $('.nav-link.active').attr('id').replace('-tab', '');
         const formData = $(`#${activeTab}-form-content :input`).serializeArray();
+
+        // Retrieve hidden fields' values
+        const memberId = $('#member_id').val();
+        const treeId = $('input[name="tree_id"]').val();
+        const memberGender = $('input[name="member_gender"]').val();
+
+        // Append hidden fields to form data
+        formData.push({ name: 'member_id', value: memberId });
+        formData.push({ name: 'tree_id', value: treeId });
+        formData.push({ name: 'member_gender', value: memberGender });
+
         const relationshipData = {
             type: activeTab, // Relationship type (spouse, child, parent, other)
             data: formData,  // Form data
         };
-    
+
         $.ajax({
             url: 'index.php',
             method: 'POST',
@@ -140,15 +152,16 @@ class RelationshipManager {
             },
         });
     }
-    
+
+
     async oldsaveRelationship(event) {
         console.log('Saving relationship...'); // Debug
         alert("hi");
-         try {
-             event.preventDefault();
+        try {
+            event.preventDefault();
             const form = document.getElementById('add-relationship-form');
-             const formData = new FormData(form);
-             const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab','');
+            const formData = new FormData(form);
+            const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab', '');
             formData.append('relationship_type', activeTab);
 
 
@@ -157,19 +170,19 @@ class RelationshipManager {
                 body: formData
             });
             const data = await response.json();
-            
+
             if (data.success) {
                 this.modal.hide();
                 window.location.reload();
             } else {
                 alert(data.message || 'Failed to add relationship');
             }
-         } catch (error) {
-              console.error('Error saving relationship', error)
+        } catch (error) {
+            console.error('Error saving relationship', error)
             alert('Failed to add relationship. Please try again.');
         }
-     }
-    
+    }
+
 }
 
 // Initialize when the DOM is ready
