@@ -20,11 +20,15 @@ input[type="date"] {
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
-                {{ get_translation("Member Details") }}
+                <h4>{{ get_translation("Member Details") }}</h4>
                 <a href="index.php?action=visualize_descendants&member_id={{ member.id }}" 
                    class="btn btn-primary float-right">
                     {{ get_translation("Visualize Descendants") }}
                 </a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
+                    {{ get_translation("Add Relationship") }}
+                </button>
+
             </div>
             <div class="card-body">
 
@@ -107,7 +111,7 @@ input[type="date"] {
                 <!-- Families where person is a child -->
                 <div class="card mt-4">
                     <div class="card-header">
-                        {{ get_translation("Parents") }}
+                       <h5> {{ get_translation("Parents") }}</h5>
                     </div>
                     <div class="card-body">
                         <table class="table">
@@ -151,7 +155,7 @@ input[type="date"] {
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
-                {{ get_translation("Families") }}
+                <h5>{{ get_translation("Families") }}</h5>
             </div>
             <div class="card-body">
                 <!-- Families where person is a spouse -->
@@ -267,15 +271,16 @@ input[type="date"] {
     <div class="col-lg-4 mb-4">
         <div class="card">
             <div class="card-header">
+            <h5>
                 {{ get_translation("Changes") }}
+                </h5>
             </div>
             <div class="card-body">
                 <!-- Add Relationship Button -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
-                    {{ get_translation("Add Relationship") }}
-                </button>
 
                 <!-- Add Relationship Modal -->
+
+                
                 <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
@@ -351,6 +356,10 @@ input[type="date"] {
                         </div>
                     </div>
                 </div>
+
+
+
+
                 <hr>
                 <h2>{{ get_translation("Delete Member") }}</h2>
                 {{ get_translation("Warning, This Can Not Be Undone") }}
