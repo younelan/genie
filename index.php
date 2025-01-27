@@ -44,6 +44,10 @@ $page = $_GET['page'] ?? 1;
 $treeController = new TreeController($config);
 $memberController = new MemberController($config);
 switch ($action) {
+    case 'get_spouse_families':
+        $memberController->getSpouseFamilies();
+        exit;
+        break;
     case 'list_trees':
         $treeController->listTrees();
         break;
