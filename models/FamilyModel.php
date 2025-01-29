@@ -19,9 +19,48 @@ class FamilyModel {
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
         
     }
-    public function createFamily($treeId,$husband,$wife,$children=null) {
-        // Create a family where treeid is required, either husband or wife is require but one can be null, children is optional
+    public function addIndividual($new_member)
+    {
+        $treeId = $new_member['treeId'] ?? null;
+        $firstName = $new_member['firstName'] ?? null;
+        $lastName = $new_member['lastName'] ?? null;
+        $dateOfBirth = $new_member['dateOfBirth'] ?? null;
+        $placeOfBirth = $new_member['placeOfBirth'] ?? null;
+        $gender = $new_member['gender'] ?? null;  // Changed from gender_id to gender
+        $alive = $new_member['alive'] ?? 1;
 
+        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender, alive, created_at, updated_at) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender, :alive, NOW(), NOW())";
+        $stmt = $this->db->prepare($query);
+        $result = $stmt->execute([
+            'tree_id' => $treeId,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'birth_date' => $dateOfBirth ? $dateOfBirth : null,
+            'birth_place' => $placeOfBirth ? $placeOfBirth : null,
+            'gender' => $gender,
+            'alive' => $alive,
+        ]);
+        return $this->db->lastInsertId();
+    }
+    public function createFamily(array $familyData): int
+    {
+        $sql = "INSERT INTO families (tree_id, husband_id, wife_id, marriage_date, created_at, updated_at) VALUES (:tree_id, :husband_id, :wife_id, :marriage_date, :created_at, :updated_at)";
+        $stmt = $this->db->prepare($sql);
+        $marriageDate = $familyData['marriage_date'] ?? null; // Get date or null
+
+       if(empty($marriageDate)){
+           $marriageDate = null;
+       }
+
+        $stmt->execute([
+            ':tree_id' => $familyData['tree_id'],
+            ':husband_id' => $familyData['husband_id'] ?? null,
+            ':wife_id' => $familyData['wife_id'] ?? null,
+            ':marriage_date' => $marriageDate,
+            ':created_at' => $familyData['created_at'],
+            ':updated_at' => $familyData['updated_at']
+        ]);
+        return $this->db->lastInsertId();
     }
     public function addSpouse($spouse)
     {

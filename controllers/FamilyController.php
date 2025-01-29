@@ -67,75 +67,105 @@ class FamilyController extends AppController
         apachelog("Adding a spouse");
         
         //$formData = $this->data ?? [];
-    
-        $spouseData = $this->data;
-         // Convert array of array to associative array
-        // foreach($formData as $item) {
-        //     $spouseData[$item['name']] = $item['value'];
-        // }
-        
-        $spouseType = $spouseData['spouse_type'] ?? null;
-        $spouseId = $spouseData['spouse_id'] ?? null;
-        $treeId = $_POST['tree_id'] ?? null; // we need this from post
-        $person1 = $_POST['person1'] ?? null; // we need this from the post
+        $alive = $this->data['alive']??1;
+        $marriageDate = $this->data['marriage_date']??null;
 
-        apachelog("Spouse Type: $spouseType");
-    
-        if ($spouseType === 'new') {
-            
-            apachelog("Creating a new spouse");
+        $spouseData = $this->data;
+        if($this->data['spouse_type'] == 'new'){
+            /* sample for new spouse */
+            /* 
+                Array
+                (
+                    [spouse_type] => new
+                    [spouse_id] => 1789
+                    [tree_id] => 9
+                    [spouse_first_name] => Babela
+                    [spouse_last_name] => Smurf
+                    [spouse_birth_date] => 1974-02-03
+                    [spouse_gender] => F
+                    [marriage_date] => 
+                    [member_id] => 1851
+                    [member_gender] => M
+                    [type] => spouse
+                )
+
+            */
             $newSpouseData = [
-                'first_name' => $spouseData['spouse_first_name'] ?? null,
-                'last_name' => $spouseData['spouse_last_name'] ?? null,
-                'birth_date' => $spouseData['spouse_birth_date'] ?? null,
-                'gender' => $spouseData['spouse_gender'] ?? null,
+                'firstName' => $this->data['spouse_first_name'] ?? null,
+                'lastName' => $this->data['spouse_last_name'] ?? null,
+                'treeId' => $this->data['tree_id'] ?? null,
+                'gender' => $this->data['spouse_gender'] ?? null,
+                'dateOfBirth' => $this->data['spouse_birth_date'] ?? null,
+                'alive' => $alive,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             ];
             
-             apachelog("New Spouse Data:");
-             apachelog($newSpouseData);
-            
-            $marriageDate = $spouseData['marriage_date']??null;
-           
-           
-            $husband_id = null;
-            $wife_id = null;
-            // Determine husband and wife based on gender
+            $spouseId = $this->family->addIndividual($newSpouseData);
             if($newSpouseData['gender'] == 'F'){
-               $husband_id = $person1;
-               $wife_id = 'new_person';
-             } else {
-               $husband_id = 'new_person';
-               $wife_id = $person1;
-            }
-            
-             $familyData = [
-                'tree_id' => $treeId,
-                'husband_id' => $husband_id,
-                'wife_id' => $wife_id,
-                'marriage_date'=>$marriageDate
-            ];
-            apachelog("Family Data:");
-            apachelog($familyData);
-            
-        } else {
-            if($spouseId){
-                 apachelog("Adding existing spouse with id: $spouseId");
-                 $marriageDate = $spouseData['marriage_date']??null;
-                    
-                 $familyData = [
-                    'tree_id' => $treeId,
-                    'husband_id' => $person1,
-                    'wife_id' => $spouseId,
-                     'marriage_date'=>$marriageDate
-                 ];
-                 
-                 apachelog("Family Data:");
-                 apachelog($familyData);
-                 
+                $person1 = $this->data['member_id'];
+                $wife = $spouseId;
+                $husband = $this->data['member_id'];
+            } elseif($newSpouseData['gender'] == 'M'){ 
+                $husband = $spouseId;
+                $wife = $this->data['member_id'];
             } else {
-                apachelog("Error: No spouse id provided for an existing spouse");
+                $husband = $this->data['member_id'];
+                $wife = $spouseId; 
             }
+            $treeId = $this->data['tree_id'];
+            $marriageDate = $this->data['marriage_date']??null;
+
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $husband,
+                'wife_id' => $wife,
+                'marriage_date'=>$marriageDate,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            apachelog("Creating a new spouse");
+            apachelog($newSpouseData);
+            $this->family->createFamily($familyData);
         }
+
+
+        if($this->data['spouse_type'] == 'existing'){
+            /* sample for existing spouse */
+            /* this->data = Array
+            (
+                [spouse_type] => existing
+                [spouse_id] => 1789
+                [tree_id] => 9
+                [spouse_first_name] => 
+                [spouse_last_name] => 
+                [spouse_birth_date] => 
+                [spouse_gender] => 
+                [marriage_date] => 
+                [member_id] => 
+                [member_gender] => 
+                [type] => spouse
+            ) */
+    
+            $spouseId = $this->data['spouse_id'];
+            $treeId = $this->data['tree_id'];
+            $person1 = $this->data['member_id'];
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $person1,
+                'wife_id' => $spouseId,
+                'marriage_date'=>$marriageDate,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $this->family->createFamily($familyData);
+            apachelog("Creating Family with Existing Person Data:");
+            //apachelog($familyData);
+        } 
+
+
+
+
     }
     public function addChild() {
         
