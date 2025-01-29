@@ -174,9 +174,83 @@ class FamilyController extends AppController
         - if the first new parent doesn't exist
             - either allow to create a second parent too and show the new person form
             - or if there is no second parent allow to create a single parent relationship
-        */
+        Array
+        (
+            [parent1_type] => new
+            [parent1_id] => 
+            [tree_id] => 9
+            [parent1_first_name] => Bob
+            [parent1_last_name] => Gargamel
+            [parent1_birth_date] => 
+            [parent1_gender] => M
+            [second_parent_option] => new
+            [parent2_first_name] => Sylvia
+            [parent2_last_name] => Bloom
+            [parent2_birth_date] => 
+            [parent2_gender] => M
+            [member_id] => 1851
+            [member_gender] => M
+            [type] => parent
+        )
 
-        
+        */
+        $alive1 = $this->data['parent1_alive']??1;
+        $alive2 = $this->data['parent2_alive']??1;
+        $childId = $this->data['member_id'];
+        if($this->data['parent1_type'] == 'new'){
+            $parent1 = [
+                'firstName' => $this->data['parent1_first_name'] ?? null,
+                'lastName' => $this->data['parent1_last_name'] ?? null,
+                'treeId' => $this->data['tree_id'] ?? null,
+                'birth_date' => $this->data['parent1_birth_date'] ?? null,
+                'gender' => $this->data['parent1_gender'] ?? null,
+                'alive' => $alive1,
+            ];
+            $parent1Id = $this->family->addIndividual($parent1);
+            $parent1Gender = $this->$parent1['gender'];
+
+        } else {
+            $parent1Id = $this->data['parent1_id'];
+            $parent1Gender=null;
+        }
+        if($this->data['second_parent_option'] == 'new'){
+            $parent2 = [
+                'firstName' => $this->data['parent2_first_name'] ?? null,
+                'lastName' => $this->data['parent2_last_name'] ?? null,
+                'treeId' => $this->data['tree_id'] ?? null,
+                'birth_date' => $this->data['parent2_birth_date'] ?? null,
+                'gender' => $this->data['parent1_gender'] ?? null,
+                'alive' => $alive1,
+            ];
+            $parent2Id = $this->family->addIndividual($parent2);
+            $parent2Gender = $parent2['gender'];
+        } else {
+            $parent2Id = $this->data['parent2_id'];
+            $parent2Gender=null;
+        }
+        if($parent1Gender == 'F' || $parent2Gender == 'M'){
+            $wife = $parent1Id;
+            $husband = $parent2Id;
+        } elseif($parent2Gender == 'M'|| $parent1Gender == 'F'){ 
+            $husband = $parent1Id;
+            $wife = $parent2Id;
+        } else {
+            $husband = $parent1Id;
+            $wife = $parent2Id; 
+        }
+        $treeId = $this->data['tree_id'];
+ 
+        $familyData = [
+            'tree_id' => $treeId,
+            'husband_id' => $husband,
+            'wife_id' => $wife,
+            'marriage_date' => null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        $familyId = $this->family->createFamily($familyData);
+        $this->family->addChildToFamily($familyId, $childId, $treeId);
+
     }
 
 
