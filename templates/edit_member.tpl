@@ -782,3 +782,5 @@ input[type="date"] {
 <!-- Load the relationship manager -->
 <script type="module" src="res/js/relationships/index.js"></script>
 
+<script type="module" src="res/js/delRel.js"></script>
+

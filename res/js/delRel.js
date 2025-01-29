@@ -1,0 +1,345 @@
+document.addEventListener('DOMContentLoaded', function () {
+    initializeRelationships(memberId);
+});
+
+function initializeRelationships(memberId) {
+    // Initialize Bootstrap modals
+    const deleteSpouseModal = new bootstrap.Modal(document.getElementById('deleteSpouseModal'), {
+        backdrop: 'static'
+    });
+
+    const deleteChildModal = new bootstrap.Modal(document.getElementById('deleteChildModal'), {
+        backdrop: 'static'
+    });
+
+    // Delete child handlers
+    document.querySelectorAll('.delete-child-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const childId = this.getAttribute('data-child-id');
+            const familyId = this.getAttribute('data-family-id');
+
+            document.getElementById('deleteChildId').value = childId;
+            document.getElementById('deleteChildFamilyId').value = familyId;
+            deleteChildModal.show();
+        });
+    });
+
+    document.getElementById('confirmDeleteChild').addEventListener('click', function () {
+        const childId = document.getElementById('deleteChildId').value;
+        const familyId = document.getElementById('deleteChildFamilyId').value;
+        const deleteType = document.getElementById('childDeleteOption').value;
+    
+        const formData = new FormData();
+        formData.append('child_id', childId);
+        formData.append('family_id', familyId);
+        formData.append('delete_type', deleteType);
+    
+        fetch('index.php?action=delete_family_member', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            deleteChildModal.hide();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to delete child');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete child. Please try again.');
+        });
+    });
+
+    // Delete spouse handlers
+    document.querySelectorAll('.delete-spouse-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const spouseId = this.getAttribute('data-spouse-id');
+            const familyId = this.getAttribute('data-family-id');
+
+            document.getElementById('deleteSpouseId').value = spouseId;
+            document.getElementById('deleteFamilyId').value = familyId;
+            deleteSpouseModal.show();
+        });
+    });
+
+    document.getElementById('confirmDeleteSpouse').addEventListener('click', function () {
+        const spouseId = document.getElementById('deleteSpouseId').value;
+        const familyId = document.getElementById('deleteFamilyId').value;
+        const deleteType = document.getElementById('spouseDeleteOption').value;
+        const formData = new FormData();
+        formData.append('spouse_id', spouseId);
+        formData.append('family_id', familyId);
+        formData.append('delete_type', deleteType);
+
+        fetch('index.php?action=delete_family_member', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            deleteSpouseModal.hide();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to delete spouse');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete spouse. Please try again.');
+        });
+    });
+
+    // Handle replace spouse button click
+    document.querySelectorAll('.replace-spouse-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const familyId = this.getAttribute('data-family-id');
+            document.getElementById('replace_family_id').value = familyId;
+            new bootstrap.Modal(document.getElementById('replaceSpouseModal')).show();
+        });
+    });
+
+    // Handle spouse type selection
+    document.querySelectorAll('input[name="spouse_type"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'existing') {
+                document.getElementById('replace-existing-section').style.display = 'block';
+                document.getElementById('replace-new-section').style.display = 'none';
+            } else {
+                document.getElementById('replace-existing-section').style.display = 'none';
+                document.getElementById('replace-new-section').style.display = 'block';
+            }
+        });
+    });
+
+    // Handle autocomplete for replace spouse
+    document.getElementById('replace_spouse').addEventListener('input', function () {
+        const input = this.value;
+        fetch(`index.php?action=autocomplete_member&tree_id=${treeId}&term=${input}`)
+            .then(response => response.json())
+            .then(data => {
+                const options = document.getElementById('replace-spouse-options');
+                options.innerHTML = '';
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.label;
+                    option.setAttribute('data-person-id', item.id);
+                    options.appendChild(option);
+                });
+            });
+    });
+
+    // Handle selection from datalist options for replace spouse
+    document.getElementById('replace_spouse').addEventListener('change', function () {
+        const selectedOption = document.querySelector(`#replace-spouse-options option[value="${this.value}"]`);
+        if (selectedOption) {
+            document.getElementById('replace_spouse_id').value = selectedOption.getAttribute('data-person-id');
+        } else {
+            document.getElementById('replace_spouse_id').value = '';
+        }
+    });
+
+    document.getElementById('confirmReplaceSpouse').addEventListener('click', function () {
+        const formData = new FormData(document.getElementById('replace-spouse-form'));
+        formData.append('action', 'replace_spouse');
+        formData.append('tree_id', treeId);
+
+        fetch('index.php?action=replace_spouse', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to replace spouse');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to replace spouse. Please try again.');
+        });
+    });
+
+    // Handle alive checkbox toggle for death fields
+    document.getElementById('form_alive').addEventListener('click', function () {
+        showHideDeath();
+    });
+
+    // Initial load of relationships
+    loadRelationships(memberId);
+
+    // Handle spouse tab click to show children
+    document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('click', function () {
+            const targetId = this.getAttribute('data-target');
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+            document.querySelector(targetId).classList.add('show', 'active');
+        });
+    });
+}
+
+function showHideDeath() {
+    const deathFields = document.getElementById('death-fields');
+    const alive = document.getElementById('form_alive');
+    if (alive && alive.checked != true) {
+        deathFields.style.display = 'block';
+    } else {
+        deathFields.style.display = 'none';
+    }
+}
+
+function loadRelationships(memberId) {
+    fetch(`index.php?action=get_relationships&member_id=${memberId}`)
+        .then(response => {
+            if (!response.ok) {
+                console.warn('Failed to load relationships: Network response was not ok');
+                return [];
+            }
+            return response.json();
+        })
+        .then(data => {
+            const relationshipsTableBody = document.getElementById('relationships-table-body');
+            relationshipsTableBody.innerHTML = '';
+            data.forEach(relationship => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><a href="index.php?action=view_member&member_id=${relationship.person1_id}">${relationship.person1_first_name} ${relationship.person1_last_name}</a></td>
+                    <td><a href="index.php?action=view_member&member_id=${relationship.person2_id}">${relationship.person2_first_name} ${relationship.person2_last_name}</a></td>
+                    <td>${relationship.relationship_description}</td>
+                    <td>${formatBrowserDate(relationship.relation_start)}</td>
+                    <td>${formatBrowserDate(relationship.relation_end)}</td>
+                    <td>
+                        <form class="delete-relationship-form" method="post">
+                            <input type="hidden" name="relationship_id" value="${relationship.id}">
+                            <button class="relation-button delete-relation-button" type="submit">🗑️</button>
+                        </form>
+                        <button type="button" class="relation-button edit-relationship-btn" data-relationship-id="${relationship.id}"
+                            data-relation-start="${relationship.relation_start}"
+                            data-relation-end="${relationship.relation_end}"
+                            data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"
+                            data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"
+                            data-relationship-type="${relationship.relationship_type}">✏️</button>
+                        <form class="swap-relationship-form" method="post">
+                            <input type="hidden" id="swap_relationship_id" name="relationship_id" value="${relationship.id}">
+                            <button type="button" class="relation-button swap-relationship-btn" data-relationship-id="${relationship.id}" data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}" data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}" data-relationship-type="${relationship.relationship_type}">⇄</button>
+                        </form>
+                    </td>
+                `;
+                relationshipsTableBody.appendChild(row);
+            });
+
+            document.querySelectorAll('.edit-relationship-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const relationshipId = this.getAttribute('data-relationship-id');
+                    const person1 = this.getAttribute('data-person1');
+                    const person2 = this.getAttribute('data-person2');
+                    const relationshipType = this.getAttribute('data-relationship-type');
+                    const relationStart = formatRelationDate(this.getAttribute('data-relation-start'));
+                    const relationEnd = formatRelationDate(this.getAttribute('data-relation-end'));
+
+                    document.getElementById('edit_relationship_id').value = relationshipId;
+                    document.getElementById('edit_relationship_person1').value = person1;
+                    document.getElementById('edit_relationship_person2').value = person2;
+                    document.getElementById('edit_relationship_type').value = relationshipType;
+                    document.getElementById('edit_relation_start').value = relationStart;
+                    document.getElementById('edit_relation_end').value = relationEnd;
+
+                    new bootstrap.Modal(document.getElementById('edit-relationship-modal')).show();
+                });
+            });
+
+            document.querySelectorAll('.swap-relationship-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const relationshipId = this.getAttribute('data-relationship-id');
+                    fetch('index.php?action=swap_relationship', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ relationship_id: relationshipId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadRelationships(memberId);
+                        } else {
+                            alert('Failed to swap relationship.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to swap relationship.');
+                    });
+                });
+            });
+
+            document.querySelectorAll('.delete-relationship-form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete this relationship?')) {
+                        const formData = new FormData(this);
+                        fetch('index.php?action=delete_relationship', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                loadRelationships(memberId);
+                            } else {
+                                alert('Failed to delete relationship.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to delete relationship.');
+                        });
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.warn('Failed to load relationships:', error);
+        });
+}
+
+function formatRelationDate(relationStart) {
+    if (relationStart && relationStart !== '-') {
+        const date = new Date(relationStart);
+        if (!isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            return `${year}-${month}-${day}`;
+        }
+    }
+    return '';
+}
+
+function formatBrowserDate(relationStart) {
+    if (relationStart && relationStart !== '-') {
+        const date = new Date(relationStart);
+        if (!isNaN(date.getTime())) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+    }
+    return '';
+}
