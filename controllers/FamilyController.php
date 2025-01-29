@@ -72,24 +72,6 @@ class FamilyController extends AppController
 
         $spouseData = $this->data;
         if($this->data['spouse_type'] == 'new'){
-            /* sample for new spouse */
-            /* 
-                Array
-                (
-                    [spouse_type] => new
-                    [spouse_id] => 1789
-                    [tree_id] => 9
-                    [spouse_first_name] => Babela
-                    [spouse_last_name] => Smurf
-                    [spouse_birth_date] => 1974-02-03
-                    [spouse_gender] => F
-                    [marriage_date] => 
-                    [member_id] => 1851
-                    [member_gender] => M
-                    [type] => spouse
-                )
-
-            */
             $newSpouseData = [
                 'firstName' => $this->data['spouse_first_name'] ?? null,
                 'lastName' => $this->data['spouse_last_name'] ?? null,
@@ -128,25 +110,7 @@ class FamilyController extends AppController
             apachelog($newSpouseData);
             $this->family->createFamily($familyData);
         }
-
-
         if($this->data['spouse_type'] == 'existing'){
-            /* sample for existing spouse */
-            /* this->data = Array
-            (
-                [spouse_type] => existing
-                [spouse_id] => 1789
-                [tree_id] => 9
-                [spouse_first_name] => 
-                [spouse_last_name] => 
-                [spouse_birth_date] => 
-                [spouse_gender] => 
-                [marriage_date] => 
-                [member_id] => 
-                [member_gender] => 
-                [type] => spouse
-            ) */
-    
             $spouseId = $this->data['spouse_id'];
             $treeId = $this->data['tree_id'];
             $person1 = $this->data['member_id'];
@@ -160,19 +124,59 @@ class FamilyController extends AppController
             ];
             $this->family->createFamily($familyData);
             apachelog("Creating Family with Existing Person Data:");
-            //apachelog($familyData);
+
         } 
-
-
-
 
     }
     public function addChild() {
-        
-        apachelog("Adding a child");
-        //apachelog($_POST);
-        $child = $_POST['child']??[];
-        //$this->member->addChild($child);
+        /* new child */
+        /*
+        Array (
+            [family_id] => 497
+            [child_type] => new
+            [child_id] => 
+            [tree_id] => 9
+            [child_first_name] => Temem
+            [child_last_name] => Smurf
+            [child_birth_date] => 
+            [child_gender] => M
+            [member_id] => 1851
+            [member_gender] => M
+            [type] => child
+        )
+        */
+        $alive = $this->data['alive']??1;
+        if($this->data['child_type'] == 'new')
+        {
+                $person = [
+                    'firstName' => $this->data['child_first_name'] ?? null,
+                    'lastName' => $this->data['child_last_name'] ?? null,
+                    'treeId' => $this->data['tree_id'] ?? null,
+                    'gender' => $this->data['child_gender'] ?? null,
+                    'dateOfBirth' => $this->data['child_birth_date'] ?? null,
+                    'alive' => $alive,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $childId = $this->family->addIndividual($person);
+        } else {
+            $childId = $this->data['child_id'];
+        }
+        if($this->data['family_id']=='new') {
+            $familyData = [
+                'tree_id' => $this->data['tree_id'],
+                'husband_id' => $this->data['member_id'],
+                'wife_id' => null,
+                'marriage_date' => null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $familyId = $this->family->createFamily($familyData);
+        } else {
+            $familyId = $this->data['family_id'];
+        }
+        $this->family->addChildToFamily($familyId, $childId, $this->data['tree_id']);
+
     }
     public function addOther() {
         apachelog("Adding other relationship");

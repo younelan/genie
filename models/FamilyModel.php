@@ -7,6 +7,8 @@ class FamilyModel {
 
     private $person_table = 'individuals';
     private $relation_table = 'person_relationship';
+    private $family_children_table = 'family_children';
+
     private $synonym_table = 'synonyms';
     private $family_field = 'family_id';
     public function __construct($config)
@@ -21,7 +23,9 @@ class FamilyModel {
     }
     public function addIndividual($new_member)
     {
+        apachelog($new_member);
         $treeId = $new_member['treeId'] ?? null;
+        apachelog($treeId);
         $firstName = $new_member['firstName'] ?? null;
         $lastName = $new_member['lastName'] ?? null;
         $dateOfBirth = $new_member['dateOfBirth'] ?? null;
@@ -61,6 +65,17 @@ class FamilyModel {
             ':updated_at' => $familyData['updated_at']
         ]);
         return $this->db->lastInsertId();
+    }
+
+    public function addChildToFamily($familyId, $childId, $treeId)
+    {
+        $query = "INSERT INTO $this->family_children_table (family_id, child_id, created_at, updated_at) 
+                  VALUES (:family_id, :child_id, NOW(), NOW())";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'family_id' => $familyId,
+            'child_id' => $childId,
+        ]);
     }
     public function addSpouse($spouse)
     {
