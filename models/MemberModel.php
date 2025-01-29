@@ -307,9 +307,10 @@ class MemberModel extends AppModel
 
     public function getSpouseFamilies($memberId) {
         // First get the families
-        $query = "SELECT f.*, 
-                         h.first_name as husband_name, h.last_name as husband_lastname,
-                         w.first_name as wife_name, w.last_name as wife_lastname,
+        $query = "SELECT f.*, concat(h.first_name, ' ', h.last_name) as husband_name,
+                         h.first_name as husband_firstname, h.last_name as husband_lastname,
+                        concat(w.first_name, ' ', w.last_name) as wife_name,
+                         w.first_name as wife_firstname, w.last_name as wife_lastname,
                          f.marriage_date, f.divorce_date,
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
@@ -327,12 +328,14 @@ class MemberModel extends AppModel
 
         // For each family, get the children
         foreach ($families as &$family) {
-            if ($family['husband_name'] && $family['husband_lastname']) {
-                $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
-            }
-            if ($family['wife_name'] && $family['wife_lastname']) {
-                $family['wife_name'] = trim($family['wife_name'] . ' ' . $family['wife_lastname']);
-            }
+            // if ($family['husband_name'] && $family['husband_lastname']) {
+            //     $family['husband_name'] = trim($family['husband_name'] . ' ' . $family['husband_lastname']);
+            // }
+            // if ($family['wife_name'] && $family['wife_lastname']) {
+            //     $family['wife_name'] = trim($family['wife_name'] . ' ' . $family['wife_lastname']);
+            // }
+            $family['husband_name'] = trim($family['husband_name']);
+            $family['wife_name'] = trim($family['wife_name']);
 
             // Get children for this family
             $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
@@ -347,6 +350,7 @@ class MemberModel extends AppModel
             
             $family['children'] = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
         }
+        //apachelog($families);
 
         return $families;
     }

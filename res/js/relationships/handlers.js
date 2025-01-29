@@ -213,7 +213,7 @@ export class RelationshipHandlers {
             }
 
             const data = await response.json();
-            console.log('Families data:', data);
+            //console.log('Families data:', data);
             
             const select = document.getElementById('existing_family_select');
             select.innerHTML = '';
@@ -221,8 +221,15 @@ export class RelationshipHandlers {
             if (data.spouse_families && data.spouse_families.length > 0) {
                 data.spouse_families.forEach(family => {
                     const option = document.createElement('option');
-                    option.value = family.family_id;
-                    option.textContent = `With ${family.spouse_name || 'Unknown Spouse'}`;
+                    option.value = family.id;
+                    var spouseName;
+                    if(parseInt(parent1Id) === parseInt(family.husband_id)) {
+                        spouseName = family.wife_name;
+                    } else {
+                        spouseName = family.husband_name;
+                    }
+
+                    option.textContent = `With ${spouseName || 'Unknown Spouse'}`;
                     select.appendChild(option);
                 });
             } else {
