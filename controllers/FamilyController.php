@@ -25,23 +25,11 @@ class FamilyController extends AppController
         return $assocArray;
     }    
     public function addRelationship() {
-        /*
-    - for now, every relationship is submitted to index.php to which call this add_relationship method
-        - the submission should include the relationship type and the data for the relationship
-        - the relationship type should be one of the following:
-            - spouse which is to be stored in family table
-            - child which is to be stored in family_children table
-            - parent where parents are to be stored in family table with the child as a child
-            - other where the relationship is stored in person_relationships
-        */
         $data = $_POST['relationship']['data']??[];
         $assocData = $this->convertToAssociativeArray($data);
-        // $assocData['tree_id'] = $_POST['tree_id']??null;
         $assocData['type'] = $_POST['relationship']['type']??null;
         $this->data = $assocData;
         apachelog($assocData);
-
-        //$reltype = $_POST['relationship']['type']??$_GET['relationship']['data']['type']??'';
         $reltype = $assocData['type']??'';
         switch($assocData['type']) {
             case 'spouse':
@@ -129,22 +117,6 @@ class FamilyController extends AppController
 
     }
     public function addChild() {
-        /* new child */
-        /*
-        Array (
-            [family_id] => 497
-            [child_type] => new
-            [child_id] => 
-            [tree_id] => 9
-            [child_first_name] => Temem
-            [child_last_name] => Smurf
-            [child_birth_date] => 
-            [child_gender] => M
-            [member_id] => 1851
-            [member_gender] => M
-            [type] => child
-        )
-        */
         $alive = $this->data['alive']??1;
         if($this->data['child_type'] == 'new')
         {
@@ -203,7 +175,8 @@ class FamilyController extends AppController
             - either allow to create a second parent too and show the new person form
             - or if there is no second parent allow to create a single parent relationship
         */
-        //apachelog($_POST);
+
+        
     }
 
 
