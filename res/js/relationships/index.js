@@ -166,7 +166,7 @@ class RelationshipManager {
             },
             success: (response) => {
                 console.log('Relationship saved:', response);
-                this.modal.hide();
+                //this.modal.hide();
 
             },
             error: (xhr, status, error) => {
@@ -183,7 +183,7 @@ class RelationshipManager {
             event.preventDefault();
             const form = document.getElementById('add-relationship-form');
             const formData = new FormData(form);
-            const activeTab = document.querySelector('.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab', '');
+            const activeTab = document.querySelector('#addRelationshipModal.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab', '');
             formData.append('relationship_type', activeTab);
 
 
