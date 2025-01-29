@@ -428,15 +428,15 @@ class MemberController extends AppController
     public function deleteFamilyMember()
     {
         header('Content-Type: application/json');
-        
         try {
             error_log('Delete family member request: ' . print_r($_POST, true));
-            
             $familyId = $_POST['family_id'] ?? null;
             $childId = $_POST['child_id'] ?? null;
             $spouseId = $_POST['spouse_id'] ?? null;
             $deleteType = $_POST['delete_type'] ?? null;
+            apachelog($_POST);
 
+    
             if (!$familyId) {
                 throw new Exception('Family ID is required');
             }
@@ -453,12 +453,15 @@ class MemberController extends AppController
                 switch ($deleteType) {
                     case '1': // Remove relationship only
                         $success = $this->member->removeSpouseFromFamily($spouseId, $familyId);
+                        apachelog("delete type $deleteType success: $success");
                         break;
                     case '2': // Delete spouse, keep children
                         $success = $spouseId ? 
                             $this->member->deleteSpouseKeepChildren($spouseId, $familyId) :
                             $this->member->removeSpouseFromFamily($spouseId, $familyId);
-                        break;
+                            apachelog("delete type $deleteType success: $success");
+
+                            break;
                     case '3': // Delete spouse and children
                         $success = $spouseId ? 
                             $this->member->deleteSpouseAndChildren($spouseId, $familyId) :

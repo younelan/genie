@@ -489,6 +489,7 @@ class MemberModel extends AppModel
     }
     public function deleteSpouseKeepChildren($spouseId, $familyId)
     {
+        apachelog("marshmallow");
         $this->db->beginTransaction();
         try {
             // First set spouse to null in family
@@ -506,12 +507,14 @@ class MemberModel extends AppModel
             if ($spouseId) {
                 $this->deleteMember($spouseId);
             }
+            apachelog("marshmallow more");
 
             // Check if family has children
             $query = "SELECT COUNT(*) FROM $this->family_children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['family_id' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
+            apachelog("marshmallow more");
 
             // If no children, delete the family
             if (!$hasChildren) {
