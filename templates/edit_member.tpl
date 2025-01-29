@@ -29,6 +29,87 @@ input[type="date"] {
                     {{ get_translation("Add Relationship") }}
                 </button>
 
+
+                <!-- Add Relationship Modal -->                
+                <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addRelationshipModalLabel">{{ get_translation("Add Relationship") }}</h5>
+                                <button type="button" id="closeRelModalX" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="add-relationship-form">
+                                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
+                                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
+                                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
+
+                                    <!-- Relationship Type Tabs -->
+                                    <ul class="nav nav-tabs" id="relationshipTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="spouse-tab" data-bs-toggle="tab" data-bs-target="#spouse-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Spouse") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="child-tab" data-bs-toggle="tab" data-bs-target="#child-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Child") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="parent-tab" data-bs-toggle="tab" data-bs-target="#parent-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Add Parents") }}
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other-tab-pane" type="button" role="tab">
+                                                {{ get_translation("Other Relationship") }}
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content pt-3" id="relationshipTabContent">
+                                        <!-- Spouse Tab -->
+                                        <div class="tab-pane fade show active" id="spouse-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="spouse-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Child Tab -->
+                                        <div class="tab-pane fade" id="child-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="child-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Parent Tab -->
+                                        <div class="tab-pane fade" id="parent-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="parent-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <!-- Other Tab -->
+                                        <div class="tab-pane fade" id="other-tab-pane" role="tabpanel" tabindex="0">
+                                            <div id="other-form-content">
+                                                <!-- Content loaded dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="dismissRelModal" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
+                                <button type="button" class="btn btn-primary" id="saveRelationship">{{ get_translation("Save") }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    
+
+
             </div>
             <div class="card-body">
 
@@ -277,85 +358,6 @@ input[type="date"] {
             </div>
             <div class="card-body">
                 <!-- Add Relationship Button -->
-
-                <!-- Add Relationship Modal -->
-
-                
-                <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addRelationshipModalLabel">{{ get_translation("Add Relationship") }}</h5>
-                                <button type="button" id="closeRelModalX" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="add-relationship-form">
-                                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
-                                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
-                                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
-
-                                    <!-- Relationship Type Tabs -->
-                                    <ul class="nav nav-tabs" id="relationshipTabs" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="spouse-tab" data-bs-toggle="tab" data-bs-target="#spouse-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Spouse") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="child-tab" data-bs-toggle="tab" data-bs-target="#child-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Child") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="parent-tab" data-bs-toggle="tab" data-bs-target="#parent-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Parents") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Other Relationship") }}
-                                            </button>
-                                        </li>
-                                    </ul>
-
-                                    <div class="tab-content pt-3" id="relationshipTabContent">
-                                        <!-- Spouse Tab -->
-                                        <div class="tab-pane fade show active" id="spouse-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="spouse-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Child Tab -->
-                                        <div class="tab-pane fade" id="child-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="child-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Parent Tab -->
-                                        <div class="tab-pane fade" id="parent-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="parent-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Other Tab -->
-                                        <div class="tab-pane fade" id="other-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="other-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" id="dismissRelModal" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
-                                <button type="button" class="btn btn-primary" id="saveRelationship">{{ get_translation("Save") }}</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
 
 
