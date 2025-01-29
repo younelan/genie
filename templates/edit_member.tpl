@@ -253,9 +253,9 @@ input[type="date"] {
                                     role="tab" 
                                     aria-controls="family-{{ family.id }}" 
                                     aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                                {% if member.gender == 'M' and family.wife_id %}
+                                {% if member.id == family.husband_id and family.wife_id %}
                                     {{ family.wife_name }}
-                                {% elseif member.gender == 'F' and family.husband_id %}
+                                {% elseif family.husband_id %}
                                     {{ family.husband_name }}
                                 {% else %}
                                     {{ get_translation("Unknown Spouse") }}
