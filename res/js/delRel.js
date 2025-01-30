@@ -443,25 +443,47 @@ function handleEditClick(e) {
                     return;
                 }
 
-                // Build options list
-                const options = types.map(type => 
+                select.innerHTML = types.map(type => 
                     `<option value="${type.id}">
                         ${type.description}
                     </option>`
                 ).join('');
                 
-                // Set the options
-                select.innerHTML = options;
-                
-                // Set the current value
                 const currentTypeId = btn.dataset.relationshipType;
                 if (currentTypeId) {
                     select.value = currentTypeId;
-                    console.log('Setting relationship type to:', currentTypeId);
                 }
 
                 // Show the modal after everything is set up
                 modalInstance.show();
+
+                // Add save button handler here after modal is shown
+                const saveBtn = document.getElementById('saveEditRelationship');
+                if (saveBtn) {
+                    saveBtn.onclick = function() {
+                        const formData = new FormData(document.getElementById('edit-relationship-form'));
+                        formData.append('member_id', memberId);
+                        formData.append('tree_id', treeId);
+                        
+                        fetch('index.php?action=update_relationship', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok'))
+                        .then(data => {
+                            if (data.success) {
+                                modalInstance.hide();
+                                loadRelationships(memberId);
+                            } else {
+                                alert(data.message || 'Failed to update relationship');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to update relationship. Please try again.');
+                        });
+                    };
+                }
             })
             .catch(error => {
                 console.error('Error fetching relationship types:', error);
