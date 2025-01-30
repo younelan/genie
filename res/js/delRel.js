@@ -7,6 +7,7 @@ function initializeRelationships(memberId) {
     const deleteSpouseModal = document.getElementById('deleteSpouseModal');
     const deleteChildModal = document.getElementById('deleteChildModal');
     const addFamilyModal = document.getElementById('addFamilyModal');
+    const editRelationshipModal = new bootstrap.Modal(document.getElementById('editRelationshipModal'));
 
     if (deleteSpouseModal) {
         new bootstrap.Modal(deleteSpouseModal, {
@@ -342,6 +343,8 @@ function loadRelationships(memberId) {
         .then(response => response.ok ? response.json() : [])
         .then(data => {
             const relationshipsTableBody = document.getElementById('relationships-table-body');
+            if (!relationshipsTableBody) return;
+            
             relationshipsTableBody.innerHTML = '';
             data.forEach(relationship => {
                 const row = document.createElement('tr');
@@ -350,28 +353,30 @@ function loadRelationships(memberId) {
                     <td><a href="index.php?action=edit_member&member_id=${relationship.person2_id}">${relationship.person2_first_name} ${relationship.person2_last_name}</a></td>
                     <td>${relationship.relationship_description}</td>
                     <td>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 ⚙️
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <button class="dropdown-item edit-relationship-btn" type="button" 
+                                    <button class="dropdown-item edit-relationship-btn" type="button"
                                         data-relationship-id="${relationship.id}"
                                         data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"
                                         data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"
-                                        data-relationship-type="${relationship.relationship_type}">
+                                        data-relationship-type="${relationship.relationship_type_id}"
+                                        data-relation-start="${relationship.relation_start || ''}"
+                                        data-relation-end="${relationship.relation_end || ''}">
                                         ✏️ Edit
                                     </button>
                                 </li>
                                 <li>
-                                    <button class="dropdown-item swap-relationship-btn" type="button" 
+                                    <button class="dropdown-item swap-relationship-btn" type="button"
                                         data-relationship-id="${relationship.id}">
                                         🔄 Swap
                                     </button>
                                 </li>
                                 <li>
-                                    <button class="dropdown-item delete-relation-button" type="button" 
+                                    <button class="dropdown-item delete-relation-button text-danger" type="button"
                                         data-relationship-id="${relationship.id}">
                                         🗑️ Delete
                                     </button>
@@ -381,15 +386,14 @@ function loadRelationships(memberId) {
                     </td>
                 `;
                 relationshipsTableBody.appendChild(row);
-
-                // Initialize dropdown for this row
-                const dropdown = row.querySelector('[data-bs-toggle="dropdown"]');
-                if (dropdown) {
-                    new bootstrap.Dropdown(dropdown);
-                }
             });
 
-            // Add event handlers for the buttons
+            // Initialize dropdowns and add event handlers
+            const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            dropdowns.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
+            });
+
             document.querySelectorAll('.edit-relationship-btn').forEach(btn => {
                 btn.addEventListener('click', handleEditClick);
             });
@@ -406,49 +410,91 @@ function loadRelationships(memberId) {
 
 function handleEditClick(e) {
     const btn = e.currentTarget;
-    const editModal = new bootstrap.Modal(document.getElementById('editRelationshipModal'));
+    const editModal = document.getElementById('editRelationshipModal');
     
-    // Populate the form
-    document.getElementById('edit_relationship_id').value = btn.dataset.relationshipId;
-    document.getElementById('edit_person1').value = btn.dataset.person1;
-    document.getElementById('edit_person2').value = btn.dataset.person2;
-    
-    // Fetch relationship types and populate select
-    fetch(`index.php?action=get_relationship_types&tree_id=${treeId}`)
-        .then(response => response.json())
-        .then(types => {
-            const select = document.getElementById('edit_relationship_type');
-            select.innerHTML = types.map(type => 
-                `<option value="${type.id}" ${type.id == btn.dataset.relationshipType ? 'selected' : ''}>
-                    ${type.description}
-                </option>`
-            ).join('');
-        });
-    
-    editModal.show();
+    if (!editModal) {
+        console.error('Edit modal not found');
+        return;
+    }
+
+    const modalInstance = new bootstrap.Modal(editModal);
+
+    try {
+        // Populate the basic fields
+        const relationshipId = document.getElementById('edit_relationship_id');
+        const person1Input = document.getElementById('edit_person1');
+        const person2Input = document.getElementById('edit_person2');
+        const relationStartInput = document.getElementById('edit_relation_start');
+        const relationEndInput = document.getElementById('edit_relation_end');
+        
+        if (relationshipId) relationshipId.value = btn.dataset.relationshipId;
+        if (person1Input) person1Input.value = btn.dataset.person1;
+        if (person2Input) person2Input.value = btn.dataset.person2;
+        if (relationStartInput) relationStartInput.value = formatRelationDate(btn.dataset.relationStart);
+        if (relationEndInput) relationEndInput.value = formatRelationDate(btn.dataset.relationEnd);
+
+        // Fetch and populate relationship types
+        fetch(`index.php?action=get_relationship_types&tree_id=${treeId}`)
+            .then(response => response.json())
+            .then(types => {
+                const select = document.getElementById('edit_relationship_type');
+                if (!select) {
+                    console.error('Relationship type select not found');
+                    return;
+                }
+
+                // Build options list
+                const options = types.map(type => 
+                    `<option value="${type.id}">
+                        ${type.description}
+                    </option>`
+                ).join('');
+                
+                // Set the options
+                select.innerHTML = options;
+                
+                // Set the current value
+                const currentTypeId = btn.dataset.relationshipType;
+                if (currentTypeId) {
+                    select.value = currentTypeId;
+                    console.log('Setting relationship type to:', currentTypeId);
+                }
+
+                // Show the modal after everything is set up
+                modalInstance.show();
+            })
+            .catch(error => {
+                console.error('Error fetching relationship types:', error);
+            });
+
+    } catch (error) {
+        console.error('Error populating edit form:', error);
+        alert('Error opening edit form. Please try again.');
+    }
 }
 
-// Add save handler for edit modal
-document.getElementById('saveEditRelationship')?.addEventListener('click', function() {
-    const formData = new FormData(document.getElementById('edit-relationship-form'));
-    fetch('index.php?action=update_relationship', {
+function handleSwapClick(e) {
+    const relationshipId = e.currentTarget.dataset.relationshipId;
+    const formData = new FormData();
+    formData.append('relationship_id', relationshipId);
+
+    fetch('index.php?action=swap_relationship', {
         method: 'POST',
-        body: formData
+        body: formData // Changed from JSON to FormData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            bootstrap.Modal.getInstance(document.getElementById('editRelationshipModal')).hide();
             loadRelationships(memberId);
         } else {
-            alert(data.message || 'Failed to update relationship');
+            console.error('Swap failed:', data);
+            alert(data.message || 'Failed to swap relationship.');
         }
+    })
+    .catch(error => {
+        console.error('Error in swap:', error);
+        alert('Failed to swap relationship. Check console for details.');
     });
-});
-
-function handleSwapClick(e) {
-    const relationshipId = e.currentTarget.dataset.relationshipId;
-    handleSwapRelationship(relationshipId);
 }
 
 function handleDeleteClick(e) {

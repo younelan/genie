@@ -549,6 +549,14 @@ input[type="date"] {
                             <!-- Will be populated dynamically -->
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("Start Date") }}:</label>
+                        <input type="date" id="edit_relation_start" name="relation_start" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("End Date") }}:</label>
+                        <input type="date" id="edit_relation_end" name="relation_end" class="form-control">
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -942,3 +950,48 @@ function activateSpouseTab() {
 </script>
 
 // ...existing code...<!-- Replace just the relationships table row template inside loadRelationships function --><td>    <div class="dropdown">        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown">            <i class="fas fa-ellipsis-v"></i>        </button>        <ul class="dropdown-menu dropdown-menu-end">            <li>                <button class="dropdown-item delete-relation-button" type="button" data-relationship-id="${relationship.id}">                    <i class="fas fa-trash text-danger"></i> Delete                </button>            </li>            <li>                <button class="dropdown-item edit-relationship-btn" type="button"                     data-relationship-id="${relationship.id}"                    data-relation-start="${relationship.relation_start}"                    data-relation-end="${relationship.relation_end}"                    data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"                    data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"                    data-relationship-type="${relationship.relationship_type}">                    <i class="fas fa-edit text-primary"></i> Edit                </button>            </li>            <li>                <button class="dropdown-item swap-relationship-btn" type="button"                     data-relationship-id="${relationship.id}">                    <i class="fas fa-exchange-alt text-success"></i> Swap                </button>            </li>        </ul>    </div></td>// ...rest of existing code...
+
+<!-- Add this new modal for editing relationships -->
+<div class="modal fade" id="editRelationshipModal" tabindex="-1" aria-labelledby="editRelationshipModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRelationshipModalLabel">{{ get_translation("Edit Relationship") }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-relationship-form">
+                    <input type="hidden" id="edit_relationship_id" name="relationship_id">
+                    <div class="mb-3">
+                        <label>{{ get_translation("Person 1") }}:</label>
+                        <input type="text" id="edit_person1" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("Person 2") }}:</label>
+                        <input type="text" id="edit_person2" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("Relationship Type") }}:</label>
+                        <select id="edit_relationship_type" name="relationship_type" class="form-control" required>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("Start Date") }}:</label>
+                        <input type="date" id="edit_relation_start" name="relation_start" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>{{ get_translation("End Date") }}:</label>
+                        <input type="date" id="edit_relation_end" name="relation_end" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                <button type="button" class="btn btn-primary" id="saveEditRelationship">{{ get_translation("Save") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+// ...existing code...

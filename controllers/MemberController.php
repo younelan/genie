@@ -319,40 +319,37 @@ class MemberController extends AppController
             ]);
         }
     }
-    public function updateRelationship($postData)
+    public function updateRelationship()
     {
-        // Example: Assuming $_POST contains 'relationship_id', 'member_id', 'member2_id', 'tree_id', and 'relationship_type'
-        $relationshipId = isset($postData['relationship_id']) ? $postData['relationship_id'] : null;
-        $personId1 = isset($postData['member_id']) ? $postData['member_id'] : null;
-        $personId2 = isset($postData['member2_id']) ? $postData['member2_id'] : null;
-        $familyTreeId = isset($postData['tree_id']) ? $postData['tree_id'] : null;
-        $relationStart = isset($postData['relation_start']) ? $postData['relation_start'] : null;
-        $relationEnd = isset($postData['relation_start']) ? $postData['relation_end'] : null;
-        $relationshipType = isset($postData['relationship_type']) ? $postData['relationship_type'] : null;
-        //apachelog("--- id $relationshipId p1 $personId1 t $familyTreeId  r $relationshipType");
-        if (!$relationshipId || !$personId1 || !$relationshipType) {
-            return json_encode(['success' => false, 'message' => 'Missing required parameters']);
+        header('Content-Type: application/json');
+        try {
+            $relationshipId = $_POST['relationship_id'] ?? null;
+            $relationshipTypeId = $_POST['relationship_type'] ?? null;
+            $relationStart = $_POST['relation_start'] ?? null;
+            $relationEnd = $_POST['relation_end'] ?? null;
+
+            if (!$relationshipId || !$relationshipTypeId) {
+                throw new Exception('Missing required parameters');
+            }
+
+            $relationship = [
+                'relationshipId' => $relationshipId,
+                'relationshipTypeId' => $relationshipTypeId,
+                'relationStart' => $relationStart,
+                'relationEnd' => $relationEnd
+            ];
+
+            $success = $this->member->updateMemberRelationship($relationship);
+
+            if ($success) {
+                echo json_encode(['success' => true, 'message' => 'Relationship updated successfully']);
+            } else {
+                throw new Exception('Failed to update relationship');
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
-
-        $relation = [
-            'relationshipId' => $relationshipId,
-            'personId1' => $personId1,
-            'personId2' => $personId2,
-            'relationStart' => $relationStart,
-            'relationEnd' => $relationEnd,
-            'relationshipTypeId' => $relationshipType,
-        ];
-        //$relationshipId, $personId1, $relationshipType
-        $this->member->updateMemberRelationship($relation);
-
-        // Example: Update relationship in database or storage
-        // Example: Replace with actual implementation
-
-        // Simulated response
-        $response = ['success' => true, 'message' => 'Relationship updated successfully'];
-
-        // Return JSON response
-        return json_encode($response);
+        exit;
     }
     public function swapRelationshipAction()
     {

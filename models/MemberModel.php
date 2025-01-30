@@ -228,6 +228,7 @@ class MemberModel extends AppModel
     {
         $query = "SELECT pr.id, p1.first_name AS person1_first_name, p1.last_name AS person1_last_name, 
                          p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
+                         pr.relationship_type_id,
                          p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
                          rt.description AS relationship_description
                   FROM $this->relation_table  pr
@@ -243,24 +244,33 @@ class MemberModel extends AppModel
     public function updateMemberRelationship($relationship)
     {
         $relationshipId = $relationship['relationshipId'] ?? null;
-        //$personId1= $relationship['relationsType'];
         $relationshipTypeId = $relationship['relationshipTypeId'] ?? null;
         $relationStart = $relationship['relationStart'] ?? null;
-        $relationEnd = $relationship['relationEnd'];
-        if (!$relationStart) $relationStart = null;
-        if (!$relationEnd) $relationEnd = null;
+        $relationEnd = $relationship['relationEnd'] ?? null;
 
-        $query = "UPDATE $this->relation_table  
-                  SET relation_start = :relation_start, 
-                  relation_end = :relation_end,
-                  relationship_type_id = :relationship_type_id WHERE id = :id";
+        if (!$relationshipId || !$relationshipTypeId) {
+            return false;
+        }
+
+        // Convert empty strings to null
+        $relationStart = $relationStart ?: null;
+        $relationEnd = $relationEnd ?: null;
+
+        $query = "UPDATE $this->relation_table 
+                  SET relationship_type_id = :relationship_type_id, 
+                      relation_start = :relation_start, 
+                      relation_end = :relation_end,
+                      updated_at = NOW()
+                  WHERE id = :id";
         $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':relationship_type_id', $relationshipTypeId);
         $stmt->bindParam(':relation_start', $relationStart);
         $stmt->bindParam(':relation_end', $relationEnd);
-        $stmt->bindParam(':relationship_type_id', $relationshipTypeId);
         $stmt->bindParam(':id', $relationshipId);
+
         return $stmt->execute();
     }
+
     public function getRelationships($memberId)
     {
         $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
