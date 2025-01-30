@@ -308,24 +308,9 @@ function initializeRelationships(memberId) {
         document.getElementById('replace_spouse_id').value = '';
     });
 
-    // Handle alive checkbox toggle for death fields
-    // document.getElementById('form_alive').addEventListener('click', function () {
-    //     showHideDeath();
-    // });
-
     // Initial load of relationships
     loadRelationships(memberId);
 
-    // Handle spouse tab click to show children
-    document.querySelectorAll('.nav-link').forEach(tab => {
-        tab.addEventListener('click', function () {
-            const targetId = this.getAttribute('data-target');
-            document.querySelectorAll('.tab-pane').forEach(pane => {
-                pane.classList.remove('show', 'active');
-            });
-            document.querySelector(targetId).classList.add('show', 'active');
-        });
-    });
 }
 
 function showHideDeath() {
