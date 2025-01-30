@@ -339,118 +339,196 @@ function showHideDeath() {
 
 function loadRelationships(memberId) {
     fetch(`index.php?action=get_relationships&member_id=${memberId}`)
-        .then(response => {
-            if (!response.ok) {
-                console.warn('Failed to load relationships: Network response was not ok');
-                return [];
-            }
-            return response.json();
-        })
+        .then(response => response.ok ? response.json() : [])
         .then(data => {
             const relationshipsTableBody = document.getElementById('relationships-table-body');
             relationshipsTableBody.innerHTML = '';
             data.forEach(relationship => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><a href="index.php?action=view_member&member_id=${relationship.person1_id}">${relationship.person1_first_name} ${relationship.person1_last_name}</a></td>
-                    <td><a href="index.php?action=view_member&member_id=${relationship.person2_id}">${relationship.person2_first_name} ${relationship.person2_last_name}</a></td>
+                    <td><a href="index.php?action=edit_member&member_id=${relationship.person1_id}">${relationship.person1_first_name} ${relationship.person1_last_name}</a></td>
+                    <td><a href="index.php?action=edit_member&member_id=${relationship.person2_id}">${relationship.person2_first_name} ${relationship.person2_last_name}</a></td>
                     <td>${relationship.relationship_description}</td>
-                    <td>${formatBrowserDate(relationship.relation_start)}</td>
-                    <td>${formatBrowserDate(relationship.relation_end)}</td>
                     <td>
-                        <form class="delete-relationship-form" method="post">
-                            <input type="hidden" name="relationship_id" value="${relationship.id}">
-                            <button class="relation-button delete-relation-button" type="submit">🗑️</button>
-                        </form>
-                        <button type="button" class="relation-button edit-relationship-btn" data-relationship-id="${relationship.id}"
-                            data-relation-start="${relationship.relation_start}"
-                            data-relation-end="${relationship.relation_end}"
-                            data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"
-                            data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"
-                            data-relationship-type="${relationship.relationship_type}">✏️</button>
-                        <form class="swap-relationship-form" method="post">
-                            <input type="hidden" id="swap_relationship_id" name="relationship_id" value="${relationship.id}">
-                            <button type="button" class="relation-button swap-relationship-btn" data-relationship-id="${relationship.id}" data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}" data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}" data-relationship-type="${relationship.relationship_type}">⇄</button>
-                        </form>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-link dropdown-toggle" data-bs-toggle="dropdown">
+                                ⚙️
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <button class="dropdown-item edit-relationship-btn" type="button" 
+                                        data-relationship-id="${relationship.id}"
+                                        data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"
+                                        data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"
+                                        data-relationship-type="${relationship.relationship_type}">
+                                        ✏️ Edit
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item swap-relationship-btn" type="button" 
+                                        data-relationship-id="${relationship.id}">
+                                        🔄 Swap
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item delete-relation-button" type="button" 
+                                        data-relationship-id="${relationship.id}">
+                                        🗑️ Delete
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
                 `;
                 relationshipsTableBody.appendChild(row);
+
+                // Initialize dropdown for this row
+                const dropdown = row.querySelector('[data-bs-toggle="dropdown"]');
+                if (dropdown) {
+                    new bootstrap.Dropdown(dropdown);
+                }
             });
 
-            document.querySelectorAll('.edit-relationship-btn').forEach(button => {
-                button.addEventListener('click', function () {
-                    const relationshipId = this.getAttribute('data-relationship-id');
-                    const person1 = this.getAttribute('data-person1');
-                    const person2 = this.getAttribute('data-person2');
-                    const relationshipType = this.getAttribute('data-relationship-type');
-                    const relationStart = formatRelationDate(this.getAttribute('data-relation-start'));
-                    const relationEnd = formatRelationDate(this.getAttribute('data-relation-end'));
-
-                    document.getElementById('edit_relationship_id').value = relationshipId;
-                    document.getElementById('edit_relationship_person1').value = person1;
-                    document.getElementById('edit_relationship_person2').value = person2;
-                    document.getElementById('edit_relationship_type').value = relationshipType;
-                    document.getElementById('edit_relation_start').value = relationStart;
-                    document.getElementById('edit_relation_end').value = relationEnd;
-
-                    new bootstrap.Modal(document.getElementById('edit-relationship-modal')).show();
-                });
+            // Add event handlers for the buttons
+            document.querySelectorAll('.edit-relationship-btn').forEach(btn => {
+                btn.addEventListener('click', handleEditClick);
             });
-
-            document.querySelectorAll('.swap-relationship-btn').forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const relationshipId = this.getAttribute('data-relationship-id');
-                    fetch('index.php?action=swap_relationship', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ relationship_id: relationshipId })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            loadRelationships(memberId);
-                        } else {
-                            alert('Failed to swap relationship.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to swap relationship.');
-                    });
-                });
+            
+            document.querySelectorAll('.swap-relationship-btn').forEach(btn => {
+                btn.addEventListener('click', handleSwapClick);
             });
+            
+            document.querySelectorAll('.delete-relation-button').forEach(btn => {
+                btn.addEventListener('click', handleDeleteClick);
+            });
+        });
+}
 
-            document.querySelectorAll('.delete-relationship-form').forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    if (confirm('Are you sure you want to delete this relationship?')) {
-                        const formData = new FormData(this);
-                        fetch('index.php?action=delete_relationship', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                loadRelationships(memberId);
-                            } else {
-                                alert('Failed to delete relationship.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to delete relationship.');
-                        });
+function handleEditClick(e) {
+    const btn = e.currentTarget;
+    const editModal = new bootstrap.Modal(document.getElementById('editRelationshipModal'));
+    
+    // Populate the form
+    document.getElementById('edit_relationship_id').value = btn.dataset.relationshipId;
+    document.getElementById('edit_person1').value = btn.dataset.person1;
+    document.getElementById('edit_person2').value = btn.dataset.person2;
+    
+    // Fetch relationship types and populate select
+    fetch(`index.php?action=get_relationship_types&tree_id=${treeId}`)
+        .then(response => response.json())
+        .then(types => {
+            const select = document.getElementById('edit_relationship_type');
+            select.innerHTML = types.map(type => 
+                `<option value="${type.id}" ${type.id == btn.dataset.relationshipType ? 'selected' : ''}>
+                    ${type.description}
+                </option>`
+            ).join('');
+        });
+    
+    editModal.show();
+}
+
+// Add save handler for edit modal
+document.getElementById('saveEditRelationship')?.addEventListener('click', function() {
+    const formData = new FormData(document.getElementById('edit-relationship-form'));
+    fetch('index.php?action=update_relationship', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('editRelationshipModal')).hide();
+            loadRelationships(memberId);
+        } else {
+            alert(data.message || 'Failed to update relationship');
+        }
+    });
+});
+
+function handleSwapClick(e) {
+    const relationshipId = e.currentTarget.dataset.relationshipId;
+    handleSwapRelationship(relationshipId);
+}
+
+function handleDeleteClick(e) {
+    if (confirm('Are you sure you want to delete this relationship?')) {
+        const relationshipId = e.currentTarget.dataset.relationshipId;
+        const formData = new FormData();
+        formData.append('relationship_id', relationshipId);
+        fetch('index.php?action=delete_relationship', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadRelationships(memberId);
+            } else {
+                alert('Failed to delete relationship.');
+            }
+        });
+    }
+}
+
+function handleEditRelationship(id, start, end, person1, person2, type) {
+    // Show edit modal or form with relationship details
+    const editModal = document.getElementById('edit-relationship-modal');
+    if (editModal) {
+        document.getElementById('edit_relationship_id').value = id;
+        document.getElementById('edit_relationship_person1').value = person1;
+        document.getElementById('edit_relationship_person2').value = person2;
+        document.getElementById('edit_relationship_type').value = type;
+        document.getElementById('edit_relation_start').value = formatRelationDate(start);
+        document.getElementById('edit_relation_end').value = formatRelationDate(end);
+        new bootstrap.Modal(editModal).show();
+    }
+}
+
+function handleSwapRelationship(relationshipId) {
+    fetch('index.php?action=swap_relationship', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ relationship_id: relationshipId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadRelationships(memberId);
+        } else {
+            alert('Failed to swap relationship.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to swap relationship.');
+    });
+}
+
+function attachDeleteHandlers() {
+    document.querySelectorAll('.delete-relation-button').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this relationship?')) {
+                const relationshipId = this.getAttribute('data-relationship-id');
+                const formData = new FormData();
+                formData.append('relationship_id', relationshipId);
+                fetch('index.php?action=delete_relationship', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadRelationships(memberId);
+                    } else {
+                        alert('Failed to delete relationship.');
                     }
                 });
-            });
-        })
-        .catch(error => {
-            console.warn('Failed to load relationships:', error);
+            }
         });
+    });
 }
 
 function formatRelationDate(relationStart) {
