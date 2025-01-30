@@ -25,10 +25,6 @@ input[type="date"] {
                    class="btn btn-primary float-right">
                     {{ get_translation("Visualize Descendants") }}
                 </a>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
-                    {{ get_translation("Add Relationship") }}
-                </button>
-
 
                 <!-- Add Relationship Modal -->                
                 <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
@@ -243,70 +239,73 @@ input[type="date"] {
 
                 <!-- Tabs for spouses -->
                 <ul class="nav nav-tabs" id="familyTabs" role="tablist">
-                    {% for family in spouse_families %}
-                        <li class="nav-item" role="presentation" class="dropdown">
-                            <div class="dropdown">
-                                <button class="nav-link {% if loop.first %}active{% endif %} dropdown-toggle" 
-                                        id="family-tab-{{ family.id }}" 
-                                        data-toggle="tab" 
-                                        data-target="#family-{{ family.id }}" 
-                                        type="button" 
-                                        role="tab" 
-                                        aria-controls="family-{{ family.id }}" 
-                                        aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    {% if family.has_spouse %}
-                                        {{ family.spouse_name }}
-                                    {% else %}
-                                        {{ get_translation("Unknown Spouse") }}
-                                    {% endif %}
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="family-tab-{{ family.id }}">
-    {% if family.has_spouse %}
-        <li>
-            <a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
-                {{ get_translation("View Spouse") }}
-            </a>
-        </li>
-        <li>
-            <button type="button" class="dropdown-item delete-spouse-btn" 
-                    data-spouse-id="{{ family.spouse_id }}"
-                    data-family-id="{{ family.id }}">
-                {{ get_translation("Delete Spouse") }}
+    {% for family in spouse_families %}
+        <li class="nav-item dropdown" role="presentation">
+            <button class="nav-link {% if loop.first %}active{% endif %} dropdown-toggle" 
+                    id="family-tab-{{ family.id }}" 
+                    data-toggle="tab" 
+                    data-target="#family-{{ family.id }}" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="family-{{ family.id }}" 
+                    aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                {% if family.has_spouse %}
+                    {{ family.spouse_name }}
+                {% else %}
+                    {{ get_translation("Unknown Spouse") }}
+                {% endif %}
             </button>
+            <ul class="dropdown-menu">
+                {% if family.has_spouse %}
+                    <li><a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
+                        {{ get_translation("View Spouse") }}</a></li>
+                {% else %}
+                    <li><button class="dropdown-item replace-spouse-btn" data-family-id="{{ family.id }}">
+                        {{ get_translation("Add Spouse") }}</button></li>
+                {% endif %}
+                <li><button class="dropdown-item delete-family-btn" data-family-id="{{ family.id }}">
+                    {{ get_translation("Delete Family") }}</button></li>
+                <li>
+                    <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
+                            data-spouse-id="{{ family.spouse_id }}"
+                            data-family-id="{{ family.id }}"
+                            onclick="event.stopPropagation();">
+                        🗑️ {{ get_translation("Delete Spouse") }}
+                    </button>
+                </li>
+                {% if family.is_single_parent %}
+                <li>
+                    <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
+                            data-family-id="{{ family.id }}">
+                        {{ get_translation("Add Spouse") }}
+                    </button>
+                </li>
+                {% endif %}
+                
+            </ul>
         </li>
-    {% else %}
-        <li>
-            <button type="button" class="dropdown-item replace-spouse-btn"
-                    data-family-id="{{ family.id }}">
-                {{ get_translation("Add Spouse") }}
-            </button>
-        </li>
-    {% endif %}
-    <li><hr class="dropdown-divider"></li>
-    <li>
-        <button type="button" class="dropdown-item delete-family-btn"
-                data-family-id="{{ family.id }}"
-                data-spouse-id="{{ family.spouse_id }}">
-            {{ get_translation("Delete Family") }}
+    {% endfor %}
+
+    <!-- Add an empty tab as visual separator -->
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" style="pointer-events: none; width: 20px;">&nbsp;</button>
+    </li>
+
+    <!-- Add new spouse tab -->
+    <li class="nav-item" role="presentation">
+        <button class="nav-link add-family-btn" title="{{ get_translation("Add New Family") }}">
+            <i class="fas fa-plus"></i>
         </button>
     </li>
+    <li class="nav-item" role="presentation">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
+                    {{ get_translation("Add Relationship") }}
+                </button>
+
+    </li>
 </ul>
-                            </div>
-                        </li>
-                    {% endfor %}
-                    <!-- Add Relationship button as a tab -->
-                    <li class="nav-item" role="presentation">
-                        <button type="button" 
-                                class="nav-link"
-                                data-bs-toggle="modal" 
-                                data-bs-target="#addRelationshipModal"
-                                title="{{ get_translation("Add New Spouse") }}">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </li>
-                </ul>
 
                 <!-- Tab content -->
                 <div class="tab-content" id="familyTabsContent">
@@ -351,21 +350,6 @@ input[type="date"] {
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     {{ get_translation("Marriage Details") }}
-                                    {% if family.is_single_parent %}
-                                        <div>
-                                            <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
-                                                    data-family-id="{{ family.id }}">
-                                                {{ get_translation("Add Spouse") }}
-                                            </button>
-                                        </div>
-                                    {% else %}
-                                        <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                data-spouse-id="{{ family.spouse_id }}"
-                                                data-family-id="{{ family.id }}"
-                                                onclick="event.stopPropagation();">
-                                            🗑️ {{ get_translation("Delete Spouse") }}
-                                        </button>
-                                    {% endif %}
                                 </div>
                                 <div class="card-body">
                                     <p><strong>{{ get_translation("Marriage Date") }}:</strong> 
@@ -412,7 +396,6 @@ input[type="date"] {
                 </h5>
             </div>
             <div class="card-body">
-                <!-- Add Relationship Button -->
 
 
 
@@ -861,6 +844,23 @@ input[type="date"] {
     align-items: center;
     gap: 0.5rem;
 }
+
+/* Add to existing styles */
+.add-spouse-tab {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    color: #0d6efd;
+}
+
+.add-spouse-tab:hover {
+    color: #0a58ca;
+}
+
+/* Remove the divider in dropdown menu */
+.dropdown-menu .dropdown-divider {
+    display: none;
+}
 </style>
 
 <script>
@@ -889,5 +889,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function activateSpouseTab() {
+    // Find and click the spouse tab in the relationship modal
+    const spouseTab = document.getElementById('spouse-tab');
+    if (spouseTab) {
+        spouseTab.click();
+    }
+}
 </script>
 
