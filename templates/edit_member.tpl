@@ -21,11 +21,23 @@ input[type="date"] {
         <div class="card">
             <div class="card-header">
                 <h4>{{ get_translation("Member Details") }}</h4>
-                <a href="index.php?action=visualize_descendants&member_id={{ member.id }}" 
-                   class="btn btn-primary float-right">
-                    {{ get_translation("Visualize Descendants") }}
-                </a>
-
+                    <div class="dropdown">
+                        <button class="btn btn-link p-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            ⚙️
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="index.php?action=visualize_descendants&member_id={{ member.id }}">
+                                    🌳 {{ get_translation("Visualize Descendants") }}
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item text-danger" type="button" onclick="if(confirm('{{ get_translation("Are you sure you want to delete this member?") }}')) document.querySelector('.delete-member-form').submit();">
+                                    🗑️ {{ get_translation("Delete Member") }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 <!-- Add Relationship Modal -->                
                 <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -157,32 +169,7 @@ input[type="date"] {
                     <label for="source">{{ get_translation("Source") }}:</label>
                     <input type="text" name="source" id="source" value="{{ member.source|e }}"><br>
 
-                    <div id="additional-fields" style="display: none;">
-
-                <!-- Other relationships section -->
-                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
-                <div id="relationships">
-                    <table class="relationship-table">
-                        <tr>
-                            <th>{{ get_translation("Person 1") }}</th>
-                            <th>{{ get_translation("Person 2") }}</th>
-                            <th>{{ get_translation("Type") }}</th>
-                            <!--
-                            <th>{{ get_translation("Start") }}</th>
-                            <th>{{ get_translation("End") }}</th>
-                            -->
-                            <th>{{ get_translation("Actions") }}</th>
-                        </tr>
-                        <tbody id="relationships-table-body">
-                            <!-- Relationships will be dynamically filled via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                    </div>
-                    <br />
-
-                    <button type="submit">{{ get_translation("Update Member") }}</button>
-                    <button type="button" id="toggle-fields-btn">{{ get_translation("More") }}</button>
+                    <button type="submit">{{ get_translation("Save") }}</button>
                 </form>
             </div>
         </div>
@@ -398,17 +385,35 @@ input[type="date"] {
                 </h5>
             </div>
             <div class="card-body">
+                    <button type="button" id="toggle-fields-btn">{{ get_translation("More") }}</button>
 
+                    <div id="additional-fields" style="display: none;">
+
+                <!-- Other relationships section -->
+                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
+                <div id="relationships">
+                    <table class="relationship-table">
+                        <tr>
+                            <th>{{ get_translation("Person 1") }}</th>
+                            <th>{{ get_translation("Person 2") }}</th>
+                            <th>{{ get_translation("Type") }}</th>
+                            <!--
+                            <th>{{ get_translation("Start") }}</th>
+                            <th>{{ get_translation("End") }}</th>
+                            -->
+                            <th>{{ get_translation("Actions") }}</th>
+                        </tr>
+                        <tbody id="relationships-table-body">
+                            <!-- Relationships will be dynamically filled via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                    </div>
 
 
 
                 <hr>
-                <h2>{{ get_translation("Delete Member") }}</h2>
-                {{ get_translation("Warning, This Can Not Be Undone") }}
-                <form method="post" class='delete-member-form' action="index.php?action=delete_member">
-                    <input type="hidden" name="member_id" value="{{ member.id }}">
-                    <button type="submit">🗑️ {{ get_translation("Delete") }}</button>
-                </form>
+
             </div>
         </div>
     </div>
@@ -522,8 +527,6 @@ input[type="date"] {
     </div>
 </div>
 
-// ...existing code...
-
 <!-- Add this new modal for editing relationships -->
 <div class="modal fade" id="editRelationshipModal" tabindex="-1" aria-labelledby="editRelationshipModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -566,8 +569,6 @@ input[type="date"] {
         </div>
     </div>
 </div>
-
-// ...existing code...
 
 <script>
     var memberId = {{memberId}}; // Pass member ID to JavaScript
@@ -949,8 +950,6 @@ function activateSpouseTab() {
 }
 </script>
 
-// ...existing code...<!-- Replace just the relationships table row template inside loadRelationships function --><td>    <div class="dropdown">        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown">            <i class="fas fa-ellipsis-v"></i>        </button>        <ul class="dropdown-menu dropdown-menu-end">            <li>                <button class="dropdown-item delete-relation-button" type="button" data-relationship-id="${relationship.id}">                    <i class="fas fa-trash text-danger"></i> Delete                </button>            </li>            <li>                <button class="dropdown-item edit-relationship-btn" type="button"                     data-relationship-id="${relationship.id}"                    data-relation-start="${relationship.relation_start}"                    data-relation-end="${relationship.relation_end}"                    data-person1="${relationship.person1_first_name} ${relationship.person1_last_name}"                    data-person2="${relationship.person2_first_name} ${relationship.person2_last_name}"                    data-relationship-type="${relationship.relationship_type}">                    <i class="fas fa-edit text-primary"></i> Edit                </button>            </li>            <li>                <button class="dropdown-item swap-relationship-btn" type="button"                     data-relationship-id="${relationship.id}">                    <i class="fas fa-exchange-alt text-success"></i> Swap                </button>            </li>        </ul>    </div></td>// ...rest of existing code...
-
 <!-- Add this new modal for editing relationships -->
 <div class="modal fade" id="editRelationshipModal" tabindex="-1" aria-labelledby="editRelationshipModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -993,5 +992,3 @@ function activateSpouseTab() {
         </div>
     </div>
 </div>
-
-// ...existing code...

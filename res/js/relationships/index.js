@@ -66,6 +66,16 @@ class RelationshipManager {
             return;
         }
 
+        // Clean up any existing popper/dropdown instances
+        const dropdowns = formContent.querySelectorAll('[data-bs-toggle="dropdown"]');
+        dropdowns.forEach(dropdown => {
+            const instance = bootstrap.Dropdown.getInstance(dropdown);
+            if (instance) {
+                instance.dispose();
+            }
+        });
+
+        // Load new content
         switch (type) {
             case RelationshipType.SPOUSE:
                 formContent.innerHTML = this.formGenerator.getSpouseForm();
@@ -84,6 +94,12 @@ class RelationshipManager {
                 this.handlers.initializeOtherHandlers();
                 break;
         }
+
+        // Reinitialize Bootstrap components
+        const newDropdowns = formContent.querySelectorAll('[data-bs-toggle="dropdown"]');
+        newDropdowns.forEach(dropdown => {
+            new bootstrap.Dropdown(dropdown);
+        });
     }
 
     loadInitialForm() {
@@ -138,36 +154,59 @@ class RelationshipManager {
         this.modal.hide();
     }
 
-    async saveRelationship(event) {
+    async saveRelationship() {
         try {
-            event.preventDefault();
             const form = document.getElementById('add-relationship-form');
+            if (!form) {
+                throw new Error('Relationship form not found');
+            }
+
             const formData = new FormData(form);
+
+            // Get type from active tab
+            const activeTabButton = document.querySelector('.nav-link[data-bs-toggle="tab"].active');
+            if (!activeTabButton) {
+                throw new Error('No active tab found');
+            }
+
+            const type = activeTabButton.id.replace('-tab', '');
+            formData.append('type', type);
+            formData.append('member_id', this.member.id);
+            formData.append('tree_id', this.member.tree_id);
+
+            // Debug what we're sending
+            console.log('Sending relationship data:', type);
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
 
             const response = await fetch('index.php?action=add_relationship', {
                 method: 'POST',
                 body: formData
             });
-            const data = await response.json();
 
-            if (data.success) {
-                // Close the modal
-                this.modal.hide();
-                // Clear the form
-                form.reset();
-                
-                // Reload only the necessary sections
-                await this.reloadFamilySection();
-                await loadRelationships(this.member.id); // Reload relationships table
-                
-                // Reset any form states
-                this.loadInitialForm();
-            } else {
-                alert(data.message || 'Failed to add relationship');
+            let result;
+            const responseText = await response.text(); // Get raw response text first
+            
+            try {
+                result = JSON.parse(responseText); // Try to parse as JSON
+            } catch (e) {
+                console.error('Server response:', responseText); // Log raw response for debugging
+                throw new Error('Invalid server response format');
             }
+
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to save relationship');
+            }
+
+            this.closeRelModal();
+            await this.reloadFamilySection();
+            return true;
+
         } catch (error) {
             console.error('Error saving relationship:', error);
-            alert('Failed to add relationship. Please try again.');
+            alert(error.message || 'Failed to save relationship');
+            return false;
         }
     }
 
@@ -255,6 +294,83 @@ class RelationshipManager {
         });
     }
 
+    generateSpouseFamilyTab(family, isActive = false) {
+        const spouseName = family.spouse_name || this.translations['Unknown Spouse'];
+        return `
+            <li class="nav-item dropdown" role="presentation">
+                <button class="nav-link ${isActive ? 'active' : ''} dropdown-toggle" 
+                        id="family-tab-${family.id}" 
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    ${spouseName}
+                </button>
+                <ul class="dropdown-menu">
+                    ${family.has_spouse ? 
+                        `<li><a class="dropdown-item" href="index.php?action=edit_member&member_id=${family.spouse_id}">
+                            ${this.translations["View Spouse"]}</a></li>` : 
+                        `<li><button class="dropdown-item replace-spouse-btn" data-family-id="${family.id}">
+                            ${this.translations["Add Spouse"]}</button></li>`
+                    }
+                    <li><button class="dropdown-item delete-family-btn" data-family-id="${family.id}">
+                        ${this.translations["Delete Family"]}</button></li>
+                </ul>
+            </li>`;
+    }
+
+    generateSpouseFamilyContent(family, isActive = false) {
+        return `
+            <div class="tab-pane fade ${isActive ? 'show active' : ''}" 
+                 id="family-${family.id}" 
+                 role="tabpanel" 
+                 aria-labelledby="family-tab-${family.id}">
+                ${this.generateChildrenSection(family)}
+                ${this.generateMarriageDetailsSection(family)}
+            </div>`;
+    }
+
+    generateChildrenSection(family) {
+        const children = family.children || [];
+        return `
+            <div class="card mt-3">
+                <div class="card-header">${this.translations["Children"]}</div>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            ${children.map(child => `
+                                <tr>
+                                    <td>
+                                        <a href="index.php?action=edit_member&member_id=${child.id}">
+                                            ${child.first_name} ${child.last_name}
+                                        </a>
+                                    </td>
+                                    <td>${child.birth_date ? new Date(child.birth_date).toLocaleDateString() : '-'}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm delete-child-btn" 
+                                                data-child-id="${child.id}"
+                                                data-family-id="${family.id}">
+                                            🗑️
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+    }
+
+    generateMarriageDetailsSection(family) {
+        return `
+            <div class="card mt-3">
+                <div class="card-header">${this.translations["Marriage Details"]}</div>
+                <div class="card-body">
+                    <p><strong>${this.translations["Marriage Date"]}:</strong> 
+                        ${family.marriage_date ? new Date(family.marriage_date).toLocaleDateString() : '-'}
+                    </p>
+                </div>
+            </div>`;
+    }
+
 }
 
 // Initialize when the DOM is ready
@@ -270,6 +386,16 @@ document.addEventListener('DOMContentLoaded', () => {
     manager.initialize();
     const addRelationshipModal = new bootstrap.Modal(document.getElementById('addRelationshipModal'));
 
+    // Event handler for save relationship button
+    document.getElementById('saveRelationship').addEventListener('click', async () => {
+        try {
+            await manager.saveRelationship();
+        } catch (error) {
+            console.error('Error:', error);
+            // Optionally show error to user
+            alert(error.message || 'Failed to save relationship');
+        }
+    });
 });
 
 // Add at the top of the file
@@ -283,33 +409,3 @@ const resizeObserverError = error => {
 
 window.addEventListener('error', resizeObserverError);
 window.addEventListener('unhandledrejection', resizeObserverError);
-
-// Update the saveRelationship function
-document.getElementById('saveRelationship').addEventListener('click', async function() {
-    // ...existing validation code...
-
-    try {
-        const response = await fetch('index.php?action=add_relationship', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-
-        if (data.success) {
-            // Close the modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addRelationshipModal'));
-            modal.hide();
-
-            // Clear the form
-            document.getElementById('add-relationship-form').reset();
-
-            // Reload the page to show new relationships
-            window.location.reload();
-        } else {
-            alert(data.message || 'Failed to add relationship');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to add relationship');
-    }
-});
