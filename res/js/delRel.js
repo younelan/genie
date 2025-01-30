@@ -484,6 +484,14 @@ function handleEditClick(e) {
                         });
                     };
                 }
+
+                // Add handlers for close buttons
+                const closeButtons = editModal.querySelectorAll('[data-bs-dismiss="modal"]');
+                closeButtons.forEach(button => {
+                    button.onclick = function() {
+                        modalInstance.hide();
+                    };
+                });
             })
             .catch(error => {
                 console.error('Error fetching relationship types:', error);
