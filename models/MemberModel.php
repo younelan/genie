@@ -813,4 +813,17 @@ public function updateFamilySpouse($data)
 
         return $result;
     }
+
+    public function getFamilyChildren($familyId)
+    {
+        $query = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender 
+                  FROM $this->family_children_table fc
+                  JOIN $this->person_table c ON fc.child_id = c.id
+                  WHERE fc.family_id = :family_id
+                  ORDER BY c.birth_date";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['family_id' => $familyId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

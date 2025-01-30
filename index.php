@@ -190,6 +190,15 @@ switch ($action) {
         $memberController->replaceSpouse();
         break;
 
+    case 'create_empty_family':
+        $memberController->createEmptyFamily();
+        break;
+
+    case 'get_families':
+        $memberId = $_GET['member_id'] ?? null;
+        $memberController->getFamilies($memberId);
+        break;
+
     default:
         header("Location: index.php?action=list_trees");
         exit();

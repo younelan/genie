@@ -289,7 +289,20 @@ class MemberController extends AppController
                 if (!$success) {
                     throw new Exception("Failed to create family");
                 }
-            } else {
+            } else if ($relationshipTypeId == 2) { // Child relationship
+                $familyData = [
+                    'tree_id' => $treeId,
+                    'husband_id' => null,
+                    'wife_id' => null,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                $success = $this->member->createFamilyWithChild($familyData, $personId2);
+                if (!$success) {
+                    throw new Exception("Failed to create family with child");
+                }
+            } else if ($relationshipTypeId == 3) { // Parent relationship
                 // Handle other relationship types here
                 // For example: parent-child, sibling, etc.
             }
@@ -385,16 +398,31 @@ class MemberController extends AppController
             echo json_encode(['success' => false, 'message' => 'No member ID provided']);
             exit;
         }
-
-        $spouse_families = $this->member->getSpouseFamilies($memberId);
-        $child_families = $this->member->getChildFamilies($memberId);
-
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'spouse_families' => $spouse_families,
-            'child_families' => $child_families
-        ]);
+    
+        try {
+            $spouse_families = $this->member->getSpouseFamilies($memberId);
+            $child_families = $this->member->getChildFamilies($memberId);
+            
+            // Add additional data needed for UI
+            foreach ($spouse_families as &$family) {
+                $family['children'] = $this->member->getFamilyChildren($family['id']);
+                $family['has_spouse'] = !empty($family['spouse_id']);
+                $family['is_single_parent'] = empty($family['husband_id']) || empty($family['wife_id']);
+            }
+    
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'spouse_families' => $spouse_families,
+                'child_families' => $child_families
+            ]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
         exit;
     }
     public function getSpouseFamilies() {
@@ -635,5 +663,46 @@ class MemberController extends AppController
         }
 
         return $result;
+    }
+
+    public function createEmptyFamily()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            $memberId = $_POST['member_id'] ?? null;
+            $treeId = $_POST['tree_id'] ?? null;
+
+            if (!$memberId || !$treeId) {
+                throw new Exception('Missing required parameters');
+            }
+
+            // Get member info to determine gender
+            $member = $this->member->getMemberById($memberId);
+            if (!$member) {
+                throw new Exception('Member not found');
+            }
+
+            // Create empty family with current member as the only parent
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $member['gender'] === 'M' ? $memberId : null,
+                'wife_id' => $member['gender'] === 'F' ? $memberId : null,
+                'marriage_date' => null
+            ];
+
+            $success = $this->member->createFamily($familyData);
+            if (!$success) {
+                throw new Exception('Failed to create family');
+            }
+
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
     }
 }

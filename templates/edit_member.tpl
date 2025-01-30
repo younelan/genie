@@ -244,23 +244,68 @@ input[type="date"] {
                 <!-- Tabs for spouses -->
                 <ul class="nav nav-tabs" id="familyTabs" role="tablist">
                     {% for family in spouse_families %}
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if loop.first %}active{% endif %}" 
-                                    id="family-tab-{{ family.id }}" 
-                                    data-toggle="tab" 
-                                    data-target="#family-{{ family.id }}" 
-                                    type="button" 
-                                    role="tab" 
-                                    aria-controls="family-{{ family.id }}" 
-                                    aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                                {% if family.has_spouse %}
-                                    {{ family.spouse_name }}
-                                {% else %}
-                                    {{ get_translation("Unknown Spouse") }}
-                                {% endif %}
-                            </button>
+                        <li class="nav-item" role="presentation" class="dropdown">
+                            <div class="dropdown">
+                                <button class="nav-link {% if loop.first %}active{% endif %} dropdown-toggle" 
+                                        id="family-tab-{{ family.id }}" 
+                                        data-toggle="tab" 
+                                        data-target="#family-{{ family.id }}" 
+                                        type="button" 
+                                        role="tab" 
+                                        aria-controls="family-{{ family.id }}" 
+                                        aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    {% if family.has_spouse %}
+                                        {{ family.spouse_name }}
+                                    {% else %}
+                                        {{ get_translation("Unknown Spouse") }}
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="family-tab-{{ family.id }}">
+    {% if family.has_spouse %}
+        <li>
+            <a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
+                {{ get_translation("View Spouse") }}
+            </a>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item delete-spouse-btn" 
+                    data-spouse-id="{{ family.spouse_id }}"
+                    data-family-id="{{ family.id }}">
+                {{ get_translation("Delete Spouse") }}
+            </button>
+        </li>
+    {% else %}
+        <li>
+            <button type="button" class="dropdown-item replace-spouse-btn"
+                    data-family-id="{{ family.id }}">
+                {{ get_translation("Add Spouse") }}
+            </button>
+        </li>
+    {% endif %}
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <button type="button" class="dropdown-item delete-family-btn"
+                data-family-id="{{ family.id }}"
+                data-spouse-id="{{ family.spouse_id }}">
+            {{ get_translation("Delete Family") }}
+        </button>
+    </li>
+</ul>
+                            </div>
                         </li>
                     {% endfor %}
+                    <!-- Add Relationship button as a tab -->
+                    <li class="nav-item" role="presentation">
+                        <button type="button" 
+                                class="nav-link"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#addRelationshipModal"
+                                title="{{ get_translation("Add New Spouse") }}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </li>
                 </ul>
 
                 <!-- Tab content -->
@@ -336,6 +381,24 @@ input[type="date"] {
                     {% endfor %}
                 </div>
 
+                <!-- Add this new modal for creating a new family -->
+                <div class="modal fade" id="addFamilyModal" tabindex="-1" aria-labelledby="addFamilyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addFamilyModalLabel">{{ get_translation("Create New Family") }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>{{ get_translation("This will create a new family with you as the only parent.") }}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                                <button type="button" class="btn btn-primary" id="confirmAddFamily">{{ get_translation("Create") }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -775,4 +838,56 @@ input[type="date"] {
 <script type="module" src="res/js/relationships/index.js"></script>
 
 <script type="module" src="res/js/delRel.js"></script>
+
+<style>
+/* Add these styles to your existing CSS */
+.nav-tabs .nav-item .dropdown-toggle::after {
+    display: inline-block;
+    margin-left: .255em;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+
+.nav-tabs .nav-item .dropdown-menu {
+    margin-top: 0;
+}
+
+.nav-tabs .nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>
+
+<script>
+// Add this to your existing JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all dropdowns
+    var dropdowns = document.querySelectorAll('.dropdown-toggle');
+    dropdowns.forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(event) {
+            // Only handle dropdown toggle if clicked on the arrow or right side
+            if (event.offsetX > this.offsetWidth - 20) {
+                event.preventDefault();
+                event.stopPropagation();
+                var dropdownMenu = this.nextElementSibling;
+                dropdownMenu.classList.toggle('show');
+            }
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.matches('.dropdown-toggle')) {
+            document.querySelectorAll('.dropdown-menu.show').forEach(function(dropdown) {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+});
+</script>
 

@@ -12,6 +12,43 @@ function initializeRelationships(memberId) {
         backdrop: 'static'
     });
 
+    // Add new family handler
+    const addFamilyBtn = document.querySelector('.add-family-btn');
+    const addFamilyModal = new bootstrap.Modal(document.getElementById('addFamilyModal'));
+    
+    if (addFamilyBtn) {
+        addFamilyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addFamilyModal.show();
+        });
+    }
+
+    // Handle create new family confirmation
+    document.getElementById('confirmAddFamily').addEventListener('click', function() {
+        const formData = new FormData();
+        formData.append('member_id', memberId);
+        formData.append('tree_id', treeId);
+
+        fetch('index.php?action=create_empty_family', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to create family');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to create family. Please try again.');
+        });
+
+        addFamilyModal.hide();
+    });
+
     // Delete child handlers
     document.querySelectorAll('.delete-child-btn').forEach(button => {
         button.addEventListener('click', function (e) {
@@ -127,32 +164,42 @@ function initializeRelationships(memberId) {
     // Handle autocomplete for replace spouse
     document.getElementById('replace_spouse').addEventListener('input', function () {
         const input = this.value;
+        const options = document.getElementById('replace-spouse-options');
+        options.innerHTML = '';
+        
         fetch(`index.php?action=autocomplete_member&tree_id=${treeId}&term=${input}`)
             .then(response => response.json())
             .then(data => {
-                const options = document.getElementById('replace-spouse-options');
-                options.innerHTML = '';
                 data.forEach(item => {
                     const option = document.createElement('option');
                     option.value = item.label;
-                    option.setAttribute('data-person-id', item.id);
+                    option.dataset.personId = item.id;
                     options.appendChild(option);
                 });
+
+                // Find if we have an exact match
+                const exactMatch = data.find(item => item.label === input);
+                if (exactMatch) {
+                    document.getElementById('replace_spouse_id').value = exactMatch.id;
+                }
             });
     });
 
-    // Handle selection from datalist options for replace spouse
-    document.getElementById('replace_spouse').addEventListener('change', function () {
-        const selectedOption = document.querySelector(`#replace-spouse-options option[value="${this.value}"]`);
-        if (selectedOption) {
-            document.getElementById('replace_spouse_id').value = selectedOption.getAttribute('data-person-id');
-        } else {
-            document.getElementById('replace_spouse_id').value = '';
-        }
-    });
-
     document.getElementById('confirmReplaceSpouse').addEventListener('click', function () {
+        // Check if we're adding an existing spouse
+        if (document.querySelector('input[name="spouse_type"]:checked').value === 'existing') {
+            const spouseId = document.getElementById('replace_spouse_id').value;
+            if (!spouseId) {
+                alert('Please select a valid spouse from the list');
+                return;
+            }
+        }
+
         const formData = new FormData(document.getElementById('replace-spouse-form'));
+        
+        // Add debugging log
+        console.log('Form data before submit:', Object.fromEntries(formData.entries()));
+        
         formData.append('action', 'replace_spouse');
         formData.append('tree_id', treeId);
 
@@ -172,6 +219,23 @@ function initializeRelationships(memberId) {
             console.error('Error:', error);
             alert('Failed to replace spouse. Please try again.');
         });
+    });
+
+    // Add a change event handler for the autocomplete input
+    document.getElementById('replace_spouse').addEventListener('change', function() {
+        const input = this.value;
+        const options = document.getElementById('replace-spouse-options').options;
+        
+        // Find matching option
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value === input) {
+                document.getElementById('replace_spouse_id').value = options[i].dataset.personId;
+                return;
+            }
+        }
+        
+        // Clear spouse_id if no match found
+        document.getElementById('replace_spouse_id').value = '';
     });
 
     // Handle alive checkbox toggle for death fields

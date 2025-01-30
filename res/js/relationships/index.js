@@ -138,54 +138,11 @@ class RelationshipManager {
         this.modal.hide();
     }
 
-    saveRelationship(event) {
-        const activeTab = $('.nav-link.active').attr('id').replace('-tab', '');
-        const formData = $(`#${activeTab}-form-content :input`).serializeArray();
-
-        // Retrieve hidden fields' values
-        const memberId = $('#member_id').val();
-        const treeId = $('input[name="tree_id"]').val();
-        const memberGender = $('input[name="member_gender"]').val();
-
-        // Append hidden fields to form data
-        formData.push({ name: 'member_id', value: memberId });
-        formData.push({ name: 'tree_id', value: treeId });
-        formData.push({ name: 'member_gender', value: memberGender });
-
-        const relationshipData = {
-            type: activeTab, // Relationship type (spouse, child, parent, other)
-            data: formData,  // Form data
-        };
-
-        $.ajax({
-            url: 'index.php',
-            method: 'POST',
-            data: {
-                action: 'add_relationship',
-                relationship: relationshipData,
-            },
-            success: (response) => {
-                console.log('Relationship saved:', response);
-                //this.modal.hide();
-
-            },
-            error: (xhr, status, error) => {
-                console.error('Error saving relationship:', error);
-            },
-        });
-    }
-
-
-    async oldsaveRelationship(event) {
-        console.log('Saving relationship...'); // Debug
-        alert("hi");
+    async saveRelationship(event) {
         try {
             event.preventDefault();
             const form = document.getElementById('add-relationship-form');
             const formData = new FormData(form);
-            const activeTab = document.querySelector('#addRelationshipModal.nav-link.active[data-bs-toggle="tab"]').id.replace('-tab', '');
-            formData.append('relationship_type', activeTab);
-
 
             const response = await fetch('index.php?action=add_relationship', {
                 method: 'POST',
@@ -194,15 +151,108 @@ class RelationshipManager {
             const data = await response.json();
 
             if (data.success) {
+                // Close the modal
                 this.modal.hide();
-                window.location.reload();
+                // Clear the form
+                form.reset();
+                
+                // Reload only the necessary sections
+                await this.reloadFamilySection();
+                await loadRelationships(this.member.id); // Reload relationships table
+                
+                // Reset any form states
+                this.loadInitialForm();
             } else {
                 alert(data.message || 'Failed to add relationship');
             }
         } catch (error) {
-            console.error('Error saving relationship', error)
+            console.error('Error saving relationship:', error);
             alert('Failed to add relationship. Please try again.');
         }
+    }
+
+    async reloadFamilySection() {
+        try {
+            const response = await fetch(`index.php?action=get_families&member_id=${this.member.id}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update spouse families
+                this.updateSpouseFamiliesSection(data.spouse_families);
+                // Update child families
+                this.updateChildFamiliesSection(data.child_families);
+            }
+        } catch (error) {
+            console.error('Error reloading family section:', error);
+        }
+    }
+
+    updateSpouseFamiliesSection(spouseFamilies) {
+        const tabsContainer = document.getElementById('familyTabs');
+        const tabContentContainer = document.getElementById('familyTabsContent');
+        
+        if (!tabsContainer || !tabContentContainer) return;
+
+        // Clear existing content
+        tabsContainer.innerHTML = '';
+        tabContentContainer.innerHTML = '';
+
+        // Rebuild the tabs and content
+        spouseFamilies.forEach((family, index) => {
+            // Create tab
+            const tabHtml = this.generateSpouseFamilyTab(family, index === 0);
+            tabsContainer.innerHTML += tabHtml;
+
+            // Create content
+            const contentHtml = this.generateSpouseFamilyContent(family, index === 0);
+            tabContentContainer.innerHTML += contentHtml;
+        });
+
+        // Reinitialize event listeners for the new content
+        this.initializeFamilyEventListeners();
+    }
+
+    updateChildFamiliesSection(childFamilies) {
+        const container = document.querySelector('.card-body table tbody');
+        if (!container) return;
+
+        container.innerHTML = childFamilies.map(family => `
+            <tr>
+                <td>
+                    ${family.husband_id ? 
+                        `<a href="index.php?action=edit_member&member_id=${family.husband_id}">${family.husband_name}</a>` : 
+                        '-'}
+                </td>
+                <td>
+                    ${family.wife_id ? 
+                        `<a href="index.php?action=edit_member&member_id=${family.wife_id}">${family.wife_name}</a>` : 
+                        '-'}
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    initializeFamilyEventListeners() {
+        // Reinitialize delete buttons
+        document.querySelectorAll('.delete-child-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // ... existing delete child handler code ...
+            });
+        });
+
+        // Reinitialize spouse buttons
+        document.querySelectorAll('.delete-spouse-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // ... existing delete spouse handler code ...
+            });
+        });
+
+        // Reinitialize replace spouse buttons
+        document.querySelectorAll('.replace-spouse-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // ... existing replace spouse handler code ...
+            });
+        });
     }
 
 }
@@ -232,4 +282,34 @@ const resizeObserverError = error => {
 };
 
 window.addEventListener('error', resizeObserverError);
-window.addEventListener('unhandledrejection', resizeObserverError); 
+window.addEventListener('unhandledrejection', resizeObserverError);
+
+// Update the saveRelationship function
+document.getElementById('saveRelationship').addEventListener('click', async function() {
+    // ...existing validation code...
+
+    try {
+        const response = await fetch('index.php?action=add_relationship', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addRelationshipModal'));
+            modal.hide();
+
+            // Clear the form
+            document.getElementById('add-relationship-form').reset();
+
+            // Reload the page to show new relationships
+            window.location.reload();
+        } else {
+            alert(data.message || 'Failed to add relationship');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to add relationship');
+    }
+});
