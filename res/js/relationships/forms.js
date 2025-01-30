@@ -75,15 +75,20 @@ export class FormGenerator {
 
     getChildForm() {
         const familyOptions = this.spouseFamilies.map(family => {
+            console.log(1);
             console.log(family);
+            console.log(2)
             var spouseName;
-            if(this.member.id === family.husband_id) {
+            if(family.spouse_name) {
+                spouseName = family.spouse_name;
+            } else if(this.member.id === family.husband_id) {
                 spouseName = family.wife_name;
             } else {
                 spouseName = family.husband_name;
             }
+            console.log (spouseName);
             //const spouseName = this.member.gender === 'M' ? family.wife_name : family.husband_name;
-            return `<option value="${family.id}">With ${spouseName || '${this.translate("Unknown Spouse")}'}</option>`;
+            return `<option value="${family.id}">With ${spouseName ||  this.translate("Unknown Spouse")}</option>`;
         }).join('');
 
         return `
