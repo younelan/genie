@@ -4,50 +4,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function initializeRelationships(memberId) {
     // Initialize Bootstrap modals
-    const deleteSpouseModal = new bootstrap.Modal(document.getElementById('deleteSpouseModal'), {
-        backdrop: 'static'
-    });
+    const deleteSpouseModal = document.getElementById('deleteSpouseModal');
+    const deleteChildModal = document.getElementById('deleteChildModal');
+    const addFamilyModal = document.getElementById('addFamilyModal');
 
-    const deleteChildModal = new bootstrap.Modal(document.getElementById('deleteChildModal'), {
-        backdrop: 'static'
-    });
-
-    // Add new family handler
-    const addFamilyBtn = document.querySelector('.add-family-btn');
-    const addFamilyModal = new bootstrap.Modal(document.getElementById('addFamilyModal'));
-    
-    if (addFamilyBtn) {
-        addFamilyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            addFamilyModal.show();
+    if (deleteSpouseModal) {
+        new bootstrap.Modal(deleteSpouseModal, {
+            backdrop: 'static'
         });
     }
 
-    // Handle create new family confirmation
-    document.getElementById('confirmAddFamily').addEventListener('click', function() {
-        const formData = new FormData();
-        formData.append('member_id', memberId);
-        formData.append('tree_id', treeId);
+    if (deleteChildModal) {
+        new bootstrap.Modal(deleteChildModal, {
+            backdrop: 'static'
+        });
+    }
 
-        fetch('index.php?action=create_empty_family', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Failed to create family');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to create family. Please try again.');
+    // Add handlers only if elements exist
+    const addFamilyBtn = document.querySelector('.add-family-btn');
+    if (addFamilyBtn && addFamilyModal) {
+        const addFamilyModalInstance = new bootstrap.Modal(addFamilyModal);
+        
+        addFamilyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addFamilyModalInstance.show();
         });
 
-        addFamilyModal.hide();
-    });
+        // Handle create new family confirmation
+        const confirmAddFamily = document.getElementById('confirmAddFamily');
+        if (confirmAddFamily) {
+            confirmAddFamily.addEventListener('click', function() {
+                const formData = new FormData();
+                formData.append('member_id', memberId);
+                formData.append('tree_id', treeId);
+
+                fetch('index.php?action=create_empty_family', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Failed to create family');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to create family. Please try again.');
+                });
+
+                addFamilyModalInstance.hide();
+            });
+        }
+    }
 
     // Delete child handlers
     document.querySelectorAll('.delete-child-btn').forEach(button => {
@@ -133,6 +144,64 @@ function initializeRelationships(memberId) {
         .catch(error => {
             console.error('Error:', error);
             alert('Failed to delete spouse. Please try again.');
+        });
+    });
+
+    // Add handler for delete family button in dropdown
+    document.querySelectorAll('.delete-family-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const familyId = this.getAttribute('data-family-id');
+            const spouseId = this.getAttribute('data-spouse-id');
+
+            document.getElementById('deleteSpouseId').value = spouseId;
+            document.getElementById('deleteFamilyId').value = familyId;
+            deleteSpouseModal.show();
+        });
+    });
+
+    // Add handler for delete family button
+    document.querySelectorAll('.delete-family-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const familyId = this.getAttribute('data-family-id');
+            
+            // Use the same delete spouse modal but preset values
+            document.getElementById('deleteSpouseId').value = '';
+            document.getElementById('deleteFamilyId').value = familyId;
+            
+            // Show the delete modal
+            const deleteSpouseModal = new bootstrap.Modal(document.getElementById('deleteSpouseModal'));
+            deleteSpouseModal.show();
+        });
+    });
+
+    // Add handler for add family button
+    document.querySelector('.add-family-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('member_id', memberId);
+        formData.append('tree_id', treeId);
+
+        fetch('index.php?action=create_empty_family', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to create family');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to create family. Please try again.');
         });
     });
 
@@ -239,9 +308,9 @@ function initializeRelationships(memberId) {
     });
 
     // Handle alive checkbox toggle for death fields
-    document.getElementById('form_alive').addEventListener('click', function () {
-        showHideDeath();
-    });
+    // document.getElementById('form_alive').addEventListener('click', function () {
+    //     showHideDeath();
+    // });
 
     // Initial load of relationships
     loadRelationships(memberId);
