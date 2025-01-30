@@ -19,8 +19,9 @@ input[type="date"] {
 <!-- Main content -->
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
-                <h4>{{ get_translation("Member Details") }}</h4>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <h4 class="mb-0">{{ get_translation("Member Details") }}</h4>
                     <div class="dropdown">
                         <button class="btn btn-link p-0 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             ⚙️
@@ -38,86 +39,7 @@ input[type="date"] {
                             </li>
                         </ul>
                     </div>
-                <!-- Add Relationship Modal -->                
-                <div class="modal fade" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addRelationshipModalLabel">{{ get_translation("Add Relationship") }}</h5>
-                                <button type="button" id="closeRelModalX" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="add-relationship-form">
-                                    <input type="hidden" id="member_id" name="member_id" value="{{ member.id|e }}">
-                                    <input type="hidden" name="tree_id" value="{{ member.tree_id|e }}">
-                                    <input type="hidden" name="member_gender" value="{{ member.gender|e }}">
-
-                                    <!-- Relationship Type Tabs -->
-                                    <ul class="nav nav-tabs" id="relationshipTabs" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="spouse-tab" data-bs-toggle="tab" data-bs-target="#spouse-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Spouse") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="child-tab" data-bs-toggle="tab" data-bs-target="#child-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Child") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="parent-tab" data-bs-toggle="tab" data-bs-target="#parent-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Add Parents") }}
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other-tab-pane" type="button" role="tab">
-                                                {{ get_translation("Other Relationship") }}
-                                            </button>
-                                        </li>
-                                    </ul>
-
-                                    <div class="tab-content pt-3" id="relationshipTabContent">
-                                        <!-- Spouse Tab -->
-                                        <div class="tab-pane fade show active" id="spouse-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="spouse-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Child Tab -->
-                                        <div class="tab-pane fade" id="child-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="child-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Parent Tab -->
-                                        <div class="tab-pane fade" id="parent-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="parent-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-
-                                        <!-- Other Tab -->
-                                        <div class="tab-pane fade" id="other-tab-pane" role="tabpanel" tabindex="0">
-                                            <div id="other-form-content">
-                                                <!-- Content loaded dynamically -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" id="dismissRelModal" data-bs-dismiss="modal">{{ get_translation("Close") }}</button>
-                                <button type="button" class="btn btn-primary" id="saveRelationship">{{ get_translation("Save") }}</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
-    
-
-
             </div>
             <div class="card-body">
 
@@ -169,7 +91,32 @@ input[type="date"] {
                     <label for="source">{{ get_translation("Source") }}:</label>
                     <input type="text" name="source" id="source" value="{{ member.source|e }}"><br>
 
-                    <button type="submit">{{ get_translation("Save") }}</button>
+                    <div id="additional-fields" style="display: none;">
+
+                <!-- Other relationships section -->
+                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
+                <div id="relationships">
+                    <table class="relationship-table">
+                        <tr>
+                            <th>{{ get_translation("Person 1") }}</th>
+                            <th>{{ get_translation("Person 2") }}</th>
+                            <th>{{ get_translation("Type") }}</th>
+                            <!--
+                            <th>{{ get_translation("Start") }}</th>
+                            <th>{{ get_translation("End") }}</th>
+                            -->
+                            <th>{{ get_translation("Actions") }}</th>
+                        </tr>
+                        <tbody id="relationships-table-body">
+                            <!-- Relationships will be dynamically filled via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                    </div>
+                    <br />
+
+                    <button type="submit">{{ get_translation("Update Member") }}</button>
+                    <button type="button" id="toggle-fields-btn">{{ get_translation("More") }}</button>
                 </form>
             </div>
         </div>
@@ -249,21 +196,30 @@ input[type="date"] {
             <ul class="dropdown-menu">
                 {% if family.has_spouse %}
                     <li><a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
-                     {{ get_translation("View Spouse") }}</a></li>
+                        {{ get_translation("View Spouse") }}</a></li>
                 {% else %}
                     <li><button class="dropdown-item replace-spouse-btn" data-family-id="{{ family.id }}">
-                      {{ get_translation("Add Spouse") }}</button></li>
+                        {{ get_translation("Add Spouse") }}</button></li>
                 {% endif %}
-
+                <li><button class="dropdown-item delete-family-btn" data-family-id="{{ family.id }}">
+                    {{ get_translation("Delete Family") }}</button></li>
                 <li>
                     <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
                             data-spouse-id="{{ family.spouse_id }}"
                             data-family-id="{{ family.id }}"
-                     cc       onclick="event.stopPropagation();">
-                        🗑️ {{ get_translation("Delete Family") }}
+                            onclick="event.stopPropagation();">
+                        🗑️ {{ get_translation("Delete Spouse") }}
                     </button>
                 </li>
-
+                {% if family.is_single_parent %}
+                <li>
+                    <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
+                            data-family-id="{{ family.id }}">
+                        {{ get_translation("Add Spouse") }}
+                    </button>
+                </li>
+                {% endif %}
+                
             </ul>
         </li>
     {% endfor %}
@@ -376,35 +332,17 @@ input[type="date"] {
                 </h5>
             </div>
             <div class="card-body">
-                    <button type="button" id="toggle-fields-btn">{{ get_translation("More") }}</button>
 
-                    <div id="additional-fields" style="display: none;">
-
-                <!-- Other relationships section -->
-                <h5 class="mt-4">{{ get_translation("Other Relationships") }}</h5>
-                <div id="relationships">
-                    <table class="relationship-table">
-                        <tr>
-                            <th>{{ get_translation("Person 1") }}</th>
-                            <th>{{ get_translation("Person 2") }}</th>
-                            <th>{{ get_translation("Type") }}</th>
-                            <!--
-                            <th>{{ get_translation("Start") }}</th>
-                            <th>{{ get_translation("End") }}</th>
-                            -->
-                            <th>{{ get_translation("Actions") }}</th>
-                        </tr>
-                        <tbody id="relationships-table-body">
-                            <!-- Relationships will be dynamically filled via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                    </div>
 
 
 
                 <hr>
-
+                <h2>{{ get_translation("Delete Member") }}</h2>
+                {{ get_translation("Warning, This Can Not Be Undone") }}
+                <form method="post" class='delete-member-form' action="index.php?action=delete_member">
+                    <input type="hidden" name="member_id" value="{{ member.id }}">
+                    <button type="submit">🗑️ {{ get_translation("Delete") }}</button>
+                </form>
             </div>
         </div>
     </div>
