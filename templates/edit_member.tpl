@@ -253,10 +253,8 @@ input[type="date"] {
                                     role="tab" 
                                     aria-controls="family-{{ family.id }}" 
                                     aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
-                                {% if member.id == family.husband_id and family.wife_id %}
-                                    {{ family.wife_name }}
-                                {% elseif family.husband_id %}
-                                    {{ family.husband_name }}
+                                {% if family.has_spouse %}
+                                    {{ family.spouse_name }}
                                 {% else %}
                                     {{ get_translation("Unknown Spouse") }}
                                 {% endif %}
@@ -272,7 +270,7 @@ input[type="date"] {
                              id="family-{{ family.id }}" 
                              role="tabpanel" 
                              aria-labelledby="family-tab-{{ family.id }}">
-                    
+                        
                             <!-- Children from this family -->
                             <div class="card mt-3">
                                 <div class="card-header">
@@ -308,22 +306,16 @@ input[type="date"] {
                             <div class="card mt-3">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     {{ get_translation("Marriage Details") }}
-                                    {% if (member.gender == 'M' and not family.wife_id) or (member.gender == 'F' and not family.husband_id) %}
+                                    {% if family.is_single_parent %}
                                         <div>
                                             <button type="button" class="btn btn-primary btn-sm replace-spouse-btn" 
                                                     data-family-id="{{ family.id }}">
-                                                {{ get_translation("Replace Unknown Spouse") }}
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                    data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
-                                                    data-family-id="{{ family.id }}"
-                                                    onclick="event.stopPropagation();">
-                                                🗑️ {{ get_translation("Delete Spouse") }}
+                                                {{ get_translation("Add Spouse") }}
                                             </button>
                                         </div>
                                     {% else %}
                                         <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                                                data-spouse-id="{{ member.gender == 'M' ? family.wife_id : family.husband_id }}"
+                                                data-spouse-id="{{ family.spouse_id }}"
                                                 data-family-id="{{ family.id }}"
                                                 onclick="event.stopPropagation();">
                                             🗑️ {{ get_translation("Delete Spouse") }}

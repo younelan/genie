@@ -487,25 +487,28 @@ class MemberController extends AppController
         header('Content-Type: application/json');
         
         try {
-            error_log('Replace spouse request: ' . print_r($_POST, true));
-            
             $familyId = $_POST['family_id'] ?? null;
             $spouseType = $_POST['spouse_type'] ?? null;
             $memberGender = $_POST['member_gender'] ?? null;
-            $spouseId = $_POST['spouse_id'] ?? null;
             $treeId = $_POST['tree_id'] ?? null;
-
-            error_log("Processing replace spouse - Family: $familyId, Spouse: $spouseId, Gender: $memberGender, Tree: $treeId");
+            $marriageDate = !empty($_POST['marriage_date']) ? $_POST['marriage_date'] : null;
 
             if (!$familyId || !$spouseType || !$memberGender || !$treeId) {
-                throw new Exception('Missing required parameters: ' . 
-                                  (!$familyId ? 'family_id ' : '') .
-                                  (!$spouseType ? 'spouse_type ' : '') .
-                                  (!$memberGender ? 'member_gender ' : '') .
-                                  (!$treeId ? 'tree_id' : ''));
+                throw new Exception('Missing required parameters');
             }
 
+            // Get current family info to determine which parent to replace
+            $family = $this->member->getFamilyById($familyId);
+            if (!$family) {
+                throw new Exception('Family not found');
+            }
+
+            // Determine which parent position is null
+            $isHusbandNull = empty($family['husband_id']);
+            $isWifeNull = empty($family['wife_id']);
+            
             if ($spouseType === 'existing') {
+                $spouseId = $_POST['spouse_id'] ?? null;
                 if (!$spouseId) {
                     throw new Exception('No spouse selected');
                 }
@@ -520,7 +523,8 @@ class MemberController extends AppController
                     'firstName' => $_POST['new_first_name'],
                     'lastName' => $_POST['new_last_name'],
                     'dateOfBirth' => $_POST['new_birth_date'] ?? null,
-                    'gender' => $memberGender == 'M' ? 'F' : 'M',  // Changed from gender_id to gender
+                    'gender' => ($isHusbandNull ? 'M' : 'F'),
+                    'alive' => 1 // Set default value for alive
                 ];
                 $spouseId = $this->member->addMember($new_member);
                 if (!$spouseId) {
@@ -528,13 +532,15 @@ class MemberController extends AppController
                 }
             }
 
-            // Update the family
-            $success = $this->member->updateFamilySpouse(
-                $familyId, 
-                $spouseId, 
-                $memberGender, 
-                $_POST['marriage_date'] ?? null
-            );
+            // Update the family with the appropriate parent position
+            $updateData = [
+                'family_id' => $familyId,
+                'spouse_id' => $spouseId,
+                'position' => $isHusbandNull ? 'husband' : 'wife',
+                'marriage_date' => $marriageDate
+            ];
+
+            $success = $this->member->updateFamilySpouse($updateData);
 
             if (!$success) {
                 throw new Exception('Failed to update family with new spouse');
