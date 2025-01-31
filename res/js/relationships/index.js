@@ -16,10 +16,11 @@ class RelationshipManager {
     initialize() {
         console.log('Initializing relationship manager...'); // Debug
         this.initializeModal();
-        this.initializeTabs();
+        this.initializeTabs();        // For relationship modal tabs
         this.initializeButtons();
         this.loadInitialForm();
         this.initializeAddButton();
+        this.initializeFamilyTabs();  // For family section tabs
     }
 
     initializeModal() {
@@ -28,32 +29,21 @@ class RelationshipManager {
             this.modal = new bootstrap.Modal(modalElement);
             console.log('Modal initialized'); // Debug
         }
+
+        // Initialize replace spouse handlers
+        //this.initializeReplaceSpouseHandlers();
     }
 
     initializeTabs() {
-        const tabs = document.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
-                // Remove active class from all tabs
-                tabs.forEach(t => {
-                    t.classList.remove('active');
-                    const pane = document.querySelector(t.dataset.bsTarget);
-                    if (pane) {
-                        pane.classList.remove('show', 'active');
-                    }
-                });
-
-                // Activate clicked tab
-                tab.classList.add('active');
-                const targetPane = document.querySelector(tab.dataset.bsTarget);
-                if (targetPane) {
-                    targetPane.classList.add('show', 'active');
-                }
-
-                this.activeTab = tab.id.replace('-tab', '');
+        // Remove the complex tab initialization and use Bootstrap's native handling
+        const triggerTabList = document.querySelectorAll('#relationshipTabs button');
+        triggerTabList.forEach(triggerEl => {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault();
+                tabTrigger.show();
+                this.activeTab = triggerEl.id.replace('-tab', '');
                 this.loadFormContent(this.activeTab);
-                console.log('Tab changed to:', this.activeTab);
             });
         });
     }
@@ -369,6 +359,148 @@ class RelationshipManager {
                     </p>
                 </div>
             </div>`;
+    }
+
+    // Add method to handle replace spouse validation
+    initializeReplaceSpouseHandlers() {
+        const form = document.getElementById('replace-spouse-form');
+        const replaceModal = new bootstrap.Modal(document.getElementById('replaceSpouseModal'));
+        if (!form) return;
+
+        // Handle replace spouse button clicks
+        document.querySelectorAll('.replace-spouse-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const familyId = e.target.dataset.familyId;
+                document.getElementById('replace_family_id').value = familyId;
+                replaceModal.show();
+            });
+        });
+
+        // Handle radio button changes
+        const spouseTypeRadios = form.querySelectorAll('input[name="spouse_type"]');
+        const existingSection = document.getElementById('replace-existing-section');
+        const newSection = document.getElementById('replace-new-section');
+
+        spouseTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                existingSection.style.display = radio.value === 'existing' ? 'block' : 'none';
+                newSection.style.display = radio.value === 'new' ? 'block' : 'none';
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('confirmReplaceSpouse').addEventListener('click', async () => {
+            const formData = new FormData(form);
+            const spouseType = form.querySelector('input[name="spouse_type"]:checked').value;
+
+            if (spouseType === 'existing') {
+                const spouseId = document.getElementById('replace_spouse_id').value;
+                if (!spouseId) {
+                    alert(this.translations['Please select a valid spouse']);
+                    return;
+                }
+            } else {
+                // Validate new spouse fields
+                const firstName = form.querySelector('input[name="new_first_name"]').value;
+                const lastName = form.querySelector('input[name="new_last_name"]').value;
+                if (!firstName || !lastName) {
+                    alert(this.translations['Please enter spouse name']);
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('index.php?action=replace_spouse', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    replaceModal.hide();
+                    await this.reloadFamilySection();
+                } else {
+                    throw new Error(result.message || 'Failed to replace spouse');
+                }
+            } catch (error) {
+                console.error('Error replacing spouse:', error);
+                alert(error.message || 'Failed to replace spouse');
+            }
+        });
+
+        // Initialize spouse autocomplete
+        const spouseInput = document.getElementById('replace_spouse');
+        if (spouseInput) {
+            spouseInput.addEventListener('input', async () => {
+                try {
+                    const response = await fetch(`index.php?action=autocomplete_member&term=${spouseInput.value}&tree_id=${this.member.tree_id}&member_id=${this.member.id}`);
+                    const data = await response.json();
+                    
+                    const datalist = document.getElementById('replace-spouse-options');
+                    datalist.innerHTML = data.map(member => 
+                        `<option value="${member.name}" data-id="${member.id}">`
+                    ).join('');
+                } catch (error) {
+                    console.error('Error fetching spouse suggestions:', error);
+                }
+            });
+
+            spouseInput.addEventListener('change', () => {
+                const selectedOption = document.querySelector(`#replace-spouse-options option[value="${spouseInput.value}"]`);
+                if (selectedOption) {
+                    document.getElementById('replace_spouse_id').value = selectedOption.dataset.id;
+                }
+            });
+        }
+    }
+
+    initializeFamilyTabs() {
+        // Initialize tab functionality
+        document.querySelectorAll('#familyTabs .nav-link[data-bs-toggle="tab"]').forEach(tabEl => {
+            tabEl.addEventListener('click', (event) => {
+                if (!event.target.closest('.dropdown')) {
+                    const tab = new bootstrap.Tab(tabEl);
+                    tab.show();
+                }
+            });
+        });
+
+        // Initialize dropdowns separately
+        document.querySelectorAll('#familyTabs .dropdown-toggle').forEach(dropdown => {
+            new bootstrap.Dropdown(dropdown);
+        });
+    }
+
+    handleFamilyTabClick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Only handle tab click if not clicking dropdown toggle
+        const target = event.currentTarget;
+        if (!target.classList.contains('dropdown-toggle')) {
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('#familyTabs .nav-link[data-toggle="tab"]');
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                const paneId = t.getAttribute('data-target');
+                if (paneId) {
+                    const pane = document.querySelector(paneId);
+                    if (pane) {
+                        pane.classList.remove('show', 'active');
+                    }
+                }
+            });
+
+            // Activate clicked tab
+            target.classList.add('active');
+            const paneId = target.getAttribute('data-target');
+            if (paneId) {
+                const pane = document.querySelector(paneId);
+                if (pane) {
+                    pane.classList.add('show', 'active');
+                }
+            }
+        }
     }
 
 }

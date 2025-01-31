@@ -1,30 +1,37 @@
 document.addEventListener('DOMContentLoaded', function () {
-    initializeRelationships(memberId);
+    // Initialize only if needed elements exist
+    if (document.getElementById('deleteSpouseModal') || 
+        document.getElementById('deleteChildModal') || 
+        document.getElementById('replaceSpouseModal')) {
+        initializeRelationships(memberId);
+    }
+    if (document.getElementById('replaceSpouseModal')) {
+        initializeReplaceSpouse();
+    }
+    if (document.getElementById('deleteSpouseModal')) {
+        initializeDeleteHandlers();
+    }
 });
 
 function initializeRelationships(memberId) {
-    // Initialize Bootstrap modals
-    const deleteSpouseModal = document.getElementById('deleteSpouseModal');
-    const deleteChildModal = document.getElementById('deleteChildModal');
-    const addFamilyModal = document.getElementById('addFamilyModal');
-    const editRelationshipModal = new bootstrap.Modal(document.getElementById('editRelationshipModal'));
+    // Initialize Bootstrap modals with null checks
+    const deleteSpouseModalEl = document.getElementById('deleteSpouseModal');
+    const deleteChildModalEl = document.getElementById('deleteChildModal');
+    const addFamilyModalEl = document.getElementById('addFamilyModal');
+    const editRelationshipModalEl = document.getElementById('editRelationshipModal');
 
-    if (deleteSpouseModal) {
-        new bootstrap.Modal(deleteSpouseModal, {
-            backdrop: 'static'
-        });
-    }
-
-    if (deleteChildModal) {
-        new bootstrap.Modal(deleteChildModal, {
-            backdrop: 'static'
-        });
-    }
+    // Store modal instances
+    const modals = {
+        deleteSpouse: deleteSpouseModalEl ? new bootstrap.Modal(deleteSpouseModalEl, { backdrop: 'static' }) : null,
+        deleteChild: deleteChildModalEl ? new bootstrap.Modal(deleteChildModalEl, { backdrop: 'static' }) : null,
+        addFamily: addFamilyModalEl ? new bootstrap.Modal(addFamilyModalEl) : null,
+        editRelationship: editRelationshipModalEl ? new bootstrap.Modal(editRelationshipModalEl) : null
+    };
 
     // Add handlers only if elements exist
     const addFamilyBtn = document.querySelector('.add-family-btn');
-    if (addFamilyBtn && addFamilyModal) {
-        const addFamilyModalInstance = new bootstrap.Modal(addFamilyModal);
+    if (addFamilyBtn && modals.addFamily) {
+        const addFamilyModalInstance = modals.addFamily;
         
         addFamilyBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -61,92 +68,98 @@ function initializeRelationships(memberId) {
         }
     }
 
-    // Delete child handlers
-    document.querySelectorAll('.delete-child-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+    // Delete child handlers with null check
+    const confirmDeleteChild = document.getElementById('confirmDeleteChild');
+    if (confirmDeleteChild && modals.deleteChild) {
+        document.querySelectorAll('.delete-child-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            const childId = this.getAttribute('data-child-id');
-            const familyId = this.getAttribute('data-family-id');
+                const childId = this.getAttribute('data-child-id');
+                const familyId = this.getAttribute('data-family-id');
 
-            document.getElementById('deleteChildId').value = childId;
-            document.getElementById('deleteChildFamilyId').value = familyId;
-            deleteChildModal.show();
+                document.getElementById('deleteChildId').value = childId;
+                document.getElementById('deleteChildFamilyId').value = familyId;
+                modals.deleteChild.show();
+            });
         });
-    });
 
-    document.getElementById('confirmDeleteChild').addEventListener('click', function () {
-        const childId = document.getElementById('deleteChildId').value;
-        const familyId = document.getElementById('deleteChildFamilyId').value;
-        const deleteType = document.getElementById('childDeleteOption').value;
-    
-        const formData = new FormData();
-        formData.append('child_id', childId);
-        formData.append('family_id', familyId);
-        formData.append('delete_type', deleteType);
-    
-        fetch('index.php?action=delete_family_member', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            deleteChildModal.hide();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Failed to delete child');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to delete child. Please try again.');
+        confirmDeleteChild.addEventListener('click', function () {
+            const childId = document.getElementById('deleteChildId').value;
+            const familyId = document.getElementById('deleteChildFamilyId').value;
+            const deleteType = document.getElementById('childDeleteOption').value;
+        
+            const formData = new FormData();
+            formData.append('child_id', childId);
+            formData.append('family_id', familyId);
+            formData.append('delete_type', deleteType);
+        
+            fetch('index.php?action=delete_family_member', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                modals.deleteChild.hide();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to delete child');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete child. Please try again.');
+            });
         });
-    });
+    }
 
-    // Delete spouse handlers
-    document.querySelectorAll('.delete-spouse-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+    // Delete spouse handlers with null check
+    const confirmDeleteSpouse = document.getElementById('confirmDeleteSpouse');
+    if (confirmDeleteSpouse && modals.deleteSpouse) {
+        document.querySelectorAll('.delete-spouse-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            const spouseId = this.getAttribute('data-spouse-id');
-            const familyId = this.getAttribute('data-family-id');
+                const spouseId = this.getAttribute('data-spouse-id');
+                const familyId = this.getAttribute('data-family-id');
 
-            document.getElementById('deleteSpouseId').value = spouseId;
-            document.getElementById('deleteFamilyId').value = familyId;
-            deleteSpouseModal.show();
+                document.getElementById('deleteSpouseId').value = spouseId;
+                document.getElementById('deleteFamilyId').value = familyId;
+                modals.deleteSpouse.show();
+            });
         });
-    });
 
-    document.getElementById('confirmDeleteSpouse').addEventListener('click', function () {
-        const spouseId = document.getElementById('deleteSpouseId').value;
-        const familyId = document.getElementById('deleteFamilyId').value;
-        const deleteType = document.getElementById('spouseDeleteOption').value;
-        const formData = new FormData();
-        formData.append('spouse_id', spouseId);
-        formData.append('family_id', familyId);
-        formData.append('delete_type', deleteType);
+        confirmDeleteSpouse.addEventListener('click', function () {
+            const spouseId = document.getElementById('deleteSpouseId').value;
+            const familyId = document.getElementById('deleteFamilyId').value;
+            const deleteType = document.getElementById('spouseDeleteOption').value;
+            const formData = new FormData();
+            formData.append('spouse_id', spouseId);
+            formData.append('family_id', familyId);
+            formData.append('delete_type', deleteType);
 
-        fetch('index.php?action=delete_family_member', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            deleteSpouseModal.hide();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Failed to delete spouse');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to delete spouse. Please try again.');
+            fetch('index.php?action=delete_family_member', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                modals.deleteSpouse.hide();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to delete spouse');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete spouse. Please try again.');
+            });
         });
-    });
+    }
 
     // Add handler for delete family button in dropdown
     document.querySelectorAll('.delete-family-btn').forEach(button => {
@@ -159,7 +172,7 @@ function initializeRelationships(memberId) {
 
             document.getElementById('deleteSpouseId').value = spouseId;
             document.getElementById('deleteFamilyId').value = familyId;
-            deleteSpouseModal.show();
+            modals.deleteSpouse.show();
         });
     });
 
@@ -308,9 +321,10 @@ function initializeRelationships(memberId) {
         document.getElementById('replace_spouse_id').value = '';
     });
 
-    // Initial load of relationships
-    loadRelationships(memberId);
-
+    // Initial load of relationships if table exists
+    if (document.getElementById('relationships-table-body')) {
+        loadRelationships(memberId);
+    }
 }
 
 function showHideDeath() {
@@ -614,4 +628,200 @@ function formatBrowserDate(relationStart) {
         }
     }
     return '';
+}
+
+// Add this to initialize the replace spouse functionality
+function initializeReplaceSpouse() {
+    const replaceSpouseModal = new bootstrap.Modal(document.getElementById('replaceSpouseModal'));
+    const form = document.getElementById('replace-spouse-form');
+    if (!form) return;
+
+    // Handle replace spouse button clicks
+    document.querySelectorAll('.replace-spouse-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const familyId = e.target.dataset.familyId;
+            document.getElementById('replace_family_id').value = familyId;
+            
+            // Reset form
+            form.reset();
+            document.getElementById('replace_spouse').value = '';
+            document.getElementById('replace_spouse_id').value = '';
+            document.getElementById('replace-existing-section').style.display = 'block';
+            document.getElementById('replace-new-section').style.display = 'none';
+            
+            replaceSpouseModal.show();
+        });
+    });
+
+    // Handle radio button changes
+    const spouseTypeRadios = form.querySelectorAll('input[name="spouse_type"]');
+    const existingSection = document.getElementById('replace-existing-section');
+    const newSection = document.getElementById('replace-new-section');
+
+    spouseTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            existingSection.style.display = radio.value === 'existing' ? 'block' : 'none';
+            newSection.style.display = radio.value === 'new' ? 'block' : 'none';
+        });
+    });
+
+    // Initialize spouse autocomplete
+    const spouseInput = document.getElementById('replace_spouse');
+    if (spouseInput) {
+        let timeout = null;
+        spouseInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`index.php?action=autocomplete_member&term=${spouseInput.value}&tree_id=${treeId}`);
+                    const data = await response.json();
+                    
+                    const datalist = document.getElementById('replace-spouse-options');
+                    datalist.innerHTML = '';
+                    
+                    data.forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.label;
+                        option.setAttribute('data-id', member.id);
+                        datalist.appendChild(option);
+
+                        // If exact match, set the ID immediately
+                        if (member.label === spouseInput.value) {
+                            document.getElementById('replace_spouse_id').value = member.id;
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error fetching spouse suggestions:', error);
+                }
+            }, 300);
+        });
+
+        // Handle selection from datalist
+        spouseInput.addEventListener('change', () => {
+            const selectedValue = spouseInput.value;
+            const options = document.getElementById('replace-spouse-options').getElementsByTagName('option');
+            
+            for (let option of options) {
+                if (option.value === selectedValue) {
+                    const spouseId = option.getAttribute('data-id');
+                    document.getElementById('replace_spouse_id').value = spouseId;
+                    return; // Exit once we've found the match
+                }
+            }
+        });
+    }
+
+    // Handle form submission
+    document.getElementById('confirmReplaceSpouse').addEventListener('click', async () => {
+        const spouseType = form.querySelector('input[name="spouse_type"]:checked').value;
+        const formData = new FormData(form);
+        formData.append('tree_id', treeId);
+
+        try {
+            if (spouseType === 'existing') {
+                const spouseId = document.getElementById('replace_spouse_id').value;
+                const spouseName = document.getElementById('replace_spouse').value;
+                if (!spouseId || !spouseName) {
+                    throw new Error('Please select a valid spouse from the list');
+                }
+            } else {
+                const firstName = form.querySelector('input[name="new_first_name"]').value;
+                const lastName = form.querySelector('input[name="new_last_name"]').value;
+                if (!firstName || !lastName) {
+                    throw new Error('Please enter first and last name for new spouse');
+                }
+            }
+
+            const response = await fetch('index.php?action=replace_spouse', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                replaceSpouseModal.hide();
+                location.reload();
+            } else {
+                throw new Error(result.message || 'Failed to replace spouse');
+            }
+        } catch (error) {
+            console.error('Error replacing spouse:', error);
+            alert(error.message || 'Failed to replace spouse');
+        }
+    });
+}
+
+function initializeDeleteHandlers() {
+    const deleteSpouseModalEl = document.getElementById('deleteSpouseModal');
+    if (!deleteSpouseModalEl) return;
+
+    const deleteSpouseModal = new bootstrap.Modal(deleteSpouseModalEl);
+    const deleteFamilyForm = document.getElementById('deleteFamilyForm');
+    const deleteFamilyId = document.getElementById('deleteFamilyId');
+    
+    if (!deleteFamilyForm || !deleteFamilyId) return;
+
+    // Delete form checkbox logic
+    const deleteSpouseRelationship = document.getElementById('deleteSpouseRelationship');
+    const deleteSpouse = document.getElementById('deleteSpouse');
+    const deleteChildren = document.getElementById('deleteChildren');
+    const deleteFamily = document.getElementById('deleteFamily');
+
+    if (deleteSpouse && deleteSpouseRelationship) {
+        // When "Delete spouse record" is checked, ensure relationship is also checked
+        deleteSpouse.addEventListener('change', function() {
+            if (this.checked) {
+                deleteSpouseRelationship.checked = true;
+            }
+        });
+
+        // When relationship is unchecked, uncheck delete spouse
+        deleteSpouseRelationship.addEventListener('change', function() {
+            if (!this.checked) {
+                deleteSpouse.checked = false;
+            }
+        });
+    }
+
+    // Show delete modal handler
+    document.querySelectorAll('.delete-family-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const familyId = this.getAttribute('data-family-id');
+            if (familyId && deleteFamilyId) {
+                deleteFamilyId.value = familyId;
+                deleteSpouseModal.show();
+            }
+        });
+    });
+
+    // Handle delete confirmation
+    const confirmDeleteFamily = document.getElementById('confirmDeleteFamily');
+    if (confirmDeleteFamily) {
+        confirmDeleteFamily.addEventListener('click', function() {
+            const formData = new FormData(deleteFamilyForm);
+            
+            fetch('index.php?action=delete_family_member', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                deleteSpouseModal.hide();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to delete family member');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || 'Failed to delete family member. Please try again.');
+            });
+        });
+    }
 }
