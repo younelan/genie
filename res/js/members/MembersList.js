@@ -5,6 +5,8 @@ const MembersList = () => {
     const [page, setPage] = React.useState(1);
     const [totalPages, setTotalPages] = React.useState(1);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
     const treeId = window.location.hash.split('/')[2];
 
     React.useEffect(() => {
@@ -13,6 +15,7 @@ const MembersList = () => {
     }, [treeId, page]);
 
     const loadMembers = async () => {
+        setLoading(true);
         try {
             const response = await fetch(`api/individuals.php?action=list&tree_id=${treeId}&page=${page}`);
             const data = await response.json();
@@ -23,6 +26,9 @@ const MembersList = () => {
             }
         } catch (error) {
             console.error('Error loading members:', error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -35,6 +41,7 @@ const MembersList = () => {
             }
         } catch (error) {
             console.error('Error loading stats:', error);
+            setError(error.message);
         }
     };
 
@@ -56,95 +63,101 @@ const MembersList = () => {
         }
     };
 
-    return React.createElement(Container, { fluid: true },
-        React.createElement(Row, null, [
-            // Members List Column
-            React.createElement(Col, { lg: 4, className: 'mb-4' },
-                React.createElement(Card, null, [
-                    React.createElement(Card.Header, null, 'Family Members'),
-                    React.createElement(Card.Body, null, [
-                        // Search input
-                        React.createElement('input', {
-                            type: 'text',
-                            placeholder: 'Search by name...',
-                            value: searchQuery,
-                            onChange: handleSearch,
-                            className: 'form-control mb-3'
-                        }),
-                        // Members list
-                        React.createElement(ListGroup, null,
-                            members.map(member =>
-                                React.createElement(ListGroup.Item, {
-                                    key: member.id,
-                                    action: true,
-                                    onClick: () => {
-                                        window.location.hash = `#/member/${member.id}`;
-                                    }
-                                }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
-                            )
-                        ),
-                        // Pagination
-                        totalPages > 1 && React.createElement(Nav, { className: 'mt-3' },
-                            [...Array(totalPages)].map((_, i) =>
-                                React.createElement(Nav.Item, { key: i },
-                                    React.createElement(Nav.Link, {
-                                        onClick: () => setPage(i + 1),
-                                        disabled: page === i + 1
-                                    }, i + 1)
+    const mainContent = [
+        React.createElement(AppHeader, { key: 'header' }),
+        React.createElement('main', { 
+            key: 'main',
+            className: 'container mx-auto px-4 py-16 mt-16 mb-16'
+        }, [
+            React.createElement(Row, null, [
+                // Members List Column
+                React.createElement(Col, { lg: 4, className: 'mb-4' },
+                    React.createElement(Card, null, [
+                        React.createElement(Card.Header, null, 'Family Members'),
+                        React.createElement(Card.Body, null, [
+                            // Search input
+                            React.createElement('input', {
+                                type: 'text',
+                                placeholder: 'Search by name...',
+                                value: searchQuery,
+                                onChange: handleSearch,
+                                className: 'form-control mb-3'
+                            }),
+                            // Members list
+                            React.createElement(ListGroup, null,
+                                members.map(member =>
+                                    React.createElement(ListGroup.Item, {
+                                        key: member.id,
+                                        action: true,
+                                        onClick: () => {
+                                            window.location.hash = `#/member/${member.id}`;
+                                        }
+                                    }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
+                                )
+                            ),
+                            // Pagination
+                            totalPages > 1 && React.createElement(Nav, { className: 'mt-3' },
+                                [...Array(totalPages)].map((_, i) =>
+                                    React.createElement(Nav.Item, { key: i },
+                                        React.createElement(Nav.Link, {
+                                            onClick: () => setPage(i + 1),
+                                            disabled: page === i + 1
+                                        }, i + 1)
+                                    )
                                 )
                             )
-                        )
+                        ])
                     ])
-                ])
-            ),
-            // Statistics Column
-            React.createElement(Col, { lg: 4, className: 'mb-4' },
-                React.createElement(Card, null, [
-                    React.createElement(Card.Header, null, 'Statistics'),
-                    React.createElement(Card.Body, null,
-                        Object.entries(stats).map(([category, data]) =>
-                            React.createElement('div', { key: category },
-                                React.createElement('h6', null, category),
-                                React.createElement(ListGroup, { className: 'mb-3' },
-                                    Object.entries(data).map(([key, value]) =>
-                                        React.createElement(ListGroup.Item, {
-                                            key: key,
-                                            className: 'd-flex justify-content-between align-items-center'
-                                        }, key, React.createElement('span', {
-                                            className: 'badge bg-primary rounded-pill'
-                                        }, value))
+                ),
+                // Statistics Column
+                React.createElement(Col, { lg: 4, className: 'mb-4' },
+                    React.createElement(Card, null, [
+                        React.createElement(Card.Header, null, 'Statistics'),
+                        React.createElement(Card.Body, null,
+                            Object.entries(stats).map(([category, data]) =>
+                                React.createElement('div', { key: category },
+                                    React.createElement('h6', null, category),
+                                    React.createElement(ListGroup, { className: 'mb-3' },
+                                        Object.entries(data).map(([key, value]) =>
+                                            React.createElement(ListGroup.Item, {
+                                                key: key,
+                                                className: 'd-flex justify-content-between align-items-center'
+                                            }, key, React.createElement('span', {
+                                                className: 'badge bg-primary rounded-pill'
+                                            }, value))
+                                        )
                                     )
                                 )
                             )
                         )
-                    )
-                ])
-            ),
-            // Recent Updates Column
-            React.createElement(Col, { lg: 4, className: 'mb-4' },
-                React.createElement(Card, null, [
-                    React.createElement(Card.Header, null, 'Recent Updates'),
-                    React.createElement(Card.Body, null,
-                        React.createElement(ListGroup, null,
-                            lastUpdates.map(member =>
-                                React.createElement(ListGroup.Item, {
-                                    key: member.id,
-                                    action: true,
-                                    onClick: () => {
-                                        window.location.hash = `#/member/${member.id}`;
-                                    }
-                                }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
+                    ])
+                ),
+                // Recent Updates Column
+                React.createElement(Col, { lg: 4, className: 'mb-4' },
+                    React.createElement(Card, null, [
+                        React.createElement(Card.Header, null, 'Recent Updates'),
+                        React.createElement(Card.Body, null,
+                            React.createElement(ListGroup, null,
+                                lastUpdates.map(member =>
+                                    React.createElement(ListGroup.Item, {
+                                        key: member.id,
+                                        action: true,
+                                        onClick: () => {
+                                            window.location.hash = `#/member/${member.id}`;
+                                        }
+                                    }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
+                                )
                             )
                         )
-                    )
-                ])
-            )
-        ])
-    );
-};
+                    ])
+                )
+            ])
+        ]),
+        React.createElement(AppFooter, { key: 'footer' })
+    ];
 
-// Mount component when the route matches
-if (window.location.hash.includes('/members')) {
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(MembersList));
-}
+    if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
+    if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
+
+    return React.createElement(React.Fragment, null, mainContent);
+};

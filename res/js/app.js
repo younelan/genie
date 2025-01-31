@@ -1,21 +1,20 @@
+// Create root once and store it
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
 const handleRoute = () => {
     const hash = window.location.hash;
-    const root = ReactDOM.createRoot(document.getElementById('root'));
     
-    console.log('Current hash:', hash); // Debug logging
+    console.log('Current hash:', hash);
 
     if (hash.startsWith('#/tree/') && hash.includes('/members')) {
-        console.log('Rendering MembersList'); // Debug logging
+        console.log('Rendering MembersList');
         root.render(React.createElement(MembersList));
     } else {
-        console.log('Rendering TreeList'); // Debug logging
+        console.log('Rendering TreeList');
         root.render(React.createElement(TreeList));
     }
 };
 
-// Initialize routing
+// Remove root creation from individual components
 window.addEventListener('hashchange', handleRoute);
-window.addEventListener('load', () => {
-    console.log('Initial route setup'); // Debug logging
-    handleRoute();
-});
+window.addEventListener('load', handleRoute);

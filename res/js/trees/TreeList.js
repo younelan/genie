@@ -301,8 +301,4 @@ const TreeList = () => {
   return React.createElement(React.Fragment, null, mainContent);
 };
 
-// Mount the component when the document is ready
-document.addEventListener('DOMContentLoaded', () => {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(React.createElement(TreeList));
-});
+// ...existing code...
