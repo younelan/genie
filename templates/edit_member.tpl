@@ -32,6 +32,12 @@ input[type="date"] {
                                 </a>
                             </li>
                             <li>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
+                    {{ get_translation("Add Relationship") }}
+                </button>
+
+                            </li>                            
+                            <li>
                                 <button class="dropdown-item text-danger" type="button" onclick="if(confirm('{{ get_translation("Are you sure you want to delete this member?") }}')) document.querySelector('.delete-member-form').submit();">
                                     🗑️ {{ get_translation("Delete Member") }}
                                 </button>
@@ -229,42 +235,43 @@ input[type="date"] {
                 <!-- Tabs for spouses -->
                 <ul class="nav nav-tabs" id="familyTabs" role="tablist">
     {% for family in spouse_families %}
-        <li class="nav-item dropdown" role="presentation">
-            <button class="nav-link {% if loop.first %}active{% endif %} dropdown-toggle" 
-                    id="family-tab-{{ family.id }}" 
-                    data-toggle="tab" 
-                    data-target="#family-{{ family.id }}" 
-                    type="button" 
-                    role="tab" 
-                    aria-controls="family-{{ family.id }}" 
-                    aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                {% if family.has_spouse %}
-                    {{ family.spouse_name }}
-                {% else %}
-                    {{ get_translation("Unknown Spouse") }}
-                {% endif %}
-            </button>
-            <ul class="dropdown-menu">
-                {% if family.has_spouse %}
-                    <li><a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
-                     {{ get_translation("View Spouse") }}</a></li>
-                {% else %}
-                    <li><button class="dropdown-item replace-spouse-btn" data-family-id="{{ family.id }}">
-                      {{ get_translation("Add Spouse") }}</button></li>
-                {% endif %}
-
-                <li>
-                    <button type="button" class="btn btn-danger btn-sm delete-spouse-btn" 
-                            data-spouse-id="{{ family.spouse_id }}"
-                            data-family-id="{{ family.id }}"
-                     cc       onclick="event.stopPropagation();">
-                        🗑️ {{ get_translation("Delete Family") }}
+        <li class="nav-item" role="presentation">
+            <div class="nav-tab-wrapper">
+                <button class="nav-link {% if loop.first %}active{% endif %}" 
+                        id="family-tab-{{ family.id }}" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#family-{{ family.id }}" 
+                        type="button" 
+                        role="tab">
+                    {% if family.has_spouse %}
+                        {{ family.spouse_name }}
+                    {% else %}
+                        {{ get_translation("Unknown Spouse") }}
+                    {% endif %}
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-link p-0 dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        ⚙️
                     </button>
-                </li>
-
-            </ul>
+                    <ul class="dropdown-menu">
+                        {% if family.has_spouse %}
+                            <li><a class="dropdown-item" href="index.php?action=edit_member&member_id={{ family.spouse_id }}">
+                                {{ get_translation("View Spouse") }}</a></li>
+                        {% else %}
+                            <li><button class="dropdown-item replace-spouse-btn" data-family-id="{{ family.id }}">
+                                {{ get_translation("Add Spouse") }}</button></li>
+                        {% endif %}
+                        <li>
+                        <button class="dropdown-item delete-family-btn" data-family-id="{{ family.id }}"
+                            >
+                            {{ get_translation("Delete Family") }}</button>
+                            </li>
+                    </ul>
+                </div>
+            </div>
         </li>
     {% endfor %}
 
@@ -278,12 +285,6 @@ input[type="date"] {
         <button class="nav-link add-family-btn" title="{{ get_translation("Add New Family") }}">
             <i class="fas fa-plus"></i>
         </button>
-    </li>
-    <li class="nav-item" role="presentation">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRelationshipModal">
-                    {{ get_translation("Add Relationship") }}
-                </button>
-
     </li>
 </ul>
 
@@ -410,29 +411,46 @@ input[type="date"] {
     </div>
 </div>
 
-<!-- Delete Spouse Modal -->
+<!-- Replace the Delete Spouse Modal content -->
 <div class="modal fade" id="deleteSpouseModal" tabindex="-1" role="dialog" aria-labelledby="deleteSpouseModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteSpouseModalLabel">{{ get_translation("Delete Spouse") }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title" id="deleteSpouseModalLabel">{{ get_translation("Delete Family Member") }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>{{ get_translation("Choose delete option:") }}</p>
-                <select id="spouseDeleteOption" class="form-control">
-                    <option value="1">{{ get_translation("Remove relationship only") }}</option>
-                    <option value="2">{{ get_translation("Delete spouse (keeps children)") }}</option>
-                    <option value="3">{{ get_translation("Delete spouse and all children") }}</option>
-                </select>
-                <input type="hidden" id="deleteSpouseId">
-                <input type="hidden" id="deleteFamilyId">
+                <form id="deleteFamilyForm">
+                    <input type="hidden" id="deleteFamilyId" name="family_id">
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="deleteSpouseRelationship" name="delete_relationship" checked>
+                        <label class="form-check-label" for="deleteSpouseRelationship">
+                            {{ get_translation("Remove spouse relationship") }}
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="deleteSpouse" name="delete_spouse">
+                        <label class="form-check-label" for="deleteSpouse">
+                            {{ get_translation("Delete spouse record") }}
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="deleteChildren" name="delete_children">
+                        <label class="form-check-label" for="deleteChildren">
+                            {{ get_translation("Delete children records") }}
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="deleteFamily" name="delete_family">
+                        <label class="form-check-label" for="deleteFamily">
+                            {{ get_translation("Delete family record") }}
+                        </label>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteSpouse">{{ get_translation("Delete") }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ get_translation("Cancel") }}</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteFamily">{{ get_translation("Delete") }}</button>
             </div>
         </div>
     </div>
@@ -470,7 +488,7 @@ input[type="date"] {
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="replaceSpouseModalLabel">{{ get_translation("Replace Unknown Spouse") }}</h5>
+                <h5 class="modal-title" id="replaceSpouseModalLabel">{{ get_translation("Change Spouse") }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -512,7 +530,7 @@ input[type="date"] {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ get_translation("Cancel") }}</button>
-                <button type="button" class="btn btn-primary" id="confirmReplaceSpouse">{{ get_translation("Replace Spouse") }}</button>
+                <button type="button" class="btn btn-primary" id="confirmReplaceSpouse">{{ get_translation("Save Spouse") }}</button>
             </div>
         </div>
     </div>
@@ -902,6 +920,73 @@ input[type="date"] {
 /* Remove the divider in dropdown menu */
 .dropdown-menu .dropdown-divider {
     display: none;
+}
+
+/* ...existing styles... */
+
+.nav-tabs .nav-item .d-flex {
+    width: 100%;
+}
+
+.nav-tabs .nav-item .nav-link {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+    text-align: left;
+}
+
+.nav-tabs .nav-item .dropdown-toggle {
+    border: 1px solid transparent;
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 0.5rem 0.5rem;
+    margin-left: 0;
+}
+
+.nav-tabs .nav-item .nav-link.active + .dropdown-toggle {
+    border-color: var(--bs-nav-tabs-link-active-border-color);
+    border-bottom-color: var(--bs-nav-tabs-link-active-bg);
+}
+
+.nav-tab-wrapper {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+.nav-tab-wrapper .nav-link {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+    flex-grow: 1;
+}
+
+.nav-tab-wrapper .dropdown {
+    display: flex;
+}
+
+.nav-tab-wrapper .dropdown-toggle {
+    border: var(--bs-nav-tabs-border-width) solid transparent;
+    border-left: 0;
+    border-top-right-radius: var(--bs-nav-tabs-border-radius);
+    border-bottom-right-radius: var(--bs-nav-tabs-border-radius);
+    padding: 0.25rem 0.5rem;
+    margin-left: 0;
+}
+
+.nav-tab-wrapper .nav-link.active + .dropdown .dropdown-toggle {
+    border-color: var(--bs-nav-tabs-link-active-border-color);
+    border-bottom-color: var(--bs-nav-tabs-link-active-bg);
+}
+
+.nav-tab-wrapper .dropdown-toggle::after {
+    margin-left: 0;
+}
+
+.nav-tabs .nav-item {
+    display: flex;
+    align-items: stretch;
 }
 </style>
 
