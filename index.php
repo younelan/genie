@@ -52,7 +52,13 @@ switch ($action) {
         exit;
         break;
     case 'list_trees':
-        $treeController->listTrees();
+        // Just render the React template
+        $data = [
+            "template" => "react_app.tpl",
+            "section" => get_translation("Family Trees"),
+            "app_title" => "Family Trees - Genie"
+        ];
+        echo $treeController->render_master($data);
         break;
     case 'add_tree':
         $treeController->addTree();

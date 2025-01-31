@@ -41,12 +41,18 @@ class TreeModel extends AppModel
 
     public function addTree($ownerId, $name, $description)
     {
-        $query = "INSERT INTO $this->tree_table  (owner_id, name, description) VALUES (:owner_id, :name, :description)";
+        $query = "INSERT INTO $this->tree_table (owner_id, name, description, is_public, created_at, updated_at) 
+                  VALUES (:owner_id, :name, :description, :is_public, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
-        $result = $stmt->execute(['owner_id' => $ownerId, 'name' => $name, 'description' => $description]);
-        return $this->db->lastInsertId();
-
+        $result = $stmt->execute([
+            'owner_id' => $ownerId, 
+            'name' => $name, 
+            'description' => $description,
+            'is_public' => 0  // Default to private
+        ]);
+        return $result ? $this->db->lastInsertId() : false;
     }
+
     public function searchMembers($treeId, $query)
     {
         $query = "%$query%";
