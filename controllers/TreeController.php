@@ -242,53 +242,14 @@ class TreeController extends AppController
 
     public function listMembers($treeId, $page)
     {
-        $limit = $this->config['limits']['members']??70; // Number of members per page
-        $update_limit = $this->config['limits']['updates']??40; // Number of members per page
-        $offset = ($page - 1) * $limit;
-
-        $members = $this->tree->getMembersByTreeId($treeId, $offset, $limit);
-        $lastUpdates = $this->tree->getMembersByTreeId($treeId, 0, $update_limit, $orderby='updated_at DESC');
-        $totalMembers = $this->tree->getPersonCount($treeId);
-        $countByGender = $this->tree->countMembersByTreeId($treeId);
-        $countByGender['Total']=$totalMembers;
-        $synonyms = $this->tree->getSynonymsByTreeId($treeId);
-        $countByLastname = $this->tree->countTreeMembersByField($treeId,'last_name', $synonyms);
-        $countByFirstname = $this->tree->countTreeMembersByField($treeId,'first_name', $synonyms);
-        $totalRelationships = $this->tree->countRelationshipsByTreeId($treeId);
-        $totalPages = ceil($totalMembers / $limit);
-        $stats=[
-            'By Gender'=> $countByGender,
-            'Relations'=> [
-                'Total'=>$totalRelationships,
-            ],
-            'By First Name'=>$countByFirstname,
-            'By Last Name'=>$countByLastname,
-        ];
-        $events = [];
-        $activities = [];
         $data = [
             "template" => "list_members.tpl",
-            "members"=>$members,
-            "lastUpdates"=> $this->tree->getMembersByTreeId($treeId, 0, $update_limit, $orderby='updated_at DESC'),
             "section" => get_translation("List Members"),
-            "str_family_members" => get_translation("Family Members"),
-            "str_pages" =>get_translation("Pages"),
-            "totalPages" => ceil($totalMembers / $limit),            
-            "totalMembers" => $this->tree->getPersonCount($treeId),
-            "countByGender" => $this->tree->countMembersByTreeId($treeId),
-            "synonyms" => $this->tree->getSynonymsByTreeId($treeId),
-            "countByLastname" => $this->tree->countTreeMembersByField($treeId,'last_name', $synonyms),
-            "countByFirstname" => $this->tree->countTreeMembersByField($treeId,'first_name', $synonyms),
-            "totalRelationships" => $this->tree->countRelationshipsByTreeId($treeId),
-            "go_back" => get_translation("Back to List"),
-            "error" => "",
-            "stats" => $stats,
-            "events"=> $events,
-            "activities" => $activities,
-            "treeId" => $_GET['tree_id'] ?? $_GET['tree_id'],
+            "treeId" => $treeId,
+            "page" => $page,
             "graph" => $this->config['graph']
         ];
-        $data["countByGender"]['Total']=$totalMembers;
+
         $treeId = $_GET['tree_id'] ?? $_GET['tree_id']; // Get tree_id from the request
         $data["menu"] = [
             [

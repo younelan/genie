@@ -227,9 +227,11 @@ const TreeList = () => {
         key: `actions-${tree.id}`,
         className: 'flex items-center justify-between gap-4 pt-4 border-t border-gray-100' 
       }, [
-        React.createElement('a', {
+        React.createElement('button', {
           key: `members-${tree.id}`,
-          href: `index.php?action=list_members&tree_id=${tree.id}`,
+          onClick: () => {
+            window.location.hash = `#/tree/${tree.id}/members`;
+          },
           className: 'inline-flex items-center text-blue-600 hover:text-blue-800 font-medium'
         }, [
           React.createElement('span', {
