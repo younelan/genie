@@ -38,18 +38,16 @@ class TreeController extends AppController
     public function listTrees()
     {
         $data = [
-            "trees" => $this->tree->getAllTreesByOwner($this->userId),
-            "template" => "tree_list.tpl",
-            "section" => get_translation("Family Trees")
+            "template" => "react_app.tpl",
+            "section" => get_translation("Family Trees"),
+            "app_title" => $this->config['app_name'] ?? "Genie",
+            "app_logo" => $this->config['app_logo'] ?? "/genie/res/images/logo.png",
+            "footer_text" => get_translation("Family Tree Manager"),
+            "company_name" => $this->config['company_name'] ?? "Genie"
         ];
-        $data["menu"][] = [
-            "link"=>"index.php?action=add_tree",
-            "text"=>get_translation("New Tree")
-        ];
-
         echo $this->render_master($data);
-
     }
+
     public function searchMembers()
     {
         $treeId = $_GET['tree_id'];

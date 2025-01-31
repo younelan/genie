@@ -3,30 +3,29 @@
 <head>
     <title>{{ app_title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             min-height: 100vh;
-        }
-        .hover-shadow:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-            transition: all .2s ease-in-out;
-        }
-        .card {
-            transition: all .2s ease-in-out;
-            background: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <!-- React -->
+    <script>
+        // Pass PHP variables to JavaScript
+        window.appTitle = "{{ app_title }}";
+        window.appLogo = "{{ app_logo }}";
+        window.footerText = "{{ footer_text }}";
+        window.companyName = "{{ company_name }}";
+        window.section = "{{ section }}";
+    </script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <!-- Our App -->
     <script src="res/js/trees/TreeList.js"></script>
 </body>
 </html>

@@ -56,9 +56,16 @@ switch ($action) {
         $data = [
             "template" => "react_app.tpl",
             "section" => get_translation("Family Trees"),
-            "app_title" => "Family Trees - Genie"
+            "app_title" => $config['app_name'] ?? "Genie",
+            "app_logo" => $config['app_logo'] ?? "/genie/res/genie.gif",
+            "footer_text" => get_translation("Family Tree Manager"),
+            "company_name" => $config['company_name'] ?? "Genie"
+
         ];
-        echo $treeController->render_master($data);
+
+        //print_r($data);exit;
+        
+        echo $treeController->render($data);
         break;
     case 'add_tree':
         $treeController->addTree();

@@ -1,3 +1,44 @@
+const AppHeader = () => {
+  return React.createElement('header', { 
+    className: 'bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg fixed top-0 w-full z-10'
+  }, React.createElement('div', {
+    className: 'max-w-7xl mx-auto px-4 py-3 flex items-center justify-between'
+  }, [
+    React.createElement('div', {
+      key: 'logo-section',
+      className: 'flex items-center gap-4'
+    }, [
+      window.appLogo && React.createElement('img', {
+        key: 'logo',
+        src: window.appLogo,
+        alt: window.companyName,
+        className: 'h-12 w-auto'
+      }),
+      React.createElement('div', {
+        key: 'titles',
+        className: 'flex flex-col'
+      }, [
+        React.createElement('h1', {
+          key: 'app-title',
+          className: 'text-2xl font-bold text-white'
+        }, window.appTitle),
+        React.createElement('span', {
+          key: 'section-title',
+          className: 'text-sm text-blue-100'
+        }, window.section)
+      ])
+    ])
+  ]));
+};
+
+const AppFooter = () => {
+  return React.createElement('footer', {
+    className: 'bg-white border-t border-gray-200 fixed bottom-0 w-full'
+  }, React.createElement('div', {
+    className: 'max-w-7xl mx-auto px-4 py-3 text-center text-sm text-gray-600'
+  }, `© ${new Date().getFullYear()} ${window.companyName} - ${window.footerText}`));
+};
+
 const TreeList = () => {
   const [trees, setTrees] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -41,17 +82,20 @@ const TreeList = () => {
   };
 
   const AddTreeModal = () => {
-    // Move form state inside the modal component
-    const [formData, setFormData] = React.useState({ name: '', description: '', is_public: false });
-    
+    if (!showAddModal) return null;
+
+    const [formData, setFormData] = React.useState({ 
+      name: '', 
+      description: '', 
+      is_public: false 
+    });
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
         const response = await fetch('api/trees.php', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...formData,
             is_public: formData.is_public ? 1 : 0
@@ -70,121 +114,189 @@ const TreeList = () => {
         alert(err.message);
       }
     };
-  
+
     return React.createElement('div', {
-      className: 'modal' + (showAddModal ? ' show d-block' : ' d-none'),
-      tabIndex: '-1',
-      role: 'dialog'
+      className: 'fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50'
     },
-      React.createElement('div', { className: 'modal-dialog modal-dialog-centered' },
-        React.createElement('div', { className: 'modal-content shadow' },
-          React.createElement('div', { className: 'modal-header' },
-            React.createElement('h5', { className: 'modal-title' }, 'Create New Family Tree'),
-            React.createElement('button', {
-              type: 'button',
-              className: 'btn-close',
-              onClick: () => setShowAddModal(false)
+      React.createElement('div', { 
+        className: 'bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 transform transition-all'
+      }, [
+        React.createElement('div', { 
+          key: 'modal-header',
+          className: 'px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl'
+        }, [
+          React.createElement('h3', { 
+            key: 'modal-title',
+            className: 'text-xl font-semibold text-white'
+          }, 'Create New Family Tree'),
+          React.createElement('button', {
+            key: 'modal-close',
+            onClick: () => setShowAddModal(false),
+            className: 'text-white hover:text-blue-100 text-2xl font-bold'
+          }, '×')
+        ]),
+        React.createElement('form', {
+          key: 'modal-form',
+          onSubmit: handleSubmit,
+          className: 'p-6 space-y-4'
+        }, [
+          React.createElement('div', { 
+            key: 'name-field',
+            className: 'space-y-2' 
+          }, [
+            React.createElement('label', { 
+              key: 'name-label',
+              className: 'text-sm font-medium text-gray-700'
+            }, 'Tree Name'),
+            React.createElement('input', {
+              key: 'name-input',
+              type: 'text',
+              value: formData.name,
+              onChange: (e) => setFormData(prev => ({ ...prev, name: e.target.value })),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+              required: true
             })
-          ),
-          React.createElement('form', { onSubmit: handleSubmit },
-            React.createElement('div', { className: 'modal-body' },
-              React.createElement('div', { className: 'mb-3' },
-                React.createElement('label', { className: 'form-label' }, 'Tree Name'),
-                React.createElement('input', {
-                  type: 'text',
-                  className: 'form-control',
-                  value: formData.name,
-                  onChange: (e) => setFormData(prev => ({ ...prev, name: e.target.value })),
-                  required: true
-                })
-              ),
-              React.createElement('div', { className: 'mb-3' },
-                React.createElement('label', { className: 'form-label' }, 'Description'),
-                React.createElement('textarea', {
-                  className: 'form-control',
-                  value: formData.description,
-                  onChange: (e) => setFormData(prev => ({ ...prev, description: e.target.value })),
-                  rows: '3'
-                })
-              ),
-              React.createElement('div', { className: 'mb-3 form-check' },
-                React.createElement('input', {
-                  type: 'checkbox',
-                  className: 'form-check-input',
-                  id: 'isPublic',
-                  checked: formData.is_public,
-                  onChange: (e) => setFormData(prev => ({ ...prev, is_public: e.target.checked }))
-                }),
-                React.createElement('label', {
-                  className: 'form-check-label',
-                  htmlFor: 'isPublic'
-                }, 'Make this tree public')
-              )
-            ),
-            React.createElement('div', { className: 'modal-footer' },
-              React.createElement('button', {
-                type: 'button',
-                className: 'btn btn-secondary',
-                onClick: () => setShowAddModal(false)
-              }, 'Cancel'),
-              React.createElement('button', {
-                type: 'submit',
-                className: 'btn btn-primary'
-              }, 'Create Tree')
-            )
-          )
-        )
-      )
+          ]),
+          React.createElement('div', { 
+            key: 'description-field',
+            className: 'space-y-2' 
+          }, [
+            React.createElement('label', { 
+              key: 'description-label',
+              className: 'text-sm font-medium text-gray-700'
+            }, 'Description'),
+            React.createElement('textarea', {
+              key: 'description-input',
+              value: formData.description,
+              onChange: (e) => setFormData(prev => ({ ...prev, description: e.target.value })),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+              rows: '3'
+            })
+          ]),
+          React.createElement('label', { 
+            key: 'public-field',
+            className: 'flex items-center gap-2 text-sm text-gray-600'
+          }, [
+            React.createElement('input', {
+              key: 'public-input',
+              type: 'checkbox',
+              checked: formData.is_public,
+              onChange: (e) => setFormData(prev => ({ ...prev, is_public: e.target.checked })),
+              className: 'rounded text-blue-600 focus:ring-blue-500'
+            }),
+            'Make this tree public'
+          ]),
+          React.createElement('div', { 
+            key: 'button-group',
+            className: 'flex justify-end gap-3 mt-6'
+          }, [
+            React.createElement('button', {
+              key: 'cancel-button',
+              type: 'button',
+              onClick: () => setShowAddModal(false),
+              className: 'px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md'
+            }, 'Cancel'),
+            React.createElement('button', {
+              key: 'submit-button',
+              type: 'submit',
+              className: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm'
+            }, 'Create Tree')
+          ])
+        ])
+      ])
     );
   };
+
+  const treeCard = (tree) => React.createElement('div', {
+    key: tree.id,
+    className: 'bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100'
+  }, [
+    React.createElement('div', { 
+      key: `content-${tree.id}`,
+      className: 'p-6' 
+    }, [
+      React.createElement('h3', { 
+        key: `title-${tree.id}`,
+        className: 'text-xl font-semibold text-gray-900 mb-2' 
+      }, tree.name),
+      React.createElement('p', { 
+        key: `desc-${tree.id}`,
+        className: 'text-gray-600 mb-4 h-20 overflow-hidden' 
+      }, tree.description || 'No description available'),
+      React.createElement('div', { 
+        key: `actions-${tree.id}`,
+        className: 'flex items-center justify-between gap-4 pt-4 border-t border-gray-100' 
+      }, [
+        React.createElement('a', {
+          key: `members-${tree.id}`,
+          href: `index.php?action=list_members&tree_id=${tree.id}`,
+          className: 'inline-flex items-center text-blue-600 hover:text-blue-800 font-medium'
+        }, [
+          React.createElement('span', {
+            key: `count-${tree.id}`,
+            className: 'bg-blue-100 text-blue-600 px-2 py-1 rounded-md mr-2'
+          }, tree.member_count || 0),
+          React.createElement('span', {
+            key: `label-${tree.id}`,
+            className: 'whitespace-nowrap'
+          }, 'Members')
+        ]),
+        React.createElement('button', {
+          key: `delete-${tree.id}`,
+          onClick: () => deleteTree(tree.id),
+          className: 'text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-1 rounded-md transition-colors'
+        }, 'Delete')
+      ])
+    ])
+  ]);
+
+  const mainContent = [
+    React.createElement(AppHeader, { key: 'header' }),
+    React.createElement('main', { 
+      key: 'main',
+      className: 'container mx-auto px-4 py-16 mt-16 mb-16'
+    }, [
+      React.createElement('div', { 
+        key: 'header-psection',
+        className: 'flex justify-between items-center mb-8' 
+      }, [
+        React.createElement('h2', { 
+          key: 'title',
+          className: 'text-3xl font-bold text-gray-900' 
+        }, 'Your Family Trees'),
+        React.createElement('button', {
+          key: 'add-button',
+          className: 'inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition-colors',
+          onClick: () => setShowAddModal(true)
+        }, [
+          React.createElement('svg', {
+            key: 'icon',
+            className: 'w-5 h-5 mr-2',
+            fill: 'none',
+            viewBox: '0 0 24 24',
+            stroke: 'currentColor'
+          }, React.createElement('path', {
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            strokeWidth: 2,
+            d: 'M12 4v16m8-8H4'
+          })),
+          'New Tree'
+        ])
+      ]),
+      React.createElement('div', { 
+        key: 'tree-grid',
+        className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
+      }, trees.map(tree => treeCard(tree)))
+    ]),
+    React.createElement(AppFooter, { key: 'footer' }),
+    React.createElement(AddTreeModal, { key: 'modal' })
+  ];
 
   if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
   if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
 
-  return React.createElement(React.Fragment, null,
-    React.createElement('div', { className: 'container-fluid px-4 py-5' },
-      React.createElement('div', { className: 'row mb-5 align-items-center' },
-        React.createElement('div', { className: 'col' },
-          React.createElement('h1', { className: 'display-4 fw-bold text-primary' }, 'Family Trees')
-        ),
-        React.createElement('div', { className: 'col-auto' },
-          React.createElement('button', { 
-            className: 'btn btn-primary btn-lg shadow-sm',
-            onClick: () => setShowAddModal(true)
-          }, 
-          React.createElement('div', { className: 'd-flex align-items-center gap-2' },
-            React.createElement('i', { className: 'bi bi-plus-circle' }, ''),
-            'New Tree'
-          ))
-        )
-      ),
-      React.createElement('div', { className: 'row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4' },
-        trees.map(tree => 
-          React.createElement('div', { className: 'col', key: tree.id },
-            React.createElement('div', { className: 'card h-100 shadow-sm border-0 hover-shadow' },
-              React.createElement('div', { className: 'card-body p-4' },
-                React.createElement('h5', { className: 'card-title fw-bold mb-3' }, tree.name),
-                React.createElement('p', { className: 'card-text text-muted mb-4' }, 
-                  tree.description || 'No description available'
-                ),
-                React.createElement('div', { className: 'd-flex gap-2 align-items-center' },
-                  React.createElement('a', {
-                    className: 'btn btn-outline-primary flex-grow-1',
-                    href: `index.php?action=list_members&tree_id=${tree.id}`
-                  }, `${tree.member_count || 0} Members`),
-                  React.createElement('button', {
-                    className: 'btn btn-outline-danger',
-                    onClick: () => deleteTree(tree.id)
-                  }, 'Delete')
-                )
-              )
-            )
-          )
-        )
-      )
-    ),
-    React.createElement(AddTreeModal)
-  );
+  return React.createElement(React.Fragment, null, mainContent);
 };
 
 // Mount the component when the document is ready

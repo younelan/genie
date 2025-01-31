@@ -50,7 +50,17 @@ class AppBase
         return $this->render_file($master_file, $data);
 
     }
+    public function render($data) {
+        $master_file = $this->basedir . "/templates/content.tpl";
+        $data["app_title"] = $this->config['app_name']??"Genie";
+        $data["section"] = $data["section"]??"";
 
+        $content_file = $this->basedir . "/templates/" . $data["template"];
+        $data['content'] = $this->render_file($content_file, $data);
+
+        return $this->render_file($master_file, $data);
+
+    }
 
 }
 class AppModel extends AppBase {
