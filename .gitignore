@@ -1,7 +1,9 @@
 *.swap
+*.swp
 data/config.json
 *.tmp
 *.ged
 *.sql
+old.php"
 temp
 
