@@ -208,16 +208,36 @@ class IndividualsAPI {
 
     private function updateMember($data) {
         try {
-            $success = $this->memberModel->updateMember($data);
+            $memberId = $data['id'];
+            $updateData = [
+                'memberId' => $memberId,
+                'firstName' => $data['first_name'],
+                'lastName' => $data['last_name'],
+                'dateOfBirth' => $data['birth_date'],
+                'placeOfBirth' => $data['birth_place'],
+                'dateOfDeath' => $data['death_date'],
+                'placeOfDeath' => $data['death_place'],
+                'gender' => $data['gender'],
+                'alive' => $data['alive'],
+                'source' => $data['source'] ?? ''
+            ];
+
+            $success = $this->memberModel->updateMember($updateData);
+            
             if ($success) {
-                echo json_encode(['success' => true]);
+                // Return updated member data
+                $member = $this->memberModel->getMemberById($memberId);
+                echo json_encode([
+                    'success' => true,
+                    'data' => $member
+                ]);
             } else {
                 throw new Exception('Failed to update member');
             }
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
-                'error' => 'Failed to update member',
+                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
