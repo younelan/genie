@@ -85,6 +85,38 @@ const TagInput = ({ memberId, treeId }) => {
         setInputValue(e.target.value || ''); // Ensure empty string if value is null
     };
 
+    const handleCopyTags = () => {
+        const tagText = tags.join(',');
+        
+        // Try modern clipboard API first
+        if (window.navigator?.clipboard?.writeText) {
+            window.navigator.clipboard.writeText(tagText)
+                .catch(error => {
+                    console.error('Clipboard API failed:', error);
+                    fallbackCopy(tagText);
+                });
+        } else {
+            fallbackCopy(tagText);
+        }
+    };
+
+    const fallbackCopy = (text) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        
+        try {
+            textarea.select();
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    };
+
     return React.createElement('div', { className: 'tag-input-container mb-3' }, [
         React.createElement('label', { key: 'label', className: 'form-label d-flex justify-content-between' }, [
             'Tags',
@@ -92,7 +124,7 @@ const TagInput = ({ memberId, treeId }) => {
                 key: 'copy-button',
                 type: 'button',
                 className: 'btn btn-sm btn-outline-secondary',
-                onClick: () => navigator.clipboard.writeText(tags.join(','))
+                onClick: handleCopyTags
             }, 'Copy')
         ]),
         React.createElement('div', { 
