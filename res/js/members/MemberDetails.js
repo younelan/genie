@@ -173,53 +173,30 @@ const MemberDetails = () => {
     const renderBasicInfo = () => React.createElement(Card, { key: 'basic-info-card' }, [
         React.createElement(Card.Header, { 
             key: 'header',
-            className: 'd-flex justify-content-between align-items-center'
+            className: 'flex justify-between items-center'
         }, [
             React.createElement('h4', { key: 'title' }, 'Member Details'),
-            React.createElement('div', { 
+            React.createElement(Dropdown, {
                 key: 'actions',
-                className: 'dropdown' 
-            }, [
-                React.createElement('button', {
-                    key: 'dropdown-toggle',
-                    className: 'btn btn-link dropdown-toggle',
-                    type: 'button',
-                    'data-bs-toggle': 'dropdown',
-                    'aria-expanded': 'false'
-                }, '⚙️'),
-                React.createElement('ul', {
-                    key: 'dropdown-menu',
-                    className: 'dropdown-menu dropdown-menu-end'
-                }, [
-                    React.createElement('li', { key: 'visualize' },
-                        React.createElement('a', {
-                            key: 'visualize-link',
-                            className: 'dropdown-item',
-                            href: `#/tree/${treeId}/member/${memberId}/descendants`
-                        }, '🌳 Visualize Descendants')
-                    ),
-                    React.createElement('li', { key: 'add-relationship' },
-                        React.createElement('button', {
-                            key: 'relationship-btn',
-                            className: 'dropdown-item',
-                            type: 'button',
-                            'data-bs-toggle': 'modal',
-                            'data-bs-target': '#addRelationshipModal'
-                        }, '➕ Add Relationship')
-                    ),
-                    React.createElement('li', { key: 'delete' },
-                        React.createElement('button', {
-                            key: 'delete-btn',
-                            className: 'dropdown-item text-danger',
-                            onClick: () => {
-                                if (confirm('Are you sure you want to delete this member?')) {
-                                    handleDeleteMember();
-                                }
-                            }
-                        }, '🗑️ Delete Member')
-                    )
-                ])
-            ])
+                trigger: '⚙️',
+                items: [
+                    {
+                        label: '🌳 Visualize Descendants',
+                        href: `#/tree/${treeId}/member/${memberId}/descendants`
+                    },
+                    {
+                        label: '➕ Add Relationship',
+                        onClick: () => {
+                            // Handle relationship modal
+                        }
+                    },
+                    {
+                        label: '🗑️ Delete Member',
+                        onClick: handleDeleteMember,
+                        className: 'text-red-600'
+                    }
+                ]
+            })
         ]),
         React.createElement(Card.Body, { key: 'body' },
             React.createElement('form', { onSubmit: handleSubmit }, [
@@ -347,6 +324,36 @@ const MemberDetails = () => {
         }
     };
 
+    const renderFamilyTab = (family) => React.createElement('div', {
+        className: 'flex items-center'
+    }, [
+        React.createElement(Nav.Link, {
+            key: 'tab-link',
+            active: activeFamily === family.id,
+            onClick: () => setActiveFamily(family.id),
+            className: 'flex-grow'
+        }, family.spouse_name || 'Unknown Spouse'),
+        React.createElement(Dropdown, {
+            key: 'family-actions',
+            trigger: '⚙️',
+            items: [
+                family.spouse_id && {
+                    label: 'View Spouse',
+                    href: `#/tree/${treeId}/member/${family.spouse_id}`
+                },
+                {
+                    label: 'Edit Family',
+                    onClick: () => handleEditFamily(family.id)
+                },
+                {
+                    label: 'Delete Family',
+                    onClick: () => handleDeleteFamily(family.id),
+                    className: 'text-red-600'
+                }
+            ].filter(Boolean)
+        })
+    ]);
+
     const renderFamilyTabs = () => React.createElement(Card, { key: 'family-card' }, [
         React.createElement(Card.Header, { key: 'header' }, 'Families'),
         React.createElement(Card.Body, { key: 'body' }, [
@@ -359,45 +366,7 @@ const MemberDetails = () => {
                     React.createElement(Nav.Item, { 
                         key: `family-tab-${family.id}`
                     }, 
-                        React.createElement('div', { 
-                            className: 'nav-tab-wrapper d-flex'
-                        }, [
-                            React.createElement(Nav.Link, {
-                                key: 'tab-link',
-                                active: activeFamily === family.id,
-                                onClick: () => setActiveFamily(family.id),
-                                className: 'flex-grow-1'
-                            }, family.spouse_name || 'Unknown Spouse'),
-                            React.createElement('div', {
-                                key: 'dropdown',
-                                className: 'dropdown'
-                            }, [
-                                React.createElement('button', {
-                                    key: 'dropdown-toggle',
-                                    className: 'btn btn-link dropdown-toggle',
-                                    'data-bs-toggle': 'dropdown'
-                                }, '⚙️'),
-                                React.createElement('ul', {
-                                    key: 'dropdown-menu',
-                                    className: 'dropdown-menu'
-                                }, [
-                                    family.spouse_id && React.createElement('li', { key: 'view-spouse' },
-                                        React.createElement('a', {
-                                            key: 'view-spouse-link',
-                                            className: 'dropdown-item',
-                                            href: `#/tree/${treeId}/member/${family.spouse_id}`
-                                        }, 'View Spouse')
-                                    ),
-                                    React.createElement('li', { key: 'delete-family' },
-                                        React.createElement('a', {
-                                            key: 'delete-family-link',
-                                            className: 'dropdown-item text-danger',
-                                            onClick: () => handleDeleteFamily(family.id)
-                                        }, 'Delete Family')
-                                    )
-                                ])
-                            ])
-                        ])
+                        renderFamilyTab(family)
                     )
                 ),
                 React.createElement(Nav.Item, {

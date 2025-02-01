@@ -39,5 +39,6 @@
     <script src="res/js/trees/TreeList.js"></script>
     <script src="res/js/app.js"></script>
     <script src="res/js/components/TagInput.js"></script>
+    <script src="res/js/components/Dropdown.js"></script>
 </body>
 </html>
