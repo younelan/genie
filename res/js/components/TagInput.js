@@ -1,11 +1,11 @@
 const TagInput = ({ memberId, treeId }) => {
-    // Initialize tags as empty array and inputValue as empty string
     const [tags, setTags] = React.useState([]);
     const [inputValue, setInputValue] = React.useState('');
 
     React.useEffect(() => {
         if (memberId) {
             loadTags();
+            setInputValue(''); // Reset input value when member changes
         }
     }, [memberId]);
 
@@ -99,6 +99,7 @@ const TagInput = ({ memberId, treeId }) => {
             key: 'tags-wrapper',
             className: 'border rounded p-2 mb-2 d-flex flex-wrap gap-2'
         }, [
+            // Render existing tags
             ...(tags || []).map(tag => 
                 React.createElement('span', {
                     key: `tag-${tag}`,
@@ -113,15 +114,16 @@ const TagInput = ({ memberId, treeId }) => {
                     })
                 ])
             ),
+            // Always render the input field, regardless of tags length
             React.createElement('input', {
                 key: 'tag-input',
                 type: 'text',
                 className: 'border-0 flex-grow-1',
-                value: inputValue || '', // Ensure empty string if null
+                value: inputValue,
                 onChange: handleInputChange,
                 onKeyDown: handleKeyDown,
                 onPaste: handlePaste,
-                placeholder: tags.length ? '' : 'Type and press Enter to add tags'
+                placeholder: 'Type and press Enter to add tags'
             })
         ])
     ]);

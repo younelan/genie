@@ -35,8 +35,7 @@ const MemberDetails = () => {
 
     React.useEffect(() => {
         if (member) {
-            const isAlive = member.alive === '1';
-            setFormData({
+            setFormData(prev => ({
                 first_name: member.first_name || '',
                 last_name: member.last_name || '',
                 birth_date: member.birth_date || '',
@@ -44,10 +43,10 @@ const MemberDetails = () => {
                 death_date: member.death_date || '',
                 death_place: member.death_place || '',
                 gender: member.gender || 'M',
-                alive: isAlive,
+                alive: member.alive === '1',
                 source: member.source || ''
-            });
-            setShowDeathFields(!isAlive);
+            }));
+            setShowDeathFields(member.alive !== '1');
         }
     }, [member]);
 
@@ -231,7 +230,7 @@ const MemberDetails = () => {
                         key: 'first-name',
                         type: 'text',
                         name: 'first_name',
-                        value: formData.first_name,
+                        value: formData.first_name || '',
                         onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
@@ -239,7 +238,7 @@ const MemberDetails = () => {
                         key: 'last-name',
                         type: 'text',
                         name: 'last_name',
-                        value: formData.last_name,
+                        value: formData.last_name || '',
                         onChange: handleInputChange,
                         className: 'form-control'
                     })
@@ -251,7 +250,7 @@ const MemberDetails = () => {
                         key: 'birth-date',
                         type: 'date',
                         name: 'birth_date',
-                        value: formData.birth_date,
+                        value: formData.birth_date || '',
                         onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
@@ -259,7 +258,7 @@ const MemberDetails = () => {
                         key: 'birth-place',
                         type: 'text',
                         name: 'birth_place',
-                        value: formData.birth_place,
+                        value: formData.birth_place || '',
                         onChange: handleInputChange,
                         className: 'form-control',
                         placeholder: 'Place of Birth'
@@ -304,7 +303,7 @@ const MemberDetails = () => {
                         key: 'death-date',
                         type: 'date',
                         name: 'death_date',
-                        value: formData.death_date,
+                        value: formData.death_date || '',
                         onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
@@ -312,7 +311,7 @@ const MemberDetails = () => {
                         key: 'death-place',
                         type: 'text',
                         name: 'death_place',
-                        value: formData.death_place,
+                        value: formData.death_place || '',
                         onChange: handleInputChange,
                         className: 'form-control',
                         placeholder: 'Place of Death'
