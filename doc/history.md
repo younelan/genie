@@ -2,18 +2,30 @@
 Check out [The README file](README.md) for more info
 
 ## Backlog
-	* Edit relationship types
 	* Edit Synonyms
 	* Simplicity
 		* Auth
 		* Config
-	* Use Simplicity for templates
 	* tags for relationships
 	* User registration 
 	* Add permission for users
 	* gedcom write/read
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
+
+## current
+     - Retire edit relationship types: using gedcom types
+     - Retire simplicity template: use react interacting with api
+## 20250201
+     - Began compatibility effort between Symfony version and This version
+         - Database Structure is now compatible
+         - Begin rewrite of the UI as React interacting with API
+             - ported tree list
+             - ported list of family members
+             - partial port of member details, view only
+     - Add Relationship modal is now a modal
+     - Other Relationship view cleanup
+     - Other Relationship add, Spouse Add, Children Add
 
 ## 20250128
      - Rewrote the add relationship as a modal so that it works better on mobile
