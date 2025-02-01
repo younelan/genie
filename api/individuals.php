@@ -55,6 +55,9 @@ class IndividualsAPI {
             case 'tags':
                 $this->getTags();
                 break;
+            case 'get_descendants':
+                $this->getDescendants();
+                break;
             default:
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid action']);
@@ -350,6 +353,86 @@ class IndividualsAPI {
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    private function getDescendants() {
+        $memberId = $_GET['member_id'] ?? null;
+        if (!$memberId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Member ID required']);
+            return;
+        }
+
+        try {
+            $data = $this->buildDescendantsTree($memberId);
+            echo json_encode([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function buildDescendantsTree($memberId, $visitedMembers = []) {
+        // Prevent infinite loops
+        if (in_array($memberId, $visitedMembers)) {
+            return null;
+        }
+        $visitedMembers[] = $memberId;
+
+        $member = $this->memberModel->getMemberById($memberId);
+        if (!$member) return null;
+
+        $data = [
+            'id' => $memberId,
+            'name' => $member['first_name'] . ' ' . $member['last_name'],
+            'data' => [
+                'gender' => $member['gender'],
+                'birth_date' => $member['birth_date']
+            ],
+            'marriages' => []
+        ];
+
+        // Get spouse families
+        $spouseFamilies = $this->memberModel->getSpouseFamilies($memberId);
+        foreach ($spouseFamilies as $family) {
+            $marriageData = [
+                'id' => $family['id'],
+                'spouse' => null,
+                'children' => []
+            ];
+
+            // Add spouse data if exists
+            if ($family['spouse_id']) {
+                $spouse = $this->memberModel->getMemberById($family['spouse_id']);
+                if ($spouse) {
+                    $marriageData['spouse'] = [
+                        'id' => $spouse['id'],
+                        'name' => $spouse['first_name'] . ' ' . $spouse['last_name'],
+                        'data' => ['gender' => $spouse['gender']]
+                    ];
+                }
+            }
+
+            // Get and process children
+            if (isset($family['children'])) {
+                foreach ($family['children'] as $child) {
+                    $childTree = $this->buildDescendantsTree($child['id'], $visitedMembers);
+                    if ($childTree) {
+                        $marriageData['children'][] = $childTree;
+                    }
+                }
+            }
+
+            $data['marriages'][] = $marriageData;
+        }
+
+        return $data;
     }
 }
 

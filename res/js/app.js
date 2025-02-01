@@ -3,12 +3,21 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const handleRoute = () => {
     const hash = window.location.hash;
     
-    if (hash.startsWith('#/tree/') && hash.includes('/members')) {
+    // Better route pattern matching
+    const treePattern = /^#\/tree\/(\d+)\/members$/;
+    const memberPattern = /^#\/tree\/(\d+)\/member\/(\d+)$/;
+    const descendantsPattern = /^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/;
+
+    if (treePattern.test(hash)) {
         root.render(React.createElement(MembersList));
-    } else if (hash.match(/#\/tree\/\d+\/member\/\d+/)) {
-        // Pass treeId and memberId as props
-        const [, , treeId, , memberId] = hash.split('/');
-        root.render(React.createElement(MemberDetails));
+    } else if (memberPattern.test(hash)) {
+        const matches = hash.match(memberPattern);
+        const [, treeId, memberId] = matches;
+        root.render(React.createElement(MemberDetails, { treeId, memberId }));
+    } else if (descendantsPattern.test(hash)) {
+        const matches = hash.match(descendantsPattern);
+        const [, treeId, memberId] = matches;
+        root.render(React.createElement(DescendantsView, { treeId, memberId }));
     } else {
         root.render(React.createElement(TreeList));
     }

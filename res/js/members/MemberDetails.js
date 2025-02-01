@@ -1,4 +1,4 @@
-const MemberDetails = () => {
+const MemberDetails = ({ treeId, memberId }) => {
     const [member, setMember] = React.useState(null);
     const [spouseFamilies, setSpouseFamilies] = React.useState([]);
     const [childFamilies, setChildFamilies] = React.useState([]);
@@ -18,13 +18,18 @@ const MemberDetails = () => {
         source: ''
     });
     
-    // Get memberId from URL hash
-    const memberId = window.location.hash.split('/').pop();
-    const treeId = window.location.hash.split('/')[2];
+    // Get IDs from props or URL as fallback
+    const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
+    const currentTreeId = treeId || window.location.hash.split('/')[2];
 
     React.useEffect(() => {
-        loadMemberDetails();
-    }, [memberId]);
+        if (currentMemberId && /^\d+$/.test(currentMemberId)) {
+            loadMemberDetails();
+        } else {
+            setError('Invalid member ID');
+            setLoading(false);
+        }
+    }, [currentMemberId]);
 
     // Set first family as active when data loads
     React.useEffect(() => {
@@ -52,7 +57,10 @@ const MemberDetails = () => {
 
     const loadMemberDetails = async () => {
         try {
-            const response = await fetch(`api/individuals.php?action=details&id=${memberId}`);
+            const response = await fetch(`api/individuals.php?action=details&id=${currentMemberId}`);
+            if (!response.ok) {
+                throw new Error('Failed to load member details');
+            }
             const data = await response.json();
             if (data.success) {
                 setMember(data.data.member);
@@ -64,9 +72,11 @@ const MemberDetails = () => {
                     ...data.data.member,
                     alive: data.data.member.alive === '1'
                 }));
+            } else {
+                throw new Error(data.message || 'Failed to load member details');
             }
         } catch (error) {
-            setError('Failed to load member details');
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -80,7 +90,7 @@ const MemberDetails = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
-                    id: memberId,
+                    id: currentMemberId,
                     alive: formData.alive ? '1' : '0'
                 })
             });
@@ -112,8 +122,8 @@ const MemberDetails = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'create',
-                    member_id: memberId,
-                    tree_id: treeId
+                    member_id: currentMemberId,
+                    tree_id: currentTreeId
                 })
             });
             if (response.ok) {
@@ -182,7 +192,7 @@ const MemberDetails = () => {
                 items: [
                     {
                         label: '🌳 Visualize Descendants',
-                        href: `#/tree/${treeId}/member/${memberId}/descendants`
+                        href: `#/tree/${currentTreeId}/member/${currentMemberId}/descendants`
                     },
                     {
                         label: '➕ Add Relationship',
@@ -297,8 +307,8 @@ const MemberDetails = () => {
                 // Add TagInput before the submit button
                 React.createElement(TagInput, {
                     key: 'tags',
-                    memberId: memberId,
-                    treeId: treeId,
+                    memberId: currentMemberId,
+                    treeId: currentTreeId,
                     member: member // Pass the entire member object
                 }),
                 React.createElement('button', {
@@ -313,11 +323,11 @@ const MemberDetails = () => {
     const handleDeleteMember = async () => {
         if (!confirm('Are you sure you want to delete this member?')) return;
         try {
-            const response = await fetch(`api/individuals.php?id=${memberId}`, {
+            const response = await fetch(`api/individuals.php?id=${currentMemberId}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
-                window.location.hash = `#/tree/${treeId}/members`;
+                window.location.hash = `#/tree/${currentTreeId}/members`;
             }
         } catch (error) {
             console.error('Error deleting member:', error);
@@ -339,7 +349,7 @@ const MemberDetails = () => {
             items: [
                 family.spouse_id && {
                     label: 'View Spouse',
-                    href: `#/tree/${treeId}/member/${family.spouse_id}`
+                    href: `#/tree/${currentTreeId}/member/${family.spouse_id}`
                 },
                 {
                     label: 'Edit Family',
@@ -400,11 +410,11 @@ const MemberDetails = () => {
                             }, [
                                 React.createElement('a', {
                                     key: 'child-link',
-                                    href: `#/tree/${treeId}/member/${child.id}`,
+                                    href: `#/tree/${currentTreeId}/member/${child.id}`,
                                     className: 'text-decoration-none',
                                     onClick: (e) => {
                                         e.preventDefault();
-                                        window.location.hash = `#/tree/${treeId}/member/${child.id}`;
+                                        window.location.hash = `#/tree/${currentTreeId}/member/${child.id}`;
                                     }
                                 }, `${child.gender === 'M' ? '♂️' : '♀️'} ${child.first_name} ${child.last_name}`),
                                 React.createElement('button', {
@@ -430,13 +440,13 @@ const MemberDetails = () => {
                 React.createElement('div', { key: `family-${family.id}`, className: 'd-flex gap-2' }, [
                     family.husband_id && React.createElement('a', {
                         key: 'father',
-                        href: `#/tree/${treeId}/member/${family.husband_id}`,
+                        href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
                         className: 'text-decoration-none'
                     }, family.husband_name),
                     (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
                     family.wife_id && React.createElement('a', {
                         key: 'mother',
-                        href: `#/tree/${treeId}/member/${family.wife_id}`,
+                        href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
                         className: 'text-decoration-none'
                     }, family.wife_name)
                 ])
@@ -445,7 +455,17 @@ const MemberDetails = () => {
     ]);
 
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
-    if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
+    if (error) {
+        // Add home link to error state
+        return React.createElement('div', { className: 'alert alert-danger' }, [
+            error,
+            React.createElement('a', {
+                key: 'home-link',
+                href: `#/tree/${currentTreeId}/members`,
+                className: 'btn btn-link'
+            }, 'Return to Members List')
+        ]);
+    }
     if (!member) return React.createElement('div', { className: 'alert alert-warning' }, 'Member not found');
 
     return React.createElement('div', { className: 'container-fluid' }, [

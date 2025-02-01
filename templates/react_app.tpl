@@ -15,6 +15,7 @@
             font-family: system-ui, -apple-system, sans-serif;
         }
     </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
@@ -37,6 +38,7 @@
     <script src="res/js/members/MemberDetails.js"></script>
     <script src="res/js/members/MembersList.js"></script>
     <script src="res/js/trees/TreeList.js"></script>
+    <script src="res/js/members/DescendantsView.js"></script>
     <script src="res/js/app.js"></script>
     <script src="res/js/components/TagInput.js"></script>
     <script src="res/js/components/Dropdown.js"></script>
