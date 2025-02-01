@@ -1,5 +1,14 @@
 <?php
 require_once '../init.php';
+function logapache($foo) {
+    if(is_array($foo)) {
+        $foo = print_r($foo,true);
+    }
+    $foo .= "\n";
+    file_put_contents('php://stderr', print_r($foo, TRUE)) ;
+}  
+
+logapache($_POST);
 
 class IndividualsAPI {
     private $memberModel;
@@ -226,7 +235,34 @@ class IndividualsAPI {
 
     private function createMember($data) {
         try {
-            $newMemberId = $this->memberModel->addMember($data);
+            error_log('Creating member with data: ' . print_r($data, true));
+            
+            if (!isset($data['tree_id'])) {
+                throw new Exception('Tree ID is required');
+            }
+
+            // Validate required fields
+            $requiredFields = ['first_name', 'gender', 'tree_id'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field]) || empty($data[$field])) {
+                    throw new Exception("Field '$field' is required");
+                }
+            }
+
+            $memberData = [
+                'treeId' => $data['tree_id'],
+                'firstName' => $data['first_name'],
+                'lastName' => $data['last_name'] ?? '',
+                'dateOfBirth' => $data['birth_date'] ?? null,
+                'gender' => $data['gender'],
+                'placeOfBirth' => $placeOfBirth,
+                'dateOfDeath' => null,
+                'alive' => isset($data['alive']) ? $data['alive'] : '1'
+            ];
+
+            error_log('Processed member data: ' . print_r($memberData, true));
+
+            $newMemberId = $this->memberModel->addMember($memberData);
             if ($newMemberId) {
                 echo json_encode([
                     'success' => true,
@@ -236,9 +272,10 @@ class IndividualsAPI {
                 throw new Exception('Failed to create member');
             }
         } catch (Exception $e) {
+            error_log('Error creating member: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode([
-                'error' => 'Failed to create member',
+                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }

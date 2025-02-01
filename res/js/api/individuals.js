@@ -10,12 +10,21 @@ const IndividualsAPI = {
     },
 
     async createMember(memberData) {
-        const response = await fetch('api/individuals.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(memberData)
-        });
-        return await response.json();
+        try {
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(memberData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to create member');
+            }
+            return data;
+        } catch (error) {
+            throw new Error(error.message || 'Network error occurred');
+        }
     },
 
     async updateMember(memberId, memberData) {

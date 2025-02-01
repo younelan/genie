@@ -469,7 +469,10 @@ const MemberDetails = ({ treeId, memberId }) => {
     if (!member) return React.createElement('div', { className: 'alert alert-warning' }, 'Member not found');
 
     return React.createElement('div', { className: 'container-fluid' }, [
-        React.createElement(AppHeader, { key: 'header' }),
+        React.createElement(Navigation, { 
+            key: 'nav',
+            treeId: currentTreeId 
+        }),
         React.createElement('main', { 
             key: 'main',
             className: 'container mx-auto px-4 py-16 mt-16 mb-16'
@@ -489,7 +492,6 @@ const MemberDetails = ({ treeId, memberId }) => {
                     ])
                 )
             ])
-        ),
-        React.createElement(AppFooter, { key: 'footer' })
+        )
     ]);
 };

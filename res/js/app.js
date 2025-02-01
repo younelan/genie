@@ -3,12 +3,20 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const handleRoute = () => {
     const hash = window.location.hash;
     
+    // Add EditTree route pattern
+    const editTreePattern = /^#\/tree\/(\d+)\/edit$/;
+    
     // Better route pattern matching
     const treePattern = /^#\/tree\/(\d+)\/members$/;
     const memberPattern = /^#\/tree\/(\d+)\/member\/(\d+)$/;
     const descendantsPattern = /^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/;
+    const addMemberPattern = /^#\/tree\/(\d+)\/member\/add$/;
 
-    if (treePattern.test(hash)) {
+    if (editTreePattern.test(hash)) {
+        root.render(React.createElement(EditTree));
+    } else if (addMemberPattern.test(hash)) {
+        root.render(React.createElement(AddMember));
+    } else if (treePattern.test(hash)) {
         root.render(React.createElement(MembersList));
     } else if (memberPattern.test(hash)) {
         const matches = hash.match(memberPattern);

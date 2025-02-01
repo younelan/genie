@@ -207,6 +207,36 @@ const TreeList = () => {
     );
   };
 
+  const Dropdown = ({ children }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const dropdownRef = React.useRef(null);
+
+    React.useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return React.createElement('div', {
+      className: 'relative inline-block',
+      ref: dropdownRef
+    }, [
+      React.createElement('button', {
+        key: 'trigger',
+        onClick: () => setIsOpen(!isOpen),
+        className: 'p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100'
+      }, '⚙️'),
+      isOpen && React.createElement('div', {
+        key: 'menu',
+        className: 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10'
+      }, children)
+    ]);
+  };
+
   const treeCard = (tree) => React.createElement('div', {
     key: tree.id,
     className: 'bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100'
@@ -243,11 +273,28 @@ const TreeList = () => {
             className: 'whitespace-nowrap'
           }, 'Members')
         ]),
-        React.createElement('button', {
-          key: `delete-${tree.id}`,
-          onClick: () => deleteTree(tree.id),
-          className: 'text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-1 rounded-md transition-colors'
-        }, 'Delete')
+        React.createElement(Dropdown, { key: 'dropdown' }, [
+          React.createElement('div', { 
+            key: 'menu-items',
+            className: 'py-1'
+          }, [
+            React.createElement('a', {
+              key: 'view',
+              href: `#/tree/${tree.id}/members`,
+              className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+            }, 'View Members'),
+            React.createElement('a', {
+              key: 'edit',
+              href: `#/tree/${tree.id}/edit`,
+              className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+            }, 'Edit Settings'),
+            React.createElement('button', {
+              key: 'delete',
+              onClick: () => deleteTree(tree.id),
+              className: 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50'
+            }, 'Delete Tree')
+          ])
+        ])
       ])
     ])
   ]);

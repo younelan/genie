@@ -39,8 +39,11 @@
     <script src="res/js/members/MembersList.js"></script>
     <script src="res/js/trees/TreeList.js"></script>
     <script src="res/js/members/DescendantsView.js"></script>
+    <script src="res/js/trees/EditTree.js"></script>
+    <script src="res/js/members/AddMember.js"></script>
     <script src="res/js/app.js"></script>
     <script src="res/js/components/TagInput.js"></script>
     <script src="res/js/components/Dropdown.js"></script>
+    <script src="res/js/components/Navigation.js"></script>
 </body>
 </html>

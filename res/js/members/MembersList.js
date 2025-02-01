@@ -185,5 +185,11 @@ const MembersList = () => {
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
     if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
 
-    return React.createElement(React.Fragment, null, mainContent);
+    return React.createElement('div', { className: 'container-fluid' }, [
+        React.createElement(Navigation, { 
+            key: 'nav',
+            treeId: treeId 
+        }),
+        React.createElement(React.Fragment, null, mainContent)
+    ]);
 };
