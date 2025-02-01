@@ -21,53 +21,58 @@ class IndividualsAPI {
     public function handleRequest() {
         header('Content-Type: application/json');
         
-        $action = $_GET['action'] ?? 'list';
-        
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
-                switch ($action) {
-                    case 'list':
-                        $this->listMembers();
-                        break;
-                    case 'stats':
-                        $this->getStats();
-                        break;
-                    case 'search':
-                        $this->searchMembers();
-                        break;
-                    case 'get':
-                        $this->getMember();
-                        break;
-                    default:
-                        http_response_code(400);
-                        echo json_encode(['error' => 'Invalid action']);
-                }
+                $this->handleGet();
                 break;
-                
             case 'POST':
-                switch ($action) {
-                    case 'create':
-                        $this->createMember();
-                        break;
-                    case 'update':
-                        $this->updateMember();
-                        break;
-                    case 'add_relationship':
-                        $this->addRelationship();
-                        break;
-                    default:
-                        http_response_code(400);
-                        echo json_encode(['error' => 'Invalid action']);
-                }
+                $this->handlePost();
                 break;
-                
+            case 'PUT':
+                $this->handlePut();
+                break;
             case 'DELETE':
-                $this->deleteMember();
+                $this->handleDelete();
                 break;
-                
+        }
+    }
+
+    private function handleGet() {
+        $action = $_GET['action'] ?? '';
+        switch ($action) {
+            case 'list':
+                $this->listMembers();
+                break;
+            case 'search':
+                $this->searchMembers();
+                break;
+            case 'stats':
+                $this->getStats();
+                break;
+            case 'details':
+                $this->getMemberDetails();
+                break;
             default:
-                http_response_code(405);
-                echo json_encode(['error' => 'Method not allowed']);
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid action']);
+                break;
+        }
+    }
+
+    private function handlePost() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $this->createMember($data);
+    }
+
+    private function handlePut() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $this->updateMember($data);
+    }
+
+    private function handleDelete() {
+        $memberId = $_GET['id'] ?? null;
+        if ($memberId) {
+            $this->deleteMember($memberId);
         }
     }
 
@@ -141,7 +146,99 @@ class IndividualsAPI {
         echo json_encode(['success' => true, 'data' => $results]);
     }
 
-    // Add other necessary methods here
+    private function getMemberDetails() {
+        $memberId = $_GET['id'] ?? null;
+        
+        if (!$memberId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Member ID required']);
+            return;
+        }
+
+        try {
+            $member = $this->memberModel->getMemberById($memberId);
+            if (!$member) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Member not found']);
+                return;
+            }
+
+            // Get additional data
+            $spouseFamilies = $this->memberModel->getSpouseFamilies($memberId);
+            $childFamilies = $this->memberModel->getChildFamilies($memberId);
+            $tags = $this->memberModel->getTags($memberId);
+
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'member' => $member,
+                    'spouseFamilies' => $spouseFamilies,
+                    'childFamilies' => $childFamilies,
+                    'tags' => $tags
+                ]
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Failed to fetch member details',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function createMember($data) {
+        try {
+            $newMemberId = $this->memberModel->addMember($data);
+            if ($newMemberId) {
+                echo json_encode([
+                    'success' => true,
+                    'data' => ['id' => $newMemberId]
+                ]);
+            } else {
+                throw new Exception('Failed to create member');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Failed to create member',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function updateMember($data) {
+        try {
+            $success = $this->memberModel->updateMember($data);
+            if ($success) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Failed to update member');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Failed to update member',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function deleteMember($memberId) {
+        try {
+            $success = $this->memberModel->deleteMember($memberId);
+            if ($success) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Failed to delete member');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Failed to delete member',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }
 
 // Initialize and handle the API request

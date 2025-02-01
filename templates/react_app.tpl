@@ -34,6 +34,7 @@
         // Make React Bootstrap components available globally
         const { Card, ListGroup, Container, Row, Col, Nav } = ReactBootstrap;
     </script>
+    <script src="res/js/members/MemberDetails.js"></script>
     <script src="res/js/members/MembersList.js"></script>
     <script src="res/js/trees/TreeList.js"></script>
     <script src="res/js/app.js"></script>
