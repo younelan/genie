@@ -11,8 +11,13 @@ const handleRoute = () => {
     const memberPattern = /^#\/tree\/(\d+)\/member\/(\d+)$/;
     const descendantsPattern = /^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/;
     const addMemberPattern = /^#\/tree\/(\d+)\/member\/add$/;
+    const visualizePattern = /^#\/tree\/(\d+)\/visualize$/;
 
-    if (editTreePattern.test(hash)) {
+    if (visualizePattern.test(hash)) {
+        const matches = hash.match(visualizePattern);
+        const [, treeId] = matches;
+        root.render(React.createElement(FamilyTreeVisualization, { treeId }));
+    } else if (editTreePattern.test(hash)) {
         root.render(React.createElement(EditTree));
     } else if (addMemberPattern.test(hash)) {
         root.render(React.createElement(AddMember));

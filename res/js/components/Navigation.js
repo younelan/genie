@@ -1,4 +1,4 @@
-const Navigation = ({ treeId }) => {
+const Navigation = function({ treeId }) {  // Changed to function expression
     const [showTreeMenu, setShowTreeMenu] = React.useState(false);
     const [showUserMenu, setShowUserMenu] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -35,56 +35,58 @@ const Navigation = ({ treeId }) => {
     return React.createElement('nav', {
         className: 'bg-gray-800 text-white px-4 py-2 fixed w-full top-0 z-50'
     }, [
-        React.createElement('div', { 
-            className: 'max-w-7xl mx-auto flex justify-between items-center',
-            key: 'nav-container'
+        React.createElement('div', {
+            key: 'nav-container',
+            className: 'max-w-7xl mx-auto flex justify-between items-center'
         }, [
-            // Left side - Logo and Tree menu
-            React.createElement('div', { 
-                className: 'flex items-center gap-4',
-                key: 'left-section'
+            React.createElement('div', {
+                key: 'left-section',
+                className: 'flex items-center gap-4'
             }, [
                 React.createElement('a', {
+                    key: 'logo-link',
                     href: '#/',
                     className: 'text-xl font-bold flex items-center gap-2'
                 }, [
                     window.appLogo && React.createElement('img', {
+                        key: 'logo',
                         src: window.appLogo,
                         alt: 'Logo',
                         className: 'h-8'
                     }),
                     React.createElement('span', {
+                        key: 'title',
                         className: 'hidden md:inline'
                     }, window.appTitle || 'Genie')
                 ]),
                 // Tree menu - visible on desktop and in mobile menu
                 treeId && React.createElement('div', { 
+                    key: 'tree-menu',
                     className: 'relative hidden md:block',
                     ref: treeMenuRef
                 }, [
                     React.createElement('button', {
+                        key: 'tree-menu-button',
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
                         onClick: () => setShowTreeMenu(!showTreeMenu)
                     }, [
                         '🌳 Tree',
-                        React.createElement('span', { className: 'ml-1' }, '▼')
+                        React.createElement('span', { key: 'arrow' }, '▼')
                     ]),
                     showTreeMenu && React.createElement('div', {
+                        key: 'tree-menu-dropdown',
                         className: 'absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5'
-                    }, 
-                        React.createElement('div', {
-                            className: 'py-1',
-                            role: 'menu'
-                        }, treeMenu.map((item, index) =>
-                            React.createElement('a', {
-                                key: `tree-item-${index}`,
-                                href: item.href,
-                                onClick: item.onClick,
-                                className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
-                                role: 'menuitem'
-                            }, item.label)
-                        ))
-                    )
+                    }, React.createElement('div', {
+                        className: 'py-1',
+                        role: 'menu'
+                    }, treeMenu.map((item, index) =>
+                        React.createElement('a', {
+                            key: `tree-item-${index}`,
+                            href: item.href,
+                            className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
+                            role: 'menuitem'
+                        }, item.label)
+                    )))
                 ])
             ]),
 

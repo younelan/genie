@@ -44,6 +44,12 @@ class TreeAPI {
             case 'list':
                 $this->listTrees();
                 break;
+            case 'get_families':
+                $this->getFamilies();
+                break;
+            case 'get':
+                $this->getTree($_GET['id']);
+                break;
             case 'details':
                 $this->getTreeDetails($_GET['id']);
                 break;
@@ -53,6 +59,13 @@ class TreeAPI {
         }
     }
 
+    public function getFamilies()
+    {
+        $familyTreeId = $_GET['tree_id']; // Get tree_id from the request
+        $treeData = $this->treeModel->getFamilies($familyTreeId);
+        header('Content-Type: application/json');
+        echo json_encode($treeData);
+    }
     private function listTrees() {
         $trees = $this->treeModel->getAllTreesByOwner($this->userId);
         foreach ($trees as &$tree) {

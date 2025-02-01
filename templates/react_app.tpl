@@ -38,6 +38,8 @@
     <script src="res/js/members/MemberDetails.js"></script>
     <script src="res/js/members/MembersList.js"></script>
     <script src="res/js/trees/TreeList.js"></script>
+    <script src="res/js/trees/FamilyTreeVisualization.js"></script>
+    <script src="res/js/components/ErrorBoundary.js"></script>
     <script src="res/js/members/DescendantsView.js"></script>
     <script src="res/js/trees/EditTree.js"></script>
     <script src="res/js/members/AddMember.js"></script>

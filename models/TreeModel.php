@@ -17,6 +17,8 @@ class TreeModel extends AppModel
     private $db,$config;
     private $tree_table = 'trees';
     private $person_table = 'individuals';
+    private $family_table = 'families';
+    private $children_table = 'family_children';
     private $relation_table = 'person_relationship';
     private $synonym_table = 'synonyms';
     private $tree_field = 'tree_id';
@@ -98,23 +100,33 @@ class TreeModel extends AppModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }    
-    public function getTreeData($familyTreeId)
+    public function getFamilies($familyTreeId)
     {
         // Fetching nodes
-        $nodesSql = "SELECT id, first_name, last_name FROM $this->person_table  WHERE $this->tree_field = :tree_id";
+        $nodesSql = "SELECT id, first_name, last_name,gender FROM $this->person_table  WHERE $this->tree_field = :tree_id";
         $nodesStmt = $this->db->prepare($nodesSql);
         $nodesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
         $nodesStmt->execute();
-        $nodes = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
+        $individuals = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $familiesSql = "SELECT id,husband_id,wife_id FROM $this->family_table  WHERE $this->tree_field = :tree_id";
+        $familiesStmt = $this->db->prepare($familiesSql);
+        $familiesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
+        $familiesStmt->execute();
+        $families = $familiesStmt->fetchAll(PDO::FETCH_ASSOC);
+
 
         // Fetching links
-        $linksSql = "SELECT person_id1 AS source, person_id2 AS target FROM person_relationship WHERE $this->tree_field = :tree_id";
-        $linksStmt = $this->db->prepare($linksSql);
-        $linksStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
-        $linksStmt->execute();
-        $links = $linksStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return ['nodes' => $nodes, 'links' => $links];
+        $childrenSql = "SELECT c.id, c.family_id,c.child_id,f.tree_id 
+                        FROM $this->children_table c
+                        JOIN $this->family_table f ON c.family_id = f.id
+                        WHERE $this->tree_field = :tree_id";
+        $childrenStmt = $this->db->prepare($childrenSql);
+        $childrenStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
+        $childrenStmt->execute();
+        $children = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
+        //print_r($children);exit;
+        return ['individuals' => $individuals, 'families' => $families,'children'=>$children];
     }
 
 
