@@ -52,6 +52,9 @@ class IndividualsAPI {
             case 'details':
                 $this->getMemberDetails();
                 break;
+            case 'tags':
+                $this->getTags();
+                break;
             default:
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid action']);
@@ -61,7 +64,21 @@ class IndividualsAPI {
 
     private function handlePost() {
         $data = json_decode(file_get_contents('php://input'), true);
-        $this->createMember($data);
+        switch ($data['action'] ?? '') {
+            case 'create':
+                $this->createMember($data);
+                break;
+            case 'add_tag':
+                $this->addTag($data);
+                break;
+            case 'delete_tag':
+                $this->deleteTag($data);
+                break;
+            default:
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid action']);
+                break;
+        }
     }
 
     private function handlePut() {
@@ -149,6 +166,40 @@ class IndividualsAPI {
     private function getMemberDetails() {
         $memberId = $_GET['id'] ?? null;
         
+        try {
+            $member = $this->memberModel->getMemberById($memberId);
+            if (!$member) {
+                throw new Exception('Member not found');
+            }
+
+            // Get member's tags as a comma-separated string
+            $tags = $this->memberModel->getTagString($memberId);
+            $member['tags'] = $tags;
+
+            // Get additional data
+            $spouseFamilies = $this->memberModel->getSpouseFamilies($memberId);
+            $childFamilies = $this->memberModel->getChildFamilies($memberId);
+
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'member' => $member,
+                    'spouseFamilies' => $spouseFamilies,
+                    'childFamilies' => $childFamilies
+                ]
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'Failed to fetch member details',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function getTags() {
+        $memberId = $_GET['member_id'] ?? null;
+        
         if (!$memberId) {
             http_response_code(400);
             echo json_encode(['error' => 'Member ID required']);
@@ -156,31 +207,15 @@ class IndividualsAPI {
         }
 
         try {
-            $member = $this->memberModel->getMemberById($memberId);
-            if (!$member) {
-                http_response_code(404);
-                echo json_encode(['error' => 'Member not found']);
-                return;
-            }
-
-            // Get additional data
-            $spouseFamilies = $this->memberModel->getSpouseFamilies($memberId);
-            $childFamilies = $this->memberModel->getChildFamilies($memberId);
-            $tags = $this->memberModel->getTags($memberId);
-
+            $tags = $this->memberModel->getTagString($memberId);
             echo json_encode([
                 'success' => true,
-                'data' => [
-                    'member' => $member,
-                    'spouseFamilies' => $spouseFamilies,
-                    'childFamilies' => $childFamilies,
-                    'tags' => $tags
-                ]
+                'data' => ['tags' => $tags]
             ]);
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
-                'error' => 'Failed to fetch member details',
+                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
@@ -255,6 +290,63 @@ class IndividualsAPI {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Failed to delete member',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function addTag($data) {
+        try {
+            if (!isset($data['tag']) || !isset($data['member_id']) || !isset($data['tree_id'])) {
+                throw new Exception('Missing required tag data');
+            }
+
+            $newTag = [
+                'tag' => $data['tag'],
+                'member_id' => $data['member_id'],
+                'tree_id' => $data['tree_id']
+            ];
+
+            $result = $this->memberModel->addTag($newTag);
+            if ($result) {
+                echo json_encode([
+                    'success' => true,
+                    'data' => ['id' => $result]
+                ]);
+            } else {
+                throw new Exception('Failed to add tag');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function deleteTag($data) {
+        try {
+            if (!isset($data['tag']) || !isset($data['member_id']) || !isset($data['tree_id'])) {
+                throw new Exception('Missing required tag data');
+            }
+
+            $tagToDelete = [
+                'tag' => $data['tag'],
+                'member_id' => $data['member_id'],
+                'tree_id' => $data['tree_id']
+            ];
+
+            $result = $this->memberModel->deleteTag($tagToDelete);
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception('Failed to delete tag');
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }

@@ -38,5 +38,6 @@
     <script src="res/js/members/MembersList.js"></script>
     <script src="res/js/trees/TreeList.js"></script>
     <script src="res/js/app.js"></script>
+    <script src="res/js/components/TagInput.js"></script>
 </body>
 </html>

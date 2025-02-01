@@ -64,7 +64,7 @@ const MembersList = () => {
     };
 
     const handleMemberClick = (memberId) => {
-        // Update to include treeId in the route
+        // Fix the routing to properly navigate to member details
         window.location.hash = `#/tree/${treeId}/member/${memberId}`;
     };
 
@@ -89,6 +89,16 @@ const MembersList = () => {
             )
         )
     ]);
+
+    const renderRecentUpdates = () => React.createElement(ListGroup, { key: 'updates-list' },
+        lastUpdates.map(member =>
+            React.createElement(ListGroup.Item, {
+                key: `update-${member.id}`,
+                action: true,
+                onClick: () => handleMemberClick(member.id) // Use the same handler
+            }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
+        )
+    );
 
     const mainContent = [
         React.createElement(AppHeader, { key: 'header' }),
@@ -163,17 +173,7 @@ const MembersList = () => {
                     React.createElement(Card, { key: 'updates-card' }, [
                         React.createElement(Card.Header, { key: 'updates-header' }, 'Recent Updates'),
                         React.createElement(Card.Body, { key: 'updates-body' },
-                            React.createElement(ListGroup, { key: 'updates-list' },
-                                lastUpdates.map(member =>
-                                    React.createElement(ListGroup.Item, {
-                                        key: `update-${member.id}`,
-                                        action: true,
-                                        onClick: () => {
-                                            window.location.hash = `#/member/${member.id}`;
-                                        }
-                                    }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
-                                )
-                            )
+                            renderRecentUpdates()
                         )
                     ])
                 )

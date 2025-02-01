@@ -5,6 +5,18 @@ const MemberDetails = () => {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
     const [activeFamily, setActiveFamily] = React.useState(null);
+    const [showDeathFields, setShowDeathFields] = React.useState(false);
+    const [formData, setFormData] = React.useState({
+        first_name: '',
+        last_name: '',
+        birth_date: '',
+        birth_place: '',
+        death_date: '',
+        death_place: '',
+        gender: 'M',
+        alive: true,
+        source: ''
+    });
     
     // Get memberId from URL hash
     const memberId = window.location.hash.split('/').pop();
@@ -21,6 +33,24 @@ const MemberDetails = () => {
         }
     }, [spouseFamilies]);
 
+    React.useEffect(() => {
+        if (member) {
+            const isAlive = member.alive === '1';
+            setFormData({
+                first_name: member.first_name || '',
+                last_name: member.last_name || '',
+                birth_date: member.birth_date || '',
+                birth_place: member.birth_place || '',
+                death_date: member.death_date || '',
+                death_place: member.death_place || '',
+                gender: member.gender || 'M',
+                alive: isAlive,
+                source: member.source || ''
+            });
+            setShowDeathFields(!isAlive);
+        }
+    }, [member]);
+
     const loadMemberDetails = async () => {
         try {
             const response = await fetch(`api/individuals.php?action=details&id=${memberId}`);
@@ -29,6 +59,12 @@ const MemberDetails = () => {
                 setMember(data.data.member);
                 setSpouseFamilies(data.data.spouseFamilies);
                 setChildFamilies(data.data.childFamilies);
+                // Load tags into form data
+                setFormData(prev => ({
+                    ...prev,
+                    ...data.data.member,
+                    alive: data.data.member.alive === '1'
+                }));
             }
         } catch (error) {
             setError('Failed to load member details');
@@ -39,21 +75,34 @@ const MemberDetails = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
-        
         try {
             const response = await fetch('api/individuals.php', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...data, id: memberId })
+                body: JSON.stringify({
+                    ...formData,
+                    id: memberId,
+                    alive: formData.alive ? '1' : '0'
+                })
             });
-            if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
                 loadMemberDetails();
+            } else {
+                throw new Error(data.message || 'Failed to update member');
             }
         } catch (error) {
             console.error('Error updating member:', error);
+            setError(error.message);
         }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : (value || '') // Ensure empty string if value is null
+        }));
     };
 
     // Add handlers for family actions
@@ -110,8 +159,69 @@ const MemberDetails = () => {
         }
     };
 
+    const handleAliveChange = (e) => {
+        const isAlive = e.target.checked;
+        setFormData(prev => ({
+            ...prev,
+            alive: isAlive,
+            // Clear death fields if becoming alive
+            death_date: isAlive ? '' : prev.death_date,
+            death_place: isAlive ? '' : prev.death_place
+        }));
+        setShowDeathFields(!isAlive);
+    };
+
     const renderBasicInfo = () => React.createElement(Card, { key: 'basic-info-card' }, [
-        React.createElement(Card.Header, { key: 'header' }, 'Member Details'),
+        React.createElement(Card.Header, { 
+            key: 'header',
+            className: 'd-flex justify-content-between align-items-center'
+        }, [
+            React.createElement('h4', { key: 'title' }, 'Member Details'),
+            React.createElement('div', { 
+                key: 'actions',
+                className: 'dropdown' 
+            }, [
+                React.createElement('button', {
+                    key: 'dropdown-toggle',
+                    className: 'btn btn-link dropdown-toggle',
+                    type: 'button',
+                    'data-bs-toggle': 'dropdown',
+                    'aria-expanded': 'false'
+                }, '⚙️'),
+                React.createElement('ul', {
+                    key: 'dropdown-menu',
+                    className: 'dropdown-menu dropdown-menu-end'
+                }, [
+                    React.createElement('li', { key: 'visualize' },
+                        React.createElement('a', {
+                            key: 'visualize-link',
+                            className: 'dropdown-item',
+                            href: `#/tree/${treeId}/member/${memberId}/descendants`
+                        }, '🌳 Visualize Descendants')
+                    ),
+                    React.createElement('li', { key: 'add-relationship' },
+                        React.createElement('button', {
+                            key: 'relationship-btn',
+                            className: 'dropdown-item',
+                            type: 'button',
+                            'data-bs-toggle': 'modal',
+                            'data-bs-target': '#addRelationshipModal'
+                        }, '➕ Add Relationship')
+                    ),
+                    React.createElement('li', { key: 'delete' },
+                        React.createElement('button', {
+                            key: 'delete-btn',
+                            className: 'dropdown-item text-danger',
+                            onClick: () => {
+                                if (confirm('Are you sure you want to delete this member?')) {
+                                    handleDeleteMember();
+                                }
+                            }
+                        }, '🗑️ Delete Member')
+                    )
+                ])
+            ])
+        ]),
         React.createElement(Card.Body, { key: 'body' },
             React.createElement('form', { onSubmit: handleSubmit }, [
                 // Name fields
@@ -121,14 +231,16 @@ const MemberDetails = () => {
                         key: 'first-name',
                         type: 'text',
                         name: 'first_name',
-                        defaultValue: member?.first_name,
+                        value: formData.first_name,
+                        onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
                     React.createElement('input', {
                         key: 'last-name',
                         type: 'text',
                         name: 'last_name',
-                        defaultValue: member?.last_name,
+                        value: formData.last_name,
+                        onChange: handleInputChange,
                         className: 'form-control'
                     })
                 ]),
@@ -139,14 +251,16 @@ const MemberDetails = () => {
                         key: 'birth-date',
                         type: 'date',
                         name: 'birth_date',
-                        defaultValue: member?.birth_date,
+                        value: formData.birth_date,
+                        onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
                     React.createElement('input', {
                         key: 'birth-place',
                         type: 'text',
                         name: 'birth_place',
-                        defaultValue: member?.birth_place,
+                        value: formData.birth_place,
+                        onChange: handleInputChange,
                         className: 'form-control',
                         placeholder: 'Place of Birth'
                     })
@@ -158,7 +272,8 @@ const MemberDetails = () => {
                         React.createElement('select', {
                             key: 'gender-select',
                             name: 'gender',
-                            defaultValue: member?.gender,
+                            value: formData.gender,
+                            onChange: handleInputChange,
                             className: 'form-select'
                         }, [
                             React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
@@ -171,7 +286,8 @@ const MemberDetails = () => {
                             type: 'checkbox',
                             id: 'alive',
                             name: 'alive',
-                            defaultChecked: member?.alive === '1',
+                            checked: formData.alive,
+                            onChange: handleAliveChange,
                             className: 'form-check-input'
                         }),
                         React.createElement('label', {
@@ -182,24 +298,33 @@ const MemberDetails = () => {
                     ])
                 ]),
                 // Death fields (shown if not alive)
-                !member?.alive && React.createElement('div', { key: 'death-group', className: 'mb-3' }, [
+                !showDeathFields ? null : React.createElement('div', { key: 'death-group', className: 'mb-3' }, [
                     React.createElement('label', { key: 'death-label' }, 'Death'),
                     React.createElement('input', {
                         key: 'death-date',
                         type: 'date',
                         name: 'death_date',
-                        defaultValue: member?.death_date,
+                        value: formData.death_date,
+                        onChange: handleInputChange,
                         className: 'form-control mb-2'
                     }),
                     React.createElement('input', {
                         key: 'death-place',
                         type: 'text',
                         name: 'death_place',
-                        defaultValue: member?.death_place,
+                        value: formData.death_place,
+                        onChange: handleInputChange,
                         className: 'form-control',
                         placeholder: 'Place of Death'
                     })
                 ]),
+                // Add TagInput before the submit button
+                React.createElement(TagInput, {
+                    key: 'tags',
+                    memberId: memberId,
+                    treeId: treeId,
+                    member: member // Pass the entire member object
+                }),
                 React.createElement('button', {
                     key: 'submit',
                     type: 'submit',
@@ -208,6 +333,20 @@ const MemberDetails = () => {
             ])
         )
     ]);
+
+    const handleDeleteMember = async () => {
+        if (!confirm('Are you sure you want to delete this member?')) return;
+        try {
+            const response = await fetch(`api/individuals.php?id=${memberId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                window.location.hash = `#/tree/${treeId}/members`;
+            }
+        } catch (error) {
+            console.error('Error deleting member:', error);
+        }
+    };
 
     const renderFamilyTabs = () => React.createElement(Card, { key: 'family-card' }, [
         React.createElement(Card.Header, { key: 'header' }, 'Families'),
@@ -219,47 +358,54 @@ const MemberDetails = () => {
             }, [
                 ...spouseFamilies.map(family => 
                     React.createElement(Nav.Item, { 
-                        key: `family-tab-${family.id}`,
-                        className: 'd-flex'
-                    }, [
-                        React.createElement(Nav.Link, {
-                            key: 'tab-link',
-                            active: activeFamily === family.id,
-                            onClick: () => setActiveFamily(family.id)
-                        }, family.spouse_name || 'Unknown Spouse'),
-                        React.createElement('div', {
-                            key: 'dropdown',
-                            className: 'dropdown'
+                        key: `family-tab-${family.id}`
+                    }, 
+                        React.createElement('div', { 
+                            className: 'nav-tab-wrapper d-flex'
                         }, [
-                            React.createElement('button', {
-                                key: 'dropdown-toggle',
-                                className: 'btn btn-link dropdown-toggle',
-                                'data-bs-toggle': 'dropdown'
-                            }, '⚙️'),
-                            React.createElement('ul', {
-                                key: 'dropdown-menu',
-                                className: 'dropdown-menu'
+                            React.createElement(Nav.Link, {
+                                key: 'tab-link',
+                                active: activeFamily === family.id,
+                                onClick: () => setActiveFamily(family.id),
+                                className: 'flex-grow-1'
+                            }, family.spouse_name || 'Unknown Spouse'),
+                            React.createElement('div', {
+                                key: 'dropdown',
+                                className: 'dropdown'
                             }, [
-                                family.spouse_id && React.createElement('li', { key: 'view-spouse' },
-                                    React.createElement('a', {
-                                        className: 'dropdown-item',
-                                        href: `#/tree/${treeId}/member/${family.spouse_id}`
-                                    }, 'View Spouse')
-                                ),
-                                React.createElement('li', { key: 'delete-family' },
-                                    React.createElement('a', {
-                                        className: 'dropdown-item text-danger',
-                                        onClick: () => handleDeleteFamily(family.id)
-                                    }, 'Delete Family')
-                                )
+                                React.createElement('button', {
+                                    key: 'dropdown-toggle',
+                                    className: 'btn btn-link dropdown-toggle',
+                                    'data-bs-toggle': 'dropdown'
+                                }, '⚙️'),
+                                React.createElement('ul', {
+                                    key: 'dropdown-menu',
+                                    className: 'dropdown-menu'
+                                }, [
+                                    family.spouse_id && React.createElement('li', { key: 'view-spouse' },
+                                        React.createElement('a', {
+                                            key: 'view-spouse-link',
+                                            className: 'dropdown-item',
+                                            href: `#/tree/${treeId}/member/${family.spouse_id}`
+                                        }, 'View Spouse')
+                                    ),
+                                    React.createElement('li', { key: 'delete-family' },
+                                        React.createElement('a', {
+                                            key: 'delete-family-link',
+                                            className: 'dropdown-item text-danger',
+                                            onClick: () => handleDeleteFamily(family.id)
+                                        }, 'Delete Family')
+                                    )
+                                ])
                             ])
                         ])
-                    ])
+                    )
                 ),
                 React.createElement(Nav.Item, {
                     key: 'add-family',
                     className: 'ms-2'
                 }, React.createElement(Nav.Link, {
+                    key: 'add-family-link',
                     onClick: handleAddFamily
                 }, '+'))
             ]),
@@ -287,7 +433,11 @@ const MemberDetails = () => {
                                 React.createElement('a', {
                                     key: 'child-link',
                                     href: `#/tree/${treeId}/member/${child.id}`,
-                                    className: 'text-decoration-none'
+                                    className: 'text-decoration-none',
+                                    onClick: (e) => {
+                                        e.preventDefault();
+                                        window.location.hash = `#/tree/${treeId}/member/${child.id}`;
+                                    }
                                 }, `${child.gender === 'M' ? '♂️' : '♀️'} ${child.first_name} ${child.last_name}`),
                                 React.createElement('button', {
                                     key: 'delete-child',
@@ -336,17 +486,16 @@ const MemberDetails = () => {
             key: 'main',
             className: 'container mx-auto px-4 py-16 mt-16 mb-16'
         }, 
-            React.createElement(Row, null, [
-                React.createElement(Col, { lg: 4 }, renderBasicInfo()),
-                React.createElement(Col, { lg: 4 }, [
+            React.createElement(Row, { key: 'content-row' }, [
+                React.createElement(Col, { key: 'col-basic', lg: 4 }, renderBasicInfo()),
+                React.createElement(Col, { key: 'col-families', lg: 4 }, [
                     renderFamilyTabs(),
                     renderParents()
                 ]),
-                React.createElement(Col, { lg: 4 }, 
-                    React.createElement(Card, null, [
-                        React.createElement(Card.Header, null, 'Other Relationships'),
-                        React.createElement(Card.Body, null, 
-                            // Relationships content here
+                React.createElement(Col, { key: 'col-other', lg: 4 }, 
+                    React.createElement(Card, { key: 'other-card' }, [
+                        React.createElement(Card.Header, { key: 'other-header' }, 'Other Relationships'),
+                        React.createElement(Card.Body, { key: 'other-body' }, 
                             'Other relationships will be displayed here'
                         )
                     ])
