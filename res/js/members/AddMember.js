@@ -17,7 +17,7 @@ const AddMember = () => {
         try {
             const memberData = {
                 action: 'create',
-                tree_id: treeId,
+                tree_id: parseInt(treeId),  // Make sure we send tree_id
                 first_name: formData.first_name.trim(),
                 last_name: formData.last_name.trim(),
                 birth_date: formData.birth_date || null,
@@ -31,17 +31,18 @@ const AddMember = () => {
                 body: JSON.stringify(memberData)
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to create member');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            if (data.success) {
-                window.location.hash = `#/tree/${treeId}/members`;
-            } else {
-                throw new Error(data.message || 'Failed to create member');
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to create member');
             }
+
+            window.location.hash = `#/tree/${treeId}/members`;
         } catch (error) {
+            console.error('Error creating member:', error);
             setError(error.message);
         }
     };
