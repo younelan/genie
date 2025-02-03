@@ -14,52 +14,75 @@ const TagInput = ({ memberId, treeId }) => {
             const response = await fetch(`api/individuals.php?action=tags&member_id=${memberId}`);
             const data = await response.json();
             if (data.success && data.data.tags) {
-                setTags(data.data.tags.split(',').filter(Boolean));
+                // Split tags and filter out empty strings
+                const tagArray = data.data.tags.split(',')
+                    .map(t => t.trim())
+                    .filter(Boolean);
+                setTags(tagArray);
+            } else {
+                setTags([]);
             }
         } catch (error) {
             console.error('Error loading tags:', error);
+            setTags([]);
         }
     };
 
-    const addTag = async (tagText) => {
+    const handleAddTag = async (tag) => {
         try {
+            const postData = {
+                action: 'add_tag',
+                tag: tag.trim(),
+                member_id: memberId,
+                tree_id: treeId
+            };
+
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'add_tag',
-                    tag: tagText,
-                    member_id: memberId,
-                    tree_id: treeId
-                })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
             });
+
             const data = await response.json();
             if (data.success) {
-                setTags(prev => [...prev, tagText]);
+                await loadTags();
+            } else {
+                throw new Error(data.message || 'Failed to add tag');
             }
         } catch (error) {
             console.error('Error adding tag:', error);
+            alert('Failed to add tag: ' + error.message);
         }
     };
 
-    const deleteTag = async (tagText) => {
+    const handleDeleteTag = async (tagToDelete) => {
         try {
+            const postData = {
+                action: 'delete_tag',
+                tag: tagToDelete.trim(),
+                member_id: memberId,
+                tree_id: treeId
+            };
+
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'delete_tag',
-                    tag: tagText,
-                    member_id: memberId,
-                    tree_id: treeId
-                })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
             });
+
             const data = await response.json();
             if (data.success) {
-                setTags(prev => prev.filter(t => t !== tagText));
+                await loadTags();
+            } else {
+                throw new Error(data.message || 'Failed to delete tag');
             }
         } catch (error) {
             console.error('Error deleting tag:', error);
+            alert('Failed to delete tag: ' + error.message);
         }
     };
 
@@ -68,7 +91,7 @@ const TagInput = ({ memberId, treeId }) => {
             e.preventDefault();
             const tag = inputValue.trim();
             if (tag && !tags.includes(tag)) {
-                addTag(tag);
+                handleAddTag(tag);
             }
             setInputValue('');
         }
@@ -78,7 +101,7 @@ const TagInput = ({ memberId, treeId }) => {
         e.preventDefault();
         const paste = e.clipboardData.getData('text');
         const newTags = paste.split(',').map(t => t.trim()).filter(t => t && !tags.includes(t));
-        newTags.forEach(addTag);
+        newTags.forEach(handleAddTag);
     };
 
     const handleInputChange = (e) => {
@@ -142,7 +165,7 @@ const TagInput = ({ memberId, treeId }) => {
                         key: 'remove',
                         type: 'button',
                         className: 'btn-close btn-close-white ms-2',
-                        onClick: () => deleteTag(tag)
+                        onClick: () => handleDeleteTag(tag)
                     })
                 ])
             ),

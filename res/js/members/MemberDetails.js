@@ -42,6 +42,7 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     React.useEffect(() => {
         if (member) {
+            const aliveValue = member.alive == '1' || member.alive === true || member.alive === 'true';
             setFormData(prev => ({
                 first_name: member.first_name || '',
                 last_name: member.last_name || '',
@@ -50,10 +51,10 @@ const MemberDetails = ({ treeId, memberId }) => {
                 death_date: member.death_date || '',
                 death_place: member.death_place || '',
                 gender: member.gender || 'M',
-                alive: member.alive === '1',
+                alive: aliveValue,
                 source: member.source || ''
             }));
-            setShowDeathFields(member.alive !== '1');
+            setShowDeathFields(!aliveValue);
         }
     }, [member]);
 
@@ -72,7 +73,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                 setFormData(prev => ({
                     ...prev,
                     ...data.data.member,
-                    alive: data.data.member.alive === '1'
+                    alive: data.data.member.alive == '1' || data.data.member.alive === true || data.data.member.alive === 'true'
                 }));
             } else {
                 throw new Error(data.message || 'Failed to load member details');
@@ -88,15 +89,20 @@ const MemberDetails = ({ treeId, memberId }) => {
         e.preventDefault();
         const form = new FormData();
         
-        // Add hidden _method field for PUT simulation
         form.append('_method', 'PUT');
         
         // Add all form fields
         Object.keys(formData).forEach(key => {
-            form.append(key, formData[key]);
+            if (key === 'alive') {
+                // Convert boolean to string '1' or '0'
+                const aliveValue = formData[key] ? '1' : '0';
+                console.log('Submitting alive value:', aliveValue);
+                form.append(key, aliveValue);
+            } else {
+                form.append(key, formData[key]);
+            }
         });
         form.append('id', currentMemberId);
-        form.append('alive', formData.alive ? '1' : '0');
 
         try {
             const response = await fetch('api/individuals.php', {
@@ -302,7 +308,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                             id: 'alive',
                             name: 'alive',
                             checked: formData.alive,
-                            onChange: handleAliveChange,
+                            onChange: e => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    alive: e.target.checked
+                                }));
+                                setShowDeathFields(!e.target.checked);
+                            },
                             className: 'form-check-input'
                         }),
                         React.createElement('label', {

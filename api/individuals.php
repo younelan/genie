@@ -102,20 +102,24 @@ class IndividualsAPI {
 
     private function handlePost() {
         try {
-            $action = $_POST['action'] ?? '';
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $data = $_POST;  // Fallback to POST if JSON parse fails
+            }
+            
+            logapache("POST data received:");
+            logapache($data);
+            
+            $action = $data['action'] ?? '';
             
             switch ($action) {
-                case 'create':
-                    $this->createMember($_POST);
+                case 'add_tag':
+                    $this->addTag($data);
                     break;
-                case 'add_relationship':
-                    $this->addRelationship($_POST);
+                case 'delete_tag':
+                    $this->deleteTag($data);
                     break;
-                case 'update':
-                    $this->updateMember($_POST); // Changed to use $_POST
-                    break;
-                default:
-                    throw new Exception('Invalid action');
+                // ... rest of cases ...
             }
         } catch (Exception $e) {
             $this->sendError($e->getMessage());
@@ -217,6 +221,10 @@ class IndividualsAPI {
                 throw new Exception('Member not found');
             }
 
+            // Ensure alive value is consistent
+            //$member['alive'] = $member['alive'] === '1' ? '1' : '0';
+            logapache("Member alive value: " . $member['alive']);
+
             // Get member's tags as a comma-separated string
             $tags = $this->memberModel->getTagString($memberId);
             $member['tags'] = $tags;
@@ -316,6 +324,9 @@ class IndividualsAPI {
 
     private function updateMember($data) {
         try {
+            logapache("Updating member with data:");
+            logapache($data);
+
             $memberId = $data['id'];
             $updateData = [
                 'memberId' => $memberId,
@@ -326,9 +337,11 @@ class IndividualsAPI {
                 'dateOfDeath' => $data['death_date'],
                 'placeOfDeath' => $data['death_place'],
                 'gender' => $data['gender'],
-                'alive' => $data['alive'],
+                'alive' => ($data['alive'] === '1' || $data['alive'] === true) ? '1' : '0',
                 'source' => $data['source'] ?? ''
             ];
+
+            logapache("Transformed alive value: " . $updateData['alive']);
 
             $success = $this->memberModel->updateMember($updateData);
             
@@ -370,27 +383,32 @@ class IndividualsAPI {
 
     private function addTag($data) {
         try {
-            if (!isset($data['tag']) || !isset($data['member_id']) || !isset($data['tree_id'])) {
+            logapache("Adding tag with data:");
+            logapache($data);
+
+            if (empty($data['tag']) || empty($data['member_id']) || empty($data['tree_id'])) {
                 throw new Exception('Missing required tag data');
             }
 
             $newTag = [
-                'tag' => $data['tag'],
+                'tag' => trim($data['tag']),
                 'member_id' => $data['member_id'],
                 'tree_id' => $data['tree_id']
             ];
 
             $result = $this->memberModel->addTag($newTag);
             if ($result) {
+                // Return updated tag list
+                $tags = $this->memberModel->getTagString($data['member_id']);
                 echo json_encode([
                     'success' => true,
-                    'data' => ['id' => $result]
+                    'data' => ['tags' => $tags]
                 ]);
             } else {
                 throw new Exception('Failed to add tag');
             }
         } catch (Exception $e) {
-            http_response_code(500);
+            http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -400,24 +418,32 @@ class IndividualsAPI {
 
     private function deleteTag($data) {
         try {
-            if (!isset($data['tag']) || !isset($data['member_id']) || !isset($data['tree_id'])) {
+            logapache("Deleting tag with data:");
+            logapache($data);
+
+            if (empty($data['tag']) || empty($data['member_id']) || empty($data['tree_id'])) {
                 throw new Exception('Missing required tag data');
             }
 
             $tagToDelete = [
-                'tag' => $data['tag'],
+                'tag' => trim($data['tag']),
                 'member_id' => $data['member_id'],
                 'tree_id' => $data['tree_id']
             ];
 
             $result = $this->memberModel->deleteTag($tagToDelete);
             if ($result) {
-                echo json_encode(['success' => true]);
+                // Return updated tag list
+                $tags = $this->memberModel->getTagString($data['member_id']);
+                echo json_encode([
+                    'success' => true,
+                    'data' => ['tags' => $tags]
+                ]);
             } else {
                 throw new Exception('Failed to delete tag');
             }
         } catch (Exception $e) {
-            http_response_code(500);
+            http_response_code(400);
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
