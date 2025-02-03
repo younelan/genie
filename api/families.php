@@ -11,6 +11,7 @@ function apachelog($foo) {
 
 class FamiliesAPI {
     private $familyModel;
+    private $memberModel;
     private $userId;
     private $requestData;  // Store request data properly
 
@@ -23,6 +24,7 @@ class FamiliesAPI {
             exit;
         }
         $this->familyModel = new FamilyModel($config);
+        $this->memberModel = new MemberModel($config);
     }
 
     public function handleRequest() {
@@ -64,17 +66,17 @@ class FamiliesAPI {
 
         try {
             switch ($action) {
-                case 'list':
-                    $families = $this->familyModel->getFamiliesByMember($memberId);
-                    echo json_encode(['success' => true, 'families' => $families]);
-                    break;
+                // case 'list':
+                //     $families = $this->familyModel->getFamiliesByMember($memberId);
+                //     echo json_encode(['success' => true, 'families' => $families]);
+                //     break;
                 case 'spouses':
                 case 'get_spouse_families':
-                    $families = $this->familyModel->getSpouseFamilies($memberId);
+                    $families = $this->memberModel->getSpouseFamilies($memberId);
                     echo json_encode(['success' => true, 'spouse_families' => $families]);
                     break;
                 case 'children':
-                    $families = $this->familyModel->getChildFamilies($memberId);
+                    $families = $this->memberModel->getChildFamilies($memberId);
                     echo json_encode(['success' => true, 'child_families' => $families]);
                     break;
                 default:

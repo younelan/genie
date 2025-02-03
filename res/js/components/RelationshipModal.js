@@ -4,16 +4,56 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         spouse_type: 'existing',
         child_type: 'existing',
         parent1_type: 'existing',
-        other_type: 'existing'
+        other_type: 'existing',
+        relationship_type: 'spouse'
     });
 
     const [spouseFamilies, setSpouseFamilies] = React.useState([]);
+    const [visibilityState, setVisibilityState] = React.useState({
+        showParent2Fields: false,
+        showExistingFamilySelect: false,
+        showParent2New: false
+    });
 
     React.useEffect(() => {
         if (show && member) {
             loadSpouseFamilies();
         }
     }, [show, member]);
+
+    const handleAddEmptyFamily = async () => {
+        try {
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'add_relationship',
+                    type: 'spouse',
+                    member_id: member.id,
+                    tree_id: member.tree_id,
+                    member_gender: member.gender,
+                    create_empty: true
+                })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            const result = await response.json();
+            
+            if (result.success) {
+                // Refresh families list
+                await loadSpouseFamilies();
+                onHide();
+                if (onSave) onSave(result);
+            } else {
+                throw new Error(result.message || 'Failed to create family');
+            }
+        } catch (error) {
+            console.error('Error creating family:', error);
+            alert('Failed to create family: ' + error.message);
+        }
+    };
 
     const loadSpouseFamilies = async () => {
         if (!member?.id) {
@@ -22,23 +62,11 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         }
 
         try {
-            const formData = new FormData();
-            formData.append('action', 'spouses');
-            formData.append('member_id', member.id);
-
-            const response = await fetch('api/families.php', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            const response = await fetch(`api/families.php?action=spouses&member_id=${member.id}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            
             const data = await response.json();
-            if (data.spouse_families) {
+            if (data.success && data.spouse_families) {
                 setSpouseFamilies(data.spouse_families);
             } else {
                 setSpouseFamilies([]);
@@ -57,6 +85,155 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         }));
     };
 
+    const handleParent1TypeChange = (e) => {
+        const isExisting = e.target.value === 'existing';
+        setFormData(prev => ({
+            ...prev,
+            parent1_type: e.target.value
+        }));
+        
+        // Reset parent2 options if parent1 is new
+        if (!isExisting) {
+            setVisibilityState(prev => ({
+                ...prev,
+                showExistingFamilySelect: false
+            }));
+            setFormData(prev => ({
+                ...prev,
+                second_parent_option: 'none'
+            }));
+        }
+    };
+
+    const handleSecondParentOptionChange = (e) => {
+        const value = e.target.value;
+        setFormData(prev => ({
+            ...prev,
+            second_parent_option: value
+        }));
+        
+        setVisibilityState(prev => ({
+            ...prev,
+            showExistingFamilySelect: value === 'existing_family',
+            showParent2New: value === 'new',
+            showParent2Fields: value !== 'none'
+        }));
+    };
+
+    const handleSpouseTypeChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            spouse_type: e.target.value
+        }));
+    };
+
+    const handleSave = async () => {
+        try {
+            // Format data exactly like the old form submission
+            const formDataToSend = new FormData();
+            
+            // Common fields that match FamilyController expectations
+            formDataToSend.append('action', 'add_relationship');
+            formDataToSend.append('type', activeTab);
+            formDataToSend.append('member_id', member.id);
+            formDataToSend.append('tree_id', member.tree_id);
+            formDataToSend.append('member_gender', member.gender);
+
+            switch (activeTab) {
+                case 'spouse':
+                    formDataToSend.append('spouse_type', formData.spouse_type);
+                    if (formData.spouse_type === 'existing') {
+                        if (!formData.spouse_id) {
+                            throw new Error('Please select a spouse');
+                        }
+                        formDataToSend.append('spouse_id', formData.spouse_id);
+                    } else {
+                        // Match format from edit_member.tpl form
+                        formDataToSend.append('spouse_first_name', formData.spouse_first_name);
+                        formDataToSend.append('spouse_last_name', formData.spouse_last_name);
+                        formDataToSend.append('spouse_birth_date', formData.spouse_birth_date || '');
+                        formDataToSend.append('spouse_gender', formData.spouse_gender || (member.gender === 'M' ? 'F' : 'M'));
+                        formDataToSend.append('alive', '1');
+                    }
+                    formDataToSend.append('marriage_date', formData.marriage_date || '');
+                    break;
+
+                case 'child':
+                    formDataToSend.append('child_type', formData.child_type);
+                    formDataToSend.append('family_id', formData.family_id || 'new');
+                    if (formData.child_type === 'existing') {
+                        if (!formData.child_id) {
+                            throw new Error('Please select a child');
+                        }
+                        formDataToSend.append('child_id', formData.child_id);
+                    } else {
+                        // Match format from FamilyController->addChild
+                        formDataToSend.append('child_first_name', formData.child_first_name);
+                        formDataToSend.append('child_last_name', formData.child_last_name);
+                        formDataToSend.append('child_birth_date', formData.child_birth_date || '');
+                        formDataToSend.append('child_gender', formData.child_gender || 'M');
+                        formDataToSend.append('alive', '1');
+                    }
+                    break;
+
+                case 'parent':
+                    // Match format from FamilyController->addParents
+                    formDataToSend.append('parent1_type', formData.parent1_type);
+                    formDataToSend.append('parent1_id', formData.parent1_id || '');
+                    formDataToSend.append('parent1_first_name', formData.parent1_first_name || '');
+                    formDataToSend.append('parent1_last_name', formData.parent1_last_name || '');
+                    formDataToSend.append('parent1_birth_date', formData.parent1_birth_date || '');
+                    formDataToSend.append('parent1_gender', formData.parent1_gender || 'M');
+                    formDataToSend.append('parent1_alive', '1');
+                    formDataToSend.append('second_parent_option', formData.second_parent_option || 'none');
+                    
+                    if (formData.second_parent_option === 'new') {
+                        formDataToSend.append('parent2_first_name', formData.parent2_first_name || '');
+                        formDataToSend.append('parent2_last_name', formData.parent2_last_name || '');
+                        formDataToSend.append('parent2_birth_date', formData.parent2_birth_date || '');
+                        formDataToSend.append('parent2_gender', formData.parent2_gender || 'F');
+                        formDataToSend.append('parent2_alive', '1');
+                    }
+                    break;
+            }
+
+            // Debug what's being sent
+            const formObj = {};
+            formDataToSend.forEach((value, key) => formObj[key] = value);
+            console.log('Submitting data:', formObj);
+
+            // Submit to new endpoint but with old form format
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                body: formDataToSend
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server response:', errorText);
+                throw new Error('Server response was not ok');
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.reload(); // Reload like the old form did
+            } else {
+                throw new Error(result.message || 'Failed to add relationship');
+            }
+        } catch (error) {
+            console.error('Error saving relationship:', error);
+            alert('Failed to save relationship: ' + error.message);
+        }
+    };
+
+    const handleNewPersonInputChange = (e, type) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [`${type}_${name}`]: value
+        }));
+    };
+
     const renderSpouseTab = () => {
         return React.createElement('div', { className: 'tab-pane active' }, [
             React.createElement('div', { key: 'type-selector', className: 'mb-3' },
@@ -69,7 +246,7 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                         id: 'existing_spouse',
                         value: 'existing',
                         checked: formData.spouse_type === 'existing',
-                        onChange: handleInputChange
+                        onChange: handleSpouseTypeChange
                     }),
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
@@ -83,7 +260,7 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                         id: 'new_spouse',
                         value: 'new',
                         checked: formData.spouse_type === 'new',
-                        onChange: handleInputChange
+                        onChange: handleSpouseTypeChange
                     }),
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
@@ -98,12 +275,20 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
     };
 
     const renderChildTab = () => {
+        // Build family options including spouses' families
         const familyOptions = spouseFamilies.map(family => {
-            const spouseName = family.spouse_name || 'Unknown Spouse';
+            let spouseName;
+            if (family.spouse_name) {
+                spouseName = family.spouse_name;
+            } else if (member.id === family.husband_id) {
+                spouseName = family.wife_name;
+            } else {
+                spouseName = family.husband_name;
+            }
             return React.createElement('option', {
                 key: `family-${family.id}`,
                 value: family.id
-            }, `With ${spouseName}`);
+            }, `With ${spouseName || 'Unknown Spouse'}`);
         });
 
         return React.createElement('div', { className: 'tab-pane' }, [
@@ -118,6 +303,10 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                     name: 'family_id',
                     onChange: handleInputChange
                 }, [
+                    React.createElement('option', { 
+                        key: 'select-family',
+                        value: ''
+                    }, '-- Select Family --'),
                     ...familyOptions,
                     React.createElement('option', {
                         key: 'new-family',
@@ -149,12 +338,45 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                     key: 'second-parent-select',
                     className: 'form-control mb-3',
                     name: 'second_parent_option',
-                    onChange: handleInputChange
+                    value: formData.second_parent_option,
+                    onChange: handleSecondParentOptionChange
                 }, [
                     React.createElement('option', { key: 'none', value: 'none' }, 'Single Parent'),
-                    React.createElement('option', { key: 'existing', value: 'existing_family' }, 'Existing Family'),
+                    formData.parent1_type === 'existing' && React.createElement('option', { 
+                        key: 'existing', 
+                        value: 'existing_family' 
+                    }, 'Existing Family'),
                     React.createElement('option', { key: 'new', value: 'new' }, 'New Parent')
-                ])
+                ].filter(Boolean)),
+
+                visibilityState.showExistingFamilySelect && React.createElement(Autocomplete, {
+                    key: 'family-autocomplete',
+                    type: 'family',
+                    memberId: member.id,
+                    treeId: member.tree_id,
+                    onSelect: (selected) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            existing_family_id: selected.id
+                        }));
+                    }
+                }),
+
+                visibilityState.showParent2Fields && formData.second_parent_option === 'existing' && 
+                React.createElement(Autocomplete, {
+                    key: 'parent2-autocomplete',
+                    type: 'parent2',
+                    memberId: member.id,
+                    treeId: member.tree_id,
+                    onSelect: (selected) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            parent2_id: selected.id
+                        }));
+                    }
+                }),
+
+                visibilityState.showParent2New && renderNewPersonSection('parent2', true)
             ])
         ]);
     };
@@ -188,52 +410,71 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
     };
 
     const renderExistingPersonSection = (type) => {
-        return React.createElement('div', { className: 'form-group mb-3' }, [
-            React.createElement('label', { key: 'label' }, `Select Existing ${type.charAt(0).toUpperCase() + type.slice(1)}:`),
-            React.createElement('input', {
-                key: 'input',
-                type: 'text',
-                className: 'form-control',
-                id: `${type}_autocomplete`,
-                list: `${type}-options`
-            }),
-            React.createElement('datalist', {
-                key: 'datalist',
-                id: `${type}-options`
-            }),
-            React.createElement('input', {
-                key: 'hidden',
-                type: 'hidden',
-                name: `${type}_id`,
-                id: `selected_${type}_id`
+        const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+        return React.createElement('div', { 
+            key: `${type}-existing-section`,
+            className: 'form-group mb-3' 
+        }, [
+            React.createElement('label', { 
+                key: `${type}-label`,
+                htmlFor: `${type}_autocomplete`
+            }, `Select Existing ${typeLabel}:`),
+            React.createElement(Autocomplete, {
+                key: `${type}-autocomplete`,
+                type: type,
+                memberId: member.id,
+                treeId: member.tree_id,
+                onSelect: (selected) => {
+                    setFormData(prev => ({
+                        ...prev,
+                        [`${type}_id`]: selected.id
+                    }));
+                }
             })
         ]);
     };
 
     const renderNewPersonSection = (type) => {
-        return React.createElement('div', { className: 'form-group mb-3' }, [
+        return React.createElement('div', { 
+            key: `${type}-new-section`,
+            className: 'form-group mb-3' 
+        }, [
             React.createElement('input', {
-                key: 'first-name',
+                key: `${type}-first-name`,
                 type: 'text',
                 className: 'form-control mb-2',
-                name: `${type}_first_name`,
+                name: 'first_name',
                 placeholder: 'First Name',
+                onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
             }),
             React.createElement('input', {
-                key: 'last-name',
+                key: `${type}-last-name`,
                 type: 'text',
                 className: 'form-control mb-2',
-                name: `${type}_last_name`,
+                name: 'last_name',
                 placeholder: 'Last Name',
+                onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
             }),
             React.createElement('input', {
-                key: 'birth-date',
+                key: `${type}-birth-date`,
                 type: 'date',
                 className: 'form-control mb-2',
-                name: `${type}_birth_date`
-            })
+                name: 'birth_date',
+                onChange: (e) => handleNewPersonInputChange(e, type)
+            }),
+            React.createElement('select', {
+                key: `${type}-gender`,
+                className: 'form-control',
+                name: 'gender',
+                onChange: (e) => handleNewPersonInputChange(e, type),
+                value: formData[`${type}_gender`] || ''
+            }, [
+                React.createElement('option', { key: 'select', value: '' }, 'Select Gender'),
+                React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
+                React.createElement('option', { key: 'female', value: 'F' }, 'Female')
+            ])
         ]);
     };
 
@@ -358,11 +599,19 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                         className: 'btn btn-secondary',
                         onClick: onHide
                     }, 'Close'),
+                    activeTab === 'spouse' && formData.spouse_type === 'new' ?
+                        React.createElement('button', {
+                            key: 'empty-family-btn',
+                            type: 'button',
+                            className: 'btn btn-outline-primary',
+                            onClick: handleAddEmptyFamily
+                        }, 'Create Empty Family')
+                        : null,
                     React.createElement('button', {
                         key: 'save-btn',
                         type: 'button',
                         className: 'btn btn-primary',
-                        onClick: () => onSave(formData)
+                        onClick: handleSave
                     }, 'Save')
                 ])
             ])

@@ -47,6 +47,7 @@
     <script src="res/js/components/TagInput.js"></script>
     <script src="res/js/components/Dropdown.js"></script>
     <script src="res/js/components/Navigation.js"></script>
+    <script src="res/js/components/Autocomplete.js"></script>
     <script src="res/js/components/RelationshipModal.js"></script>
 </body>
 </html>

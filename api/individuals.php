@@ -12,6 +12,7 @@ logapache($_POST);
 
 class IndividualsAPI {
     private $memberModel;
+    private $familyModel;
     private $treeModel;
     private $userId;
 
@@ -25,6 +26,7 @@ class IndividualsAPI {
         }
         $this->memberModel = new MemberModel($config);
         $this->treeModel = new TreeModel($config);
+        $this->familyModel = new FamilyModel($config);
     }
 
     public function handleRequest() {
@@ -94,33 +96,37 @@ class IndividualsAPI {
     }
 
     private function handlePost() {
-        $data = json_decode(file_get_contents('php://input'), true);
-        switch ($data['action'] ?? '') {
-            case 'create':
-                $this->createMember($data);
-                break;
-            case 'add_tag':
-                $this->addTag($data);
-                break;
-            case 'delete_tag':
-                $this->deleteTag($data);
-                break;
-            case 'addRelationship':
-                $this->addRelationship($data);
-                break;
-            case 'add_relationship':
-                $this->addRelationship($data);
-                break;
-            case 'swap_relationship':
-                $this->swapRelationship($data);
-                break;
-            case 'update_relationship':
-                $this->updateRelationship($data);
-                break;
-            default:
-                http_response_code(400);
-                echo json_encode(['error' => 'Invalid action']);
-                break;
+        try {
+            $action = $_POST['action'] ?? '';
+            
+            switch ($action) {
+                case 'add_relationship':
+                    $type = $_POST['type'] ?? '';
+                    switch ($type) {
+                        case 'spouse':
+                            $this->addSpouse($_POST);
+                            break;
+                        case 'child':
+                            $this->addChild($_POST);
+                            break;
+                        case 'parent':
+                            $this->addParent($_POST);
+                            break;
+                        case 'other':
+                            $this->addOther($_POST);
+                            break;
+                        default:
+                            throw new Exception('Invalid relationship type');
+                    }
+                    break;
+                // ...other cases...
+            }
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -286,7 +292,7 @@ class IndividualsAPI {
                 'lastName' => $data['last_name'] ?? '',
                 'dateOfBirth' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'],
-                'placeOfBirth' => $placeOfBirth,
+                'placeOfBirth' => null,
                 'dateOfDeath' => null,
                 'alive' => isset($data['alive']) ? $data['alive'] : '1'
             ];
@@ -570,6 +576,20 @@ class IndividualsAPI {
             $wife = $memberId;
         }
 
+        // Handle empty family creation
+        if (isset($data['create_empty']) && $data['create_empty']) {
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $data['member_gender'] === 'M' ? $memberId : null,
+                'wife_id' => $data['member_gender'] === 'F' ? $memberId : null,
+                'marriage_date' => null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $familyId = $this->treeModel->createFamily($familyData);
+            return ['familyId' => $familyId];
+        }
+
         // Create family record
         $familyData = [
             'tree_id' => $treeId,
@@ -579,48 +599,58 @@ class IndividualsAPI {
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
-        $familyId = $this->treeModel->createFamily($familyData);
+        $familyId = $this->familyModel->createFamily($familyData);
 
         return ['familyId' => $familyId, 'spouseId' => $spouseId];
     }
 
     private function addChild($data) {
-        $alive = $data['alive'] ?? 1;
-        $treeId = $data['tree_id'];
+        if (!isset($data['child_type'])) {
+            throw new Exception('Missing child type');
+        }
 
-        if (($data['child_type'] ?? '') === 'new') {
+        // Create new child if needed
+        if ($data['child_type'] === 'new') {
             $childData = [
                 'firstName' => $data['child_first_name'] ?? null,
                 'lastName' => $data['child_last_name'] ?? null,
-                'treeId' => $treeId,
-                'gender' => $data['child_gender'] ?? null,
+                'treeId' => $data['tree_id'],
+                'gender' => $data['child_gender'] ?? 'M',
                 'dateOfBirth' => $data['child_birth_date'] ?? null,
-                'alive' => $alive,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'alive' => 1
             ];
             $childId = $this->memberModel->addMember($childData);
         } else {
-            $childId = $data['child_id'];
+            $childId = $data['child_id'] ?? null;
+            if (!$childId) throw new Exception('Child ID required for existing child');
         }
 
-        $familyId = $data['family_id'];
-        // If user indicates a new family
+        // Handle family assignment
+        $familyId = $data['family_id'] ?? 'new';
         if ($familyId === 'new') {
             $familyData = [
-                'tree_id' => $treeId,
-                'husband_id' => $data['member_id'],
-                'wife_id' => null,
-                'marriage_date' => null,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'tree_id' => $data['tree_id'],
+                'husband_id' => $data['member_gender'] === 'M' ? $data['member_id'] : null,
+                'wife_id' => $data['member_gender'] === 'F' ? $data['member_id'] : null,
+                'marriage_date' => null
             ];
-            $familyId = $this->treeModel->createFamily($familyData);
+            $familyId = $this->familyModel->createFamily($familyData);
         }
-        // Link child to family
-        $this->treeModel->addChildToFamily($familyId, $childId, $treeId);
 
-        return ['childId' => $childId, 'familyId' => $familyId];
+        // Link child to family
+        $success = $this->familyModel->addChildToFamily($familyId, $childId, $data['tree_id']);
+        
+        if ($success) {
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'child_id' => $childId,
+                    'family_id' => $familyId
+                ]
+            ]);
+        } else {
+            throw new Exception('Failed to add child to family');
+        }
     }
 
     private function addParent($data) {
@@ -680,8 +710,8 @@ class IndividualsAPI {
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
-        $familyId = $this->treeModel->createFamily($familyData);
-        $this->treeModel->addChildToFamily($familyId, $childId, $treeId);
+        $familyId = $this->familyModel->createFamily($familyData);
+        $this->familyModel->addChildToFamily($familyId, $childId, $treeId);
 
         return ['parents' => [$parent1Id, $parent2Id], 'child' => $childId, 'familyId' => $familyId];
     }

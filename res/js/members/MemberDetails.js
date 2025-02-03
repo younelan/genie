@@ -118,21 +118,36 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     // Add handlers for family actions
     const handleAddFamily = async () => {
+        if (!confirm('Create a new family with no spouse?')) return;
+        
         try {
-            const response = await fetch('api/families.php', {
+            const response = await fetch('api/individuals.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
-                    action: 'create',
+                    action: 'add_relationship',
+                    type: 'spouse',
                     member_id: currentMemberId,
-                    tree_id: currentTreeId
+                    tree_id: currentTreeId,
+                    relationship_type: 'spouse',
+                    spouse_type: 'new',  // This indicates we want a new empty family
+                    create_empty: true    // Special flag for empty family
                 })
             });
-            if (response.ok) {
-                loadMemberDetails();
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            const result = await response.json();
+            
+            if (result.success) {
+                loadMemberDetails(); // Reload to show new family
+            } else {
+                throw new Error(result.message || 'Failed to create family');
             }
         } catch (error) {
-            console.error('Error adding family:', error);
+            console.error('Error creating family:', error);
+            alert('Failed to create family: ' + error.message);
         }
     };
 
