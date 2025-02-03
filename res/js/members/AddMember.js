@@ -15,20 +15,22 @@ const AddMember = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const memberData = {
-                action: 'create',
-                tree_id: parseInt(treeId),  // Make sure we send tree_id
-                first_name: formData.first_name.trim(),
-                last_name: formData.last_name.trim(),
-                birth_date: formData.birth_date || null,
-                gender: formData.gender,
-                alive: formData.alive ? '1' : '0'
-            };
+            // Create URLSearchParams object for standard POST
+            const formParams = new URLSearchParams();
+            formParams.append('action', 'create');
+            formParams.append('tree_id', treeId);
+            formParams.append('first_name', formData.first_name.trim());
+            formParams.append('last_name', formData.last_name.trim());
+            formParams.append('birth_date', formData.birth_date || '');
+            formParams.append('gender', formData.gender);
+            formParams.append('alive', formData.alive ? '1' : '0');
 
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(memberData)
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formParams
             });
 
             if (!response.ok) {

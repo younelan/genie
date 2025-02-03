@@ -97,36 +97,21 @@ class IndividualsAPI {
 
     private function handlePost() {
         try {
+            // Use $_POST directly instead of parsing JSON input
             $action = $_POST['action'] ?? '';
             
             switch ($action) {
-                case 'add_relationship':
-                    $type = $_POST['type'] ?? '';
-                    switch ($type) {
-                        case 'spouse':
-                            $this->addSpouse($_POST);
-                            break;
-                        case 'child':
-                            $this->addChild($_POST);
-                            break;
-                        case 'parent':
-                            $this->addParent($_POST);
-                            break;
-                        case 'other':
-                            $this->addOther($_POST);
-                            break;
-                        default:
-                            throw new Exception('Invalid relationship type');
-                    }
+                case 'create':
+                    $this->createMember($_POST);
                     break;
-                // ...other cases...
+                case 'add_relationship':
+                    $this->addRelationship($_POST);
+                    break;
+                default:
+                    throw new Exception('Invalid action');
             }
         } catch (Exception $e) {
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            $this->sendError($e->getMessage());
         }
     }
 
@@ -271,51 +256,51 @@ class IndividualsAPI {
     }
 
     private function createMember($data) {
+
+        // Map incoming data to expected format
+        $memberData = [
+            'firstName' => $data['first_name'] ?? null,
+            'lastName' => $data['last_name'] ?? null,
+            'dateOfBirth' => $data['birth_date'] ?? null,
+            'gender' => $data['gender'] ?? null,
+            'alive' => $data['alive'] ?? 1,
+            'treeId' => $data['tree_id'] ?? null
+        ];
+
+        if (!$memberData['first_name'] || !$memberData['tree_id']) {
+            $this->sendError('First name and tree ID are required');
+            return;
+        }
+
         try {
-            error_log('Creating member with data: ' . print_r($data, true));
-            
-            if (!isset($data['tree_id'])) {
-                throw new Exception('Tree ID is required');
-            }
-
-            // Validate required fields
-            $requiredFields = ['first_name', 'gender', 'tree_id'];
-            foreach ($requiredFields as $field) {
-                if (!isset($data[$field]) || empty($data[$field])) {
-                    throw new Exception("Field '$field' is required");
-                }
-            }
-
-            $memberData = [
-                'treeId' => $data['tree_id'],
-                'firstName' => $data['first_name'],
-                'lastName' => $data['last_name'] ?? '',
-                'dateOfBirth' => $data['birth_date'] ?? null,
-                'gender' => $data['gender'],
-                'placeOfBirth' => null,
-                'dateOfDeath' => null,
-                'alive' => isset($data['alive']) ? $data['alive'] : '1'
-            ];
-
-            error_log('Processed member data: ' . print_r($memberData, true));
-
-            $newMemberId = $this->memberModel->addMember($memberData);
-            if ($newMemberId) {
-                echo json_encode([
+            $memberId = $this->memberModel->addMember($memberData);
+            if ($memberId) {
+                $this->sendResponse([
                     'success' => true,
-                    'data' => ['id' => $newMemberId]
+                    'data' => ['id' => $memberId]
                 ]);
             } else {
-                throw new Exception('Failed to create member');
+                $this->sendError('Failed to create member');
             }
         } catch (Exception $e) {
-            error_log('Error creating member: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            $this->sendError($e->getMessage());
         }
+    }
+
+    private function sendResponse($data) {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+
+    private function sendError($message, $code = 400) {
+        header('Content-Type: application/json');
+        http_response_code($code);
+        echo json_encode([
+            'success' => false,
+            'error' => $message
+        ]);
+        exit;
     }
 
     private function updateMember($data) {
