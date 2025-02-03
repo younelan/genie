@@ -85,11 +85,13 @@ const EditTree = () => {
         }, [
             React.createElement(Card, { key: 'edit-card' }, [
                 React.createElement(Card.Header, { key: 'card-header' }, 'Edit Tree Settings'),
+
                 React.createElement(Card.Body, { key: 'card-body' }, [
                     error && React.createElement('div', { 
                         key: 'error',
                         className: 'alert alert-danger mb-4' 
                     }, error),
+                    
                     React.createElement('form', { 
                         key: 'form',
                         onSubmit: handleSubmit 
@@ -153,13 +155,10 @@ const EditTree = () => {
                                 type: 'submit',
                                 className: 'btn btn-primary'
                             }, 'Save Changes'),
-                            React.createElement('button', {
-                                key: 'delete-button',
-                                type: 'button',
-                                className: 'btn btn-danger',
-                                onClick: handleDelete
-                            }, 'Delete Tree')
-                        ])
+
+                            
+                        ]),
+                        
                     ])
                 ])
             ])
