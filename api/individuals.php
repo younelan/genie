@@ -119,6 +119,9 @@ class IndividualsAPI {
                 case 'delete_tag':
                     $this->deleteTag($data);
                     break;
+                case 'create': // Added case for creating a member
+                    $this->createMember($data);
+                    break;
                 // ... rest of cases ...
             }
         } catch (Exception $e) {
@@ -278,15 +281,16 @@ class IndividualsAPI {
 
         // Map incoming data to expected format
         $memberData = [
-            'firstName' => $data['first_name'] ?? null,
-            'lastName' => $data['last_name'] ?? null,
+            'firstName'   => $data['first_name'] ?? null,
+            'lastName'    => $data['last_name'] ?? null,
             'dateOfBirth' => $data['birth_date'] ?? null,
-            'gender' => $data['gender'] ?? null,
-            'alive' => $data['alive'] ?? 1,
-            'treeId' => $data['tree_id'] ?? null
+            'gender'      => $data['gender'] ?? null,
+            'alive'       => $data['alive'] ?? 1,
+            'treeId'      => $data['tree_id'] ?? null
         ];
 
-        if (!$memberData['first_name'] || !$memberData['tree_id']) {
+        // Corrected the validation to use the proper keys
+        if (!$memberData['firstName'] || !$memberData['treeId']) {
             $this->sendError('First name and tree ID are required');
             return;
         }
