@@ -18,8 +18,7 @@ const TreeList = () => {
 
   const fetchTrees = async () => {
     try {
-      // Use the dedicated API endpoint
-      const response = await fetch('api/trees.php');
+      const response = await fetch('api/trees.php?action=list');
       if (!response.ok) throw new Error('Failed to fetch trees');
       const data = await response.json();
       console.log('Trees data:', data);
@@ -36,8 +35,7 @@ const TreeList = () => {
     if (!confirm('Are you sure you want to delete this tree?')) return;
     
     try {
-      // Use the dedicated API endpoint with DELETE method
-      const response = await fetch(`api/trees.php?id=${treeId}`, {
+      const response = await fetch(`api/trees.php?action=delete&id=${treeId}`, {
         method: 'DELETE'
       });
       if (!response.ok) throw new Error('Failed to delete tree');
@@ -60,7 +58,7 @@ const TreeList = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const response = await fetch('api/trees.php', {
+        const response = await fetch('api/trees.php?action=create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

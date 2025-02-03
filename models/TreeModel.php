@@ -223,4 +223,32 @@ class TreeModel extends AppModel
         $result->execute([$treeId]);
         return $result->fetchColumn();
     }
+
+    public function updateTree($treeId, $data, $ownerId)
+    {
+        $allowedFields = ['name', 'description', 'is_public'];
+        $updates = [];
+        $params = ['tree_id' => $treeId, 'owner_id' => $ownerId];
+
+        foreach ($allowedFields as $field) {
+            if (isset($data[$field])) {
+                $updates[] = "$field = :$field";
+                $params[$field] = $data[$field];
+            }
+        }
+
+        if (empty($updates)) {
+            return false;
+        }
+
+        $updates[] = "updated_at = NOW()";
+        $updateStr = implode(', ', $updates);
+
+        $query = "UPDATE $this->tree_table 
+                 SET $updateStr 
+                 WHERE id = :tree_id AND owner_id = :owner_id";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute($params);
+    }
 }

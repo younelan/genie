@@ -31,15 +31,17 @@ const EditTree = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const formData = {
+            name: tree.name,
+            description: tree.description,
+            is_public: tree.is_public
+        };
+        
         try {
-            const response = await fetch(`api/trees.php?id=${treeId}`, {
+            const response = await fetch(`api/trees.php?action=update&id=${treeId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: tree.name,
-                    description: tree.description,
-                    is_public: tree.is_public
-                })
+                body: JSON.stringify(formData)
             });
             if (!response.ok) throw new Error('Failed to update tree');
             const data = await response.json();
@@ -58,7 +60,7 @@ const EditTree = () => {
             return;
         }
         try {
-            const response = await fetch(`api/trees.php?id=${treeId}`, {
+            const response = await fetch(`api/trees.php?action=delete&id=${treeId}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to delete tree');
@@ -82,8 +84,8 @@ const EditTree = () => {
             className: 'container mx-auto px-4 py-16 mt-16 mb-16'
         }, [
             React.createElement(Card, { key: 'edit-card' }, [
-                React.createElement(Card.Header, null, 'Edit Tree Settings'),
-                React.createElement(Card.Body, null, [
+                React.createElement(Card.Header, { key: 'card-header' }, 'Edit Tree Settings'),
+                React.createElement(Card.Body, { key: 'card-body' }, [
                     error && React.createElement('div', { 
                         key: 'error',
                         className: 'alert alert-danger mb-4' 
@@ -93,34 +95,50 @@ const EditTree = () => {
                         onSubmit: handleSubmit 
                     }, [
                         React.createElement('div', { key: 'name', className: 'mb-4' }, [
-                            React.createElement('label', { className: 'form-label' }, 'Tree Name'),
+                            React.createElement('label', { 
+                                key: 'name-label',
+                                className: 'form-label' 
+                            }, 'Tree Name'),
                             React.createElement('input', {
+                                key: 'name-input',
                                 type: 'text',
                                 name: 'name',
-                                defaultValue: tree.name,
+                                value: tree.name, // Change from defaultValue to value
+                                onChange: (e) => setTree(prev => ({ ...prev, name: e.target.value })),
                                 className: 'form-control',
                                 required: true
                             })
                         ]),
                         React.createElement('div', { key: 'description', className: 'mb-4' }, [
-                            React.createElement('label', { className: 'form-label' }, 'Description'),
+                            React.createElement('label', { 
+                                key: 'description-label',
+                                className: 'form-label' 
+                            }, 'Description'),
                             React.createElement('textarea', {
+                                key: 'description-input',
                                 name: 'description',
-                                defaultValue: tree.description,
+                                value: tree.description, // Change from defaultValue to value
+                                onChange: (e) => setTree(prev => ({ ...prev, description: e.target.value })),
                                 className: 'form-control',
                                 rows: 3
                             })
                         ]),
                         React.createElement('div', { key: 'public', className: 'mb-4' }, [
-                            React.createElement('div', { className: 'form-check' }, [
+                            React.createElement('div', { 
+                                key: 'public-check',
+                                className: 'form-check' 
+                            }, [
                                 React.createElement('input', {
+                                    key: 'public-input',
                                     type: 'checkbox',
                                     name: 'is_public',
                                     id: 'is_public',
-                                    defaultChecked: tree.is_public,
+                                    checked: tree.is_public, // Change from defaultChecked to checked
+                                    onChange: (e) => setTree(prev => ({ ...prev, is_public: e.target.checked })),
                                     className: 'form-check-input'
                                 }),
                                 React.createElement('label', {
+                                    key: 'public-label',
                                     htmlFor: 'is_public',
                                     className: 'form-check-label'
                                 }, 'Make this tree public')
@@ -131,10 +149,12 @@ const EditTree = () => {
                             className: 'flex justify-between items-center mt-6'
                         }, [
                             React.createElement('button', {
+                                key: 'save-button',
                                 type: 'submit',
                                 className: 'btn btn-primary'
                             }, 'Save Changes'),
                             React.createElement('button', {
+                                key: 'delete-button',
                                 type: 'button',
                                 className: 'btn btn-danger',
                                 onClick: handleDelete

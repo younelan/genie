@@ -6,8 +6,7 @@ class TreeAPI {
     private $userId;
 
     public function __construct($config) {
-        $user = new UserModel($config);
-        $this->userId = $user->getCurrentUserId();
+        $this->userId = $config['current-user'];
         if (!$this->userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
@@ -16,47 +15,78 @@ class TreeAPI {
         $this->treeModel = new TreeModel($config);
     }
 
-    public function handleRequest() {
-        header('Content-Type: application/json');
+    private function sendError($message, $code = 400) {
+        http_response_code($code);
+        echo json_encode(['error' => $message]);
+        exit;
+    }
 
-        switch ($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
-                $this->handleGet();
-                break;
-            case 'POST':
-                $this->createTree();
-                break;
-            case 'PUT':
-                $this->updateTree();
-                break;
-            case 'DELETE':
-                $this->deleteTree();
-                break;
-            default:
-                http_response_code(405);
-                echo json_encode(['error' => 'Method not allowed']);
+    private function sendResponse($data) {
+        echo json_encode($data);
+        exit;
+    }
+
+    public function handleRequest() {
+        try {
+            $method = $_SERVER['REQUEST_METHOD'];
+            $action = $_GET['action'] ?? '';
+
+            switch ($action) {
+                case 'list':
+                    if ($method !== 'GET') $this->sendError('Method not allowed', 405);
+                    $this->listTrees();
+                    break;
+
+                case 'get_families':
+                    if ($method !== 'GET') $this->sendError('Method not allowed', 405);
+                    $this->getFamilies();
+                    break;
+
+                case 'details':
+                    if ($method !== 'GET') $this->sendError('Method not allowed', 405);
+                    $this->getTreeDetails();
+                    break;
+
+                case 'create':
+                    if ($method !== 'POST') $this->sendError('Method not allowed', 405);
+                    $this->createTree();
+                    break;
+
+                case 'update':
+                    if ($method !== 'PUT') $this->sendError('Method not allowed', 405);
+                    $this->updateTree();
+                    break;
+
+                case 'delete':
+                    if ($method !== 'DELETE') $this->sendError('Method not allowed', 405);
+                    $this->deleteTree();
+                    break;
+
+                case '':
+                    if ($method === 'GET') {
+                        $this->getTrees(); // Default action for GET
+                    } else {
+                        $this->sendError('Action required', 400);
+                    }
+                    break;
+
+                default:
+                    $this->sendError('Invalid action', 400);
+            }
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
         }
     }
 
-    private function handleGet() {
-        $action = $_GET['action'] ?? '';
-        switch ($action) {
-            case 'list':
-                $this->listTrees();
-                break;
-            case 'get_families':
-                $this->getFamilies();
-                break;
-            case 'get':
-                $this->getTree($_GET['id']);
-                break;
-            case 'details':
-                $this->getTreeDetails($_GET['id']);
-                break;
-            default:
-                $this->listTrees(); // Default to list for backward compatibility
-                break;
+    private function getTrees() {
+        $trees = $this->treeModel->getAllTreesByOwner($this->userId);
+        foreach ($trees as &$tree) {
+            $tree['member_count'] = $this->treeModel->getPersonCount($tree['id']);
         }
+        $this->sendResponse([
+            'success' => true,
+            'data' => $trees
+        ]);
     }
 
     public function getFamilies()
@@ -98,30 +128,33 @@ class TreeAPI {
         ]);
     }
 
-    private function getTreeDetails($id) {
+    private function getTreeDetails() {
+        $treeId = $_GET['id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
+            return;
+        }
+
         try {
-            $tree = $this->treeModel->getAllTreesByOwner($this->userId);
-            $tree = array_filter($tree, function($t) use ($id) {
-                return $t['id'] == $id;
+            $trees = $this->treeModel->getAllTreesByOwner($this->userId);
+            $tree = array_filter($trees, function($t) use ($treeId) {
+                return $t['id'] == $treeId;
             });
             
             if (empty($tree)) {
-                throw new Exception('Tree not found');
+                $this->sendError('Tree not found', 404);
+                return;
             }
 
             $tree = reset($tree); // Get first (and only) tree
             $tree['member_count'] = $this->treeModel->getPersonCount($tree['id']);
 
-            echo json_encode([
+            $this->sendResponse([
                 'success' => true,
                 'data' => $tree
             ]);
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            $this->sendError($e->getMessage(), 500);
         }
     }
 
@@ -163,33 +196,27 @@ class TreeAPI {
     }
 
     private function updateTree() {
-        $id = $_GET['id'] ?? null;
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Tree ID required']);
+        $treeId = $_GET['id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
             return;
         }
 
         $data = json_decode(file_get_contents('php://input'), true);
-        try {
-            // Update tree logic here - you'll need to add this method to TreeModel
-            $success = $this->treeModel->updateTree($id, $this->userId, [
-                'name' => $data['name'],
-                'description' => $data['description'],
-                'is_public' => $data['is_public']
-            ]);
+        if (!$data) {
+            $this->sendError('Invalid request data');
+            return;
+        }
 
+        try {
+            $success = $this->treeModel->updateTree($treeId, $data, $this->userId);
             if ($success) {
-                echo json_encode(['success' => true]);
+                $this->sendResponse(['success' => true]);
             } else {
-                throw new Exception('Failed to update tree');
+                $this->sendError('Failed to update tree');
             }
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            $this->sendError($e->getMessage());
         }
     }
 
@@ -213,6 +240,5 @@ class TreeAPI {
     }
 }
 
-// Initialize and handle the API request
 $api = new TreeAPI($config);
 $api->handleRequest();

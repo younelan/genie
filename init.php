@@ -314,3 +314,12 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
+
+
+$user = new UserModel($config);
+$userId = $user->getCurrentUserId();
+$config['current-user']=$userId;
+if (!$userId) {
+    header("Location: login.php");
+    exit();
+}
