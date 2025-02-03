@@ -1,6 +1,16 @@
 <?php
 
 $basedir = $basedir ?? __DIR__;
+/*
+function logapache($foo) {
+    if(is_array($foo)) {
+        $foo = print_r($foo,true);
+    }
+    $foo .= "\n";
+    file_put_contents('php://stderr', print_r($foo, TRUE)) ;
+}
+*/
+
 
 require_once "$basedir/vendor/autoload.php";
 require_once "$basedir/AppBase.php";
