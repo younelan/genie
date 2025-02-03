@@ -493,7 +493,9 @@ const MemberDetails = ({ treeId, memberId }) => {
     return React.createElement('div', { className: 'container-fluid' }, [
         React.createElement(Navigation, { 
             key: 'nav',
-            treeId: currentTreeId 
+            title: `${member.first_name} ${member.last_name}`,
+            leftMenuItems: Navigation.createTreeMenu(currentTreeId),
+            rightMenuItems: Navigation.createUserMenu()
         }),
         React.createElement('main', { 
             key: 'main',

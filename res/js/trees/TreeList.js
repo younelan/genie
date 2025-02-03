@@ -1,36 +1,3 @@
-const AppHeader = () => {
-  return React.createElement('header', { 
-    className: 'bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg fixed top-0 w-full z-10'
-  }, React.createElement('div', {
-    className: 'max-w-7xl mx-auto px-4 py-3 flex items-center justify-between'
-  }, [
-    React.createElement('div', {
-      key: 'logo-section',
-      className: 'flex items-center gap-4'
-    }, [
-      window.appLogo && React.createElement('img', {
-        key: 'logo',
-        src: window.appLogo,
-        alt: window.companyName,
-        className: 'h-12 w-auto'
-      }),
-      React.createElement('div', {
-        key: 'titles',
-        className: 'flex flex-col'
-      }, [
-        React.createElement('h1', {
-          key: 'app-title',
-          className: 'text-2xl font-bold text-white'
-        }, window.appTitle),
-        React.createElement('span', {
-          key: 'section-title',
-          className: 'text-sm text-blue-100'
-        }, window.section)
-      ])
-    ])
-  ]));
-};
-
 const AppFooter = () => {
   return React.createElement('footer', {
     className: 'bg-white border-t border-gray-200 fixed bottom-0 w-full'
@@ -300,7 +267,6 @@ const TreeList = () => {
   ]);
 
   const mainContent = [
-    React.createElement(AppHeader, { key: 'header' }),
     React.createElement('main', { 
       key: 'main',
       className: 'container mx-auto px-4 py-16 mt-16 mb-16'
@@ -345,7 +311,14 @@ const TreeList = () => {
   if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
   if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
 
-  return React.createElement(React.Fragment, null, mainContent);
+  return React.createElement('div', { className: 'container-fluid' }, [
+    React.createElement(Navigation, { 
+        key: 'nav',
+        title: 'Family Trees',
+        rightMenuItems: Navigation.createUserMenu()
+    }),
+    React.createElement(React.Fragment, null, mainContent)
+  ]);
 };
 
 // ...existing code...

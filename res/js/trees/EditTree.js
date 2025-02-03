@@ -71,9 +71,15 @@ const EditTree = () => {
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading tree settings...');
 
     return React.createElement('div', { className: 'container-fluid' }, [
-        React.createElement(Navigation, { key: 'nav', treeId }),
+        React.createElement(Navigation, { 
+            key: 'nav',
+            title: 'Edit Tree',
+            leftMenuItems: Navigation.createTreeMenu(treeId),
+            rightMenuItems: Navigation.createUserMenu()
+        }),
         React.createElement('main', {
-            className: 'container mx-auto px-4 py-16 mt-16'
+            key: 'main',
+            className: 'container mx-auto px-4 py-16 mt-16 mb-16'
         }, [
             React.createElement(Card, { key: 'edit-card' }, [
                 React.createElement(Card.Header, null, 'Edit Tree Settings'),

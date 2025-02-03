@@ -101,7 +101,6 @@ const MembersList = () => {
     );
 
     const mainContent = [
-        React.createElement(AppHeader, { key: 'header' }),
         React.createElement('main', { 
             key: 'main',
             className: 'container mx-auto px-4 py-16 mt-16 mb-16'
@@ -188,7 +187,9 @@ const MembersList = () => {
     return React.createElement('div', { className: 'container-fluid' }, [
         React.createElement(Navigation, { 
             key: 'nav',
-            treeId: treeId 
+            title: 'Family Members',
+            leftMenuItems: Navigation.createTreeMenu(treeId),
+            rightMenuItems: Navigation.createUserMenu()
         }),
         React.createElement(React.Fragment, null, mainContent)
     ]);

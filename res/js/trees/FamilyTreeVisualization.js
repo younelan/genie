@@ -242,7 +242,12 @@ const FamilyTreeVisualization = ({ treeId }) => {
     if (error) return React.createElement('div', { className: 'text-center p-8 text-red-500' }, error);
 
     return React.createElement(ErrorBoundary, null, [
-        React.createElement(Navigation, { key: 'nav', treeId }),
+        React.createElement(Navigation, { 
+            key: 'nav',
+            title: 'Family Tree Visualization',
+            leftMenuItems: Navigation.createTreeMenu(treeId),
+            rightMenuItems: Navigation.createUserMenu()
+        }),
         React.createElement('div', { 
             key: 'container',
             className: 'container mx-auto px-4 py-8 mt-16'

@@ -1,36 +1,23 @@
-const Navigation = function({ treeId }) {  // Changed to function expression
-    const [showTreeMenu, setShowTreeMenu] = React.useState(false);
-    const [showUserMenu, setShowUserMenu] = React.useState(false);
+const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [] }) {  
+    const [showLeftMenu, setShowLeftMenu] = React.useState(false);
+    const [showRightMenu, setShowRightMenu] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-    const treeMenuRef = React.useRef(null);
-    const userMenuRef = React.useRef(null);
+    const leftMenuRef = React.useRef(null);
+    const rightMenuRef = React.useRef(null);
 
     React.useEffect(() => {
         const handleClickOutside = (event) => {
-            if (treeMenuRef.current && !treeMenuRef.current.contains(event.target)) {
-                setShowTreeMenu(false);
+            if (leftMenuRef.current && !leftMenuRef.current.contains(event.target)) {
+                setShowLeftMenu(false);
             }
-            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-                setShowUserMenu(false);
+            if (rightMenuRef.current && !rightMenuRef.current.contains(event.target)) {
+                setShowRightMenu(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    const treeMenu = treeId ? [
-        { label: 'List Members', href: `#/tree/${treeId}/members` },
-        { label: 'Add Member', href: `#/tree/${treeId}/member/add` },
-        { label: 'Visualize Tree', href: `#/tree/${treeId}/visualize` },
-        { label: 'Tree Settings', href: `#/tree/${treeId}/edit` }
-    ] : [];
-
-    const userMenu = [
-        { label: 'Profile', href: '#/profile' },
-        { label: 'Settings', href: '#/settings' },
-        { label: 'Logout', onClick: () => console.log('Logout clicked') }
-    ];
 
     return React.createElement('nav', {
         className: 'bg-gray-800 text-white px-4 py-2 fixed w-full top-0 z-50'
@@ -59,30 +46,36 @@ const Navigation = function({ treeId }) {  // Changed to function expression
                         className: 'hidden md:inline'
                     }, window.appTitle || 'Genie')
                 ]),
-                // Tree menu - visible on desktop and in mobile menu
-                treeId && React.createElement('div', { 
-                    key: 'tree-menu',
+                // Add section title if provided
+                title && React.createElement('span', {
+                    key: 'section-title',
+                    className: 'text-lg font-semibold'
+                }, title),
+                // Left menu - visible on desktop and in mobile menu
+                leftMenuItems.length > 0 && React.createElement('div', { 
+                    key: 'left-menu',
                     className: 'relative hidden md:block',
-                    ref: treeMenuRef
+                    ref: leftMenuRef
                 }, [
                     React.createElement('button', {
-                        key: 'tree-menu-button',
+                        key: 'left-menu-button',
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
-                        onClick: () => setShowTreeMenu(!showTreeMenu)
+                        onClick: () => setShowLeftMenu(!showLeftMenu)
                     }, [
-                        React.createElement('span', { key: 'tree-text' }, '🌳 Tree'),
-                        React.createElement('span', { key: 'tree-arrow' }, '▼')
+                        React.createElement('span', { key: 'left-text' }, '🌳 Tree'),
+                        React.createElement('span', { key: 'left-arrow' }, '▼')
                     ]),
-                    showTreeMenu && React.createElement('div', {
-                        key: 'tree-menu-dropdown',
+                    showLeftMenu && React.createElement('div', {
+                        key: 'left-menu-dropdown',
                         className: 'absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5'
                     }, React.createElement('div', {
                         className: 'py-1',
                         role: 'menu'
-                    }, treeMenu.map((item, index) =>
+                    }, leftMenuItems.map((item, index) =>
                         React.createElement('a', {
-                            key: `tree-item-${index}`,
+                            key: `left-item-${index}`,
                             href: item.href,
+                            onClick: item.onClick,  // Add this line
                             className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
                             role: 'menuitem'
                         }, item.label)
@@ -102,30 +95,30 @@ const Navigation = function({ treeId }) {  // Changed to function expression
                     onClick: () => setIsMobileMenuOpen(!isMobileMenuOpen)
                 }, '☰'),
 
-                // User menu
-                React.createElement('div', { 
-                    key: 'user-menu',
+                // Right menu
+                rightMenuItems.length > 0 && React.createElement('div', { 
+                    key: 'right-menu',
                     className: 'hidden md:block relative',
-                    ref: userMenuRef
+                    ref: rightMenuRef
                 }, [
                     React.createElement('button', {
-                        key: 'user-menu-button',
+                        key: 'right-menu-button',
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
-                        onClick: () => setShowUserMenu(!showUserMenu)
+                        onClick: () => setShowRightMenu(!showRightMenu)
                     }, [
-                        React.createElement('span', { key: 'user-text' }, '👤 User'),
-                        React.createElement('span', { key: 'user-arrow', className: 'ml-1' }, '▼')
+                        React.createElement('span', { key: 'right-text' }, '👤 User'),
+                        React.createElement('span', { key: 'right-arrow', className: 'ml-1' }, '▼')
                     ]),
-                    showUserMenu && React.createElement('div', {
-                        key: 'user-menu-dropdown',
+                    showRightMenu && React.createElement('div', {
+                        key: 'right-menu-dropdown',
                         className: 'absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5'
                     },
                         React.createElement('div', {
                             className: 'py-1',
                             role: 'menu'
-                        }, userMenu.map((item, index) =>
+                        }, rightMenuItems.map((item, index) =>
                             React.createElement('a', {
-                                key: `user-item-${index}`,
+                                key: `right-item-${index}`,
                                 href: item.href,
                                 onClick: item.onClick,
                                 className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
@@ -137,35 +130,35 @@ const Navigation = function({ treeId }) {  // Changed to function expression
             ])
         ]),
 
-        // Mobile menu - shows both tree and user menus
+        // Mobile menu - shows both left and right menus
         isMobileMenuOpen && React.createElement('div', {
             key: 'mobile-menu-container',
             className: 'md:hidden bg-gray-700 mt-2 p-2'
         }, [
-            // Tree menu items in mobile view
-            treeId && React.createElement('div', { key: 'mobile-tree' }, [
+            // Left menu items in mobile view
+            leftMenuItems.length > 0 && React.createElement('div', { key: 'mobile-left' }, [
                 React.createElement('div', { 
-                    key: 'mobile-tree-title',
+                    key: 'mobile-left-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
                 }, 'Tree Menu'),
-                ...treeMenu.map((item, index) =>
+                ...leftMenuItems.map((item, index) =>
                     React.createElement('a', {
-                        key: `mobile-tree-item-${index}`,
+                        key: `mobile-left-item-${index}`,
                         href: item.href,
                         className: 'block py-2 text-white hover:bg-gray-600 px-4'
                     }, item.label)
                 ),
-                React.createElement('hr', { key: 'mobile-tree-divider', className: 'my-2 border-gray-600' })
+                React.createElement('hr', { key: 'mobile-left-divider', className: 'my-2 border-gray-600' })
             ]),
-            // User menu items in mobile view
-            React.createElement('div', { key: 'mobile-user' }, [
+            // Right menu items in mobile view
+            rightMenuItems.length > 0 && React.createElement('div', { key: 'mobile-right' }, [
                 React.createElement('div', { 
-                    key: 'mobile-user-title',
+                    key: 'mobile-right-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
                 }, 'User Menu'),
-                ...userMenu.map((item, index) =>
+                ...rightMenuItems.map((item, index) =>
                     React.createElement('a', {
-                        key: `mobile-user-item-${index}`,
+                        key: `mobile-right-item-${index}`,
                         href: item.href,
                         onClick: item.onClick,
                         className: 'block py-2 text-white hover:bg-gray-600 px-4'
@@ -175,3 +168,68 @@ const Navigation = function({ treeId }) {  // Changed to function expression
         ])
     ]);
 };
+
+// Helper function to create tree menu items
+Navigation.createTreeMenu = (treeId) => ([
+    { 
+        label: 'List Members', 
+        href: `#/tree/${treeId}/members`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = `#/tree/${treeId}/members`;
+        }
+    },
+    { 
+        label: 'Add Member', 
+        href: `#/tree/${treeId}/member/add`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = `#/tree/${treeId}/member/add`;
+        }
+    },
+    { 
+        label: 'Visualize Tree', 
+        href: `#/tree/${treeId}/visualize`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = `#/tree/${treeId}/visualize`;
+        }
+    },
+    { 
+        label: 'Tree Settings', 
+        href: `#/tree/${treeId}/edit`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = `#/tree/${treeId}/edit`;
+        }
+    }
+]);
+
+// Helper function to create user menu items
+Navigation.createUserMenu = () => ([
+    { 
+        label: 'Profile', 
+        href: '#/profile',
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = '#/profile';
+        }
+    },
+    { 
+        label: 'Settings', 
+        href: '#/settings',
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = '#/settings';
+        }
+    },
+    { 
+        label: 'Logout', 
+        href: '#',
+        onClick: (e) => {
+            e.preventDefault();
+            console.log('Logout clicked');
+            // Add logout logic here
+        }
+    }
+]);

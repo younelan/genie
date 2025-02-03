@@ -47,10 +47,15 @@ const AddMember = () => {
     };
 
     return React.createElement('div', { className: 'container-fluid' }, [
-        React.createElement(Navigation, { key: 'nav', treeId }),
+        React.createElement(Navigation, { 
+            key: 'nav',
+            title: 'Add Family Member',
+            leftMenuItems: Navigation.createTreeMenu(treeId),
+            rightMenuItems: Navigation.createUserMenu()
+        }),
         React.createElement('main', {
             key: 'main',
-            className: 'container mx-auto px-4 py-16 mt-16'
+            className: 'container mx-auto px-4 py-16 mt-16 mb-16'
         }, [
             React.createElement(Card, { key: 'add-card' }, [
                 React.createElement(Card.Header, { key: 'header' }, 'Add New Member'),
