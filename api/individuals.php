@@ -37,13 +37,18 @@ class IndividualsAPI {
                 $this->handleGet();
                 break;
             case 'POST':
-                $this->handlePost();
-                break;
-            case 'PUT':
-                $this->handlePut();
+                if (isset($_POST['_method']) && $_POST['_method'] === 'PUT') {
+                    $this->handlePut();
+                } else {
+                    $this->handlePost();
+                }
                 break;
             case 'DELETE':
                 $this->handleDelete();
+                break;
+            default:
+                http_response_code(405);
+                echo json_encode(['error' => 'Method not allowed']);
                 break;
         }
     }
@@ -97,7 +102,6 @@ class IndividualsAPI {
 
     private function handlePost() {
         try {
-            // Use $_POST directly instead of parsing JSON input
             $action = $_POST['action'] ?? '';
             
             switch ($action) {
@@ -106,6 +110,9 @@ class IndividualsAPI {
                     break;
                 case 'add_relationship':
                     $this->addRelationship($_POST);
+                    break;
+                case 'update':
+                    $this->updateMember($_POST); // Changed to use $_POST
                     break;
                 default:
                     throw new Exception('Invalid action');
@@ -116,7 +123,11 @@ class IndividualsAPI {
     }
 
     private function handlePut() {
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Support both form data and JSON for backward compatibility
+        $data = $_POST;
+        if (empty($_POST)) {
+            $data = json_decode(file_get_contents('php://input'), true);
+        }
         $this->updateMember($data);
     }
 
@@ -496,7 +507,13 @@ class IndividualsAPI {
 
     private function addRelationship($data) {
         try {
-            switch ($data['relationship_type'] ?? '') {
+            logapache("Relationship data received:");
+            logapache($data);
+            
+            // Extract relationship type - either from form data or action type
+            $relationType = $data['relationship_type'] ?? $data['type'] ?? '';
+            
+            switch ($relationType) {
                 case 'spouse':
                     $response = $this->addSpouse($data);
                     break;
@@ -510,15 +527,24 @@ class IndividualsAPI {
                     $response = $this->addOther($data);
                     break;
                 default:
-                    throw new Exception('Unsupported relationship type');
+                    throw new Exception('Unsupported relationship type: ' . $relationType);
             }
-            echo json_encode([
-                'success' => true,
-                'message' => 'Relationship added',
-                'data' => $response
-            ]);
+
+            // Always return a consistent response format
+            if (!isset($response['success'])) {
+                $response = [
+                    'success' => true,
+                    'data' => $response
+                ];
+            }
+            
+            logapache("Response:");
+            logapache($response);
+            
+            echo json_encode($response);
+            
         } catch (Exception $e) {
-            http_response_code(500);
+            http_response_code(400); // Change to 400 for client errors
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -528,42 +554,60 @@ class IndividualsAPI {
 
     private function addSpouse($data) {
         $defaultDate = date('Y-m-d H:i:s');
-        $response = ['success' => false];
-
+        
         // Validate required base data
-        if (!isset($data['tree_id']) || !isset($data['member_id']) || !isset($data['spouse_type'])) {
-            $response['message'] = 'Missing required data';
-            echo json_encode($response);
-            return;
+        if (empty($data['tree_id']) || empty($data['member_id'])) {
+            throw new Exception('Missing required data: tree_id or member_id');
         }
 
         $treeId = $data['tree_id'];
         $memberId = $data['member_id'];
         $spouseId = null;
 
+        // Handle empty family creation first
+        if (isset($data['create_empty']) && $data['create_empty']) {
+            $memberInfo = $this->memberModel->getMemberById($memberId);
+            if (!$memberInfo) {
+                throw new Exception('Member not found');
+            }
+
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $memberInfo['gender'] === 'M' ? $memberId : null,
+                'wife_id' => $memberInfo['gender'] === 'F' ? $memberId : null,
+                'marriage_date' => null,
+                'created_at' => $defaultDate,
+                'updated_at' => $defaultDate
+            ];
+            
+            $familyId = $this->familyModel->createFamily($familyData);
+            if (!$familyId) {
+                throw new Exception('Failed to create empty family');
+            }
+            
+            return [
+                'success' => true,
+                'data' => ['family_id' => $familyId]
+            ];
+        }
+
         // Handle spouse based on type
         switch ($data['spouse_type']) {
             case 'existing':
                 if (!isset($data['spouse_id'])) {
-                    $response['message'] = 'Spouse ID required for existing spouse';
-                    echo json_encode($response);
-                    return;
+                    throw new Exception('Spouse ID required for existing spouse');
                 }
                 $spouseId = $data['spouse_id'];
                 $spouse = $this->memberModel->getMemberById($spouseId);
                 if (!$spouse) {
-                    $response['message'] = 'Selected spouse not found';
-                    echo json_encode($response);
-                    return;
+                    throw new Exception('Selected spouse not found');
                 }
                 $spouseGender = $spouse['gender'];
                 break;
 
             case 'new':
                 if (empty($data['spouse_first_name']) || empty($data['spouse_last_name'])) {
-                    $response['message'] = 'First name and last name required for new spouse';
-                    echo json_encode($response);
-                    return;
+                    throw new Exception('First name and last name required for new spouse');
                 }
                 $spouseData = [
                     'firstName' => $data['spouse_first_name'],
@@ -577,40 +621,13 @@ class IndividualsAPI {
                 ];
                 $spouseId = $this->memberModel->addMember($spouseData);
                 if (!$spouseId) {
-                    $response['message'] = 'Failed to create new spouse';
-                    echo json_encode($response);
-                    return;
+                    throw new Exception('Failed to create new spouse');
                 }
                 $spouseGender = $spouseData['gender'];
                 break;
 
             default:
-                $response['message'] = 'Invalid spouse type';
-                echo json_encode($response);
-                return;
-        }
-
-        // Handle empty family creation
-        if (isset($data['create_empty']) && $data['create_empty']) {
-            $familyData = [
-                'tree_id' => $treeId,
-                'husband_id' => $data['member_gender'] === 'M' ? $memberId : null,
-                'wife_id' => $data['member_gender'] === 'F' ? $memberId : null,
-                'marriage_date' => null,
-                'created_at' => $defaultDate,
-                'updated_at' => $defaultDate
-            ];
-            $familyId = $this->familyModel->createFamily($familyData);
-            if (!$familyId) {
-                $response['message'] = 'Failed to create empty family';
-                echo json_encode($response);
-                return;
-            }
-            echo json_encode([
-                'success' => true,
-                'data' => ['family_id' => $familyId]
-            ]);
-            return;
+                throw new Exception('Invalid spouse type');
         }
 
         // Create family with spouse
@@ -625,125 +642,100 @@ class IndividualsAPI {
 
         $familyId = $this->familyModel->createFamily($familyData);
         if (!$familyId) {
-            $response['message'] = 'Failed to create family';
-            echo json_encode($response);
-            return;
+            throw new Exception('Failed to create family');
         }
 
-        echo json_encode([
+        return [
             'success' => true,
             'data' => [
                 'family_id' => $familyId,
                 'spouse_id' => $spouseId
             ]
-        ]);
+        ];
     }
 
     private function addChild($data) {
-        $defaultDate = date('Y-m-d H:i:s');
-        $response = ['success' => false];
-
-        // Validate required base data
-        if (!isset($data['tree_id']) || !isset($data['member_id']) || !isset($data['child_type'])) {
-            $response['message'] = 'Missing required data';
-            echo json_encode($response);
-            return;
+        logapache("Adding child with data:");
+        logapache($data);
+        
+        if (empty($data['tree_id']) || empty($data['member_id']) || empty($data['child_type'])) {
+            throw new Exception('Missing required data: tree_id, member_id, or child_type');
         }
 
         $treeId = $data['tree_id'];
         $memberId = $data['member_id'];
+        $defaultDate = date('Y-m-d H:i:s');
+
+        // Handle child creation/selection
         $childId = null;
-
-        // Handle child based on type
-        switch ($data['child_type']) {
-            case 'existing':
-                if (!isset($data['child_id'])) {
-                    $response['message'] = 'Child ID required for existing child';
-                    echo json_encode($response);
-                    return;
-                }
-                $childId = $data['child_id'];
-                $child = $this->memberModel->getMemberById($childId);
-                if (!$child) {
-                    $response['message'] = 'Selected child not found';
-                    echo json_encode($response);
-                    return;
-                }
-                break;
-
-            case 'new':
-                if (empty($data['child_first_name']) || empty($data['child_last_name'])) {
-                    $response['message'] = 'First name and last name required for new child';
-                    echo json_encode($response);
-                    return;
-                }
-                $childData = [
-                    'firstName' => $data['child_first_name'],
-                    'lastName' => $data['child_last_name'],
-                    'treeId' => $treeId,
-                    'gender' => $data['child_gender'] ?? 'M',
-                    'dateOfBirth' => $data['child_birth_date'] ?? null,
-                    'alive' => 1,
-                    'created_at' => $defaultDate,
-                    'updated_at' => $defaultDate
-                ];
-                $childId = $this->memberModel->addMember($childData);
-                if (!$childId) {
-                    $response['message'] = 'Failed to create new child';
-                    echo json_encode($response);
-                    return;
-                }
-                break;
-
-            default:
-                $response['message'] = 'Invalid child type';
-                echo json_encode($response);
-                return;
+        if ($data['child_type'] === 'existing') {
+            if (empty($data['child_id'])) {
+                throw new Exception('Child ID required for existing child');
+            }
+            $childId = $data['child_id'];
+            // Verify child exists
+            $child = $this->memberModel->getMemberById($childId);
+            if (!$child) {
+                throw new Exception('Selected child not found');
+            }
+        } else {
+            // Create new child
+            if (empty($data['child_first_name']) || empty($data['child_last_name'])) {
+                throw new Exception('First name and last name required for new child');
+            }
+            
+            $childData = [
+                'firstName' => $data['child_first_name'],
+                'lastName' => $data['child_last_name'],
+                'treeId' => $treeId,
+                'gender' => $data['child_gender'] ?? 'M',
+                'dateOfBirth' => $data['child_birth_date'] ?? null,
+                'alive' => 1,
+                'created_at' => $defaultDate,
+                'updated_at' => $defaultDate
+            ];
+            
+            $childId = $this->memberModel->addMember($childData);
+            if (!$childId) {
+                throw new Exception('Failed to create new child');
+            }
         }
 
         // Handle family assignment
         $familyId = $data['family_id'] ?? 'new';
         if ($familyId === 'new') {
+            $memberInfo = $this->memberModel->getMemberById($memberId);
+            if (!$memberInfo) {
+                throw new Exception('Member not found');
+            }
+
             $familyData = [
                 'tree_id' => $treeId,
-                'husband_id' => $data['member_gender'] === 'M' ? $memberId : null,
-                'wife_id' => $data['member_gender'] === 'F' ? $memberId : null,
-                'marriage_date' => null,
+                'husband_id' => $memberInfo['gender'] === 'M' ? $memberId : null,
+                'wife_id' => $memberInfo['gender'] === 'F' ? $memberId : null,
                 'created_at' => $defaultDate,
                 'updated_at' => $defaultDate
             ];
+            
             $familyId = $this->familyModel->createFamily($familyData);
             if (!$familyId) {
-                $response['message'] = 'Failed to create new family';
-                echo json_encode($response);
-                return;
-            }
-        } else {
-            // Verify existing family
-            $family = $this->familyModel->getFamilyById($familyId);
-            if (!$family) {
-                $response['message'] = 'Selected family not found';
-                echo json_encode($response);
-                return;
+                throw new Exception('Failed to create new family');
             }
         }
 
         // Link child to family
         $success = $this->familyModel->addChildToFamily($familyId, $childId, $treeId);
         if (!$success) {
-            $response['message'] = 'Failed to link child to family';
-            echo json_encode($response);
-            return;
+            throw new Exception('Failed to link child to family');
         }
 
-        // Return success response
-        echo json_encode([
+        return [
             'success' => true,
             'data' => [
                 'child_id' => $childId,
                 'family_id' => $familyId
             ]
-        ]);
+        ];
     }
 
     private function addParent($data) {

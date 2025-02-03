@@ -86,15 +86,22 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const form = new FormData();
+        
+        // Add hidden _method field for PUT simulation
+        form.append('_method', 'PUT');
+        
+        // Add all form fields
+        Object.keys(formData).forEach(key => {
+            form.append(key, formData[key]);
+        });
+        form.append('id', currentMemberId);
+        form.append('alive', formData.alive ? '1' : '0');
+
         try {
             const response = await fetch('api/individuals.php', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    id: currentMemberId,
-                    alive: formData.alive ? '1' : '0'
-                })
+                method: 'POST',
+                body: form
             });
             const data = await response.json();
             if (data.success) {

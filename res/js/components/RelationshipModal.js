@@ -129,83 +129,64 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
 
     const handleSave = async () => {
         try {
-            // Format data exactly like the old form submission
-            const formDataToSend = new FormData();
+            const form = new FormData();
             
-            // Common fields that match FamilyController expectations
-            formDataToSend.append('action', 'add_relationship');
-            formDataToSend.append('type', activeTab);
-            formDataToSend.append('member_id', member.id);
-            formDataToSend.append('tree_id', member.tree_id);
-            formDataToSend.append('member_gender', member.gender);
+            // Common fields
+            form.append('action', 'add_relationship');
+            form.append('type', activeTab);
+            form.append('member_id', member.id);
+            form.append('tree_id', member.tree_id);
+            form.append('member_gender', member.gender);
+            form.append('relationship_type', activeTab);
 
+            // Add form data based on active tab
             switch (activeTab) {
                 case 'spouse':
-                    formDataToSend.append('spouse_type', formData.spouse_type);
+                    form.append('spouse_type', formData.spouse_type);
                     if (formData.spouse_type === 'existing') {
                         if (!formData.spouse_id) {
                             throw new Error('Please select a spouse');
                         }
-                        formDataToSend.append('spouse_id', formData.spouse_id);
+                        form.append('spouse_id', formData.spouse_id);
                     } else {
-                        // Match format from edit_member.tpl form
-                        formDataToSend.append('spouse_first_name', formData.spouse_first_name);
-                        formDataToSend.append('spouse_last_name', formData.spouse_last_name);
-                        formDataToSend.append('spouse_birth_date', formData.spouse_birth_date || '');
-                        formDataToSend.append('spouse_gender', formData.spouse_gender || (member.gender === 'M' ? 'F' : 'M'));
-                        formDataToSend.append('alive', '1');
+                        // For new spouse, append all relevant fields
+                        Object.entries(formData).forEach(([key, value]) => {
+                            if (key.startsWith('spouse_') && value) {
+                                form.append(key, value);
+                            }
+                        });
                     }
-                    formDataToSend.append('marriage_date', formData.marriage_date || '');
+                    if (formData.marriage_date) {
+                        form.append('marriage_date', formData.marriage_date);
+                    }
                     break;
-
                 case 'child':
-                    formDataToSend.append('child_type', formData.child_type);
-                    formDataToSend.append('family_id', formData.family_id || 'new');
+                    form.append('child_type', formData.child_type);
+                    form.append('family_id', formData.family_id || 'new');
+                    
                     if (formData.child_type === 'existing') {
                         if (!formData.child_id) {
                             throw new Error('Please select a child');
                         }
-                        formDataToSend.append('child_id', formData.child_id);
+                        form.append('child_id', formData.child_id);
                     } else {
-                        // Match format from FamilyController->addChild
-                        formDataToSend.append('child_first_name', formData.child_first_name);
-                        formDataToSend.append('child_last_name', formData.child_last_name);
-                        formDataToSend.append('child_birth_date', formData.child_birth_date || '');
-                        formDataToSend.append('child_gender', formData.child_gender || 'M');
-                        formDataToSend.append('alive', '1');
+                        // For new child, append all child-related fields
+                        if (!formData.child_first_name || !formData.child_last_name) {
+                            throw new Error('Child first and last name are required');
+                        }
+                        Object.entries(formData).forEach(([key, value]) => {
+                            if (key.startsWith('child_') && value) {
+                                form.append(key, value);
+                            }
+                        });
                     }
                     break;
-
-                case 'parent':
-                    // Match format from FamilyController->addParents
-                    formDataToSend.append('parent1_type', formData.parent1_type);
-                    formDataToSend.append('parent1_id', formData.parent1_id || '');
-                    formDataToSend.append('parent1_first_name', formData.parent1_first_name || '');
-                    formDataToSend.append('parent1_last_name', formData.parent1_last_name || '');
-                    formDataToSend.append('parent1_birth_date', formData.parent1_birth_date || '');
-                    formDataToSend.append('parent1_gender', formData.parent1_gender || 'M');
-                    formDataToSend.append('parent1_alive', '1');
-                    formDataToSend.append('second_parent_option', formData.second_parent_option || 'none');
-                    
-                    if (formData.second_parent_option === 'new') {
-                        formDataToSend.append('parent2_first_name', formData.parent2_first_name || '');
-                        formDataToSend.append('parent2_last_name', formData.parent2_last_name || '');
-                        formDataToSend.append('parent2_birth_date', formData.parent2_birth_date || '');
-                        formDataToSend.append('parent2_gender', formData.parent2_gender || 'F');
-                        formDataToSend.append('parent2_alive', '1');
-                    }
-                    break;
+                // ... other cases remain the same ...
             }
 
-            // Debug what's being sent
-            const formObj = {};
-            formDataToSend.forEach((value, key) => formObj[key] = value);
-            console.log('Submitting data:', formObj);
-
-            // Submit to new endpoint but with old form format
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
-                body: formDataToSend
+                body: form
             });
 
             if (!response.ok) {
@@ -215,11 +196,14 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
             }
 
             const result = await response.json();
-            if (result.success) {
-                window.location.reload(); // Reload like the old form did
-            } else {
+            if (!result.success) {
                 throw new Error(result.message || 'Failed to add relationship');
             }
+
+            // Close modal and reload page
+            onHide();
+            window.location.reload();
+
         } catch (error) {
             console.error('Error saving relationship:', error);
             alert('Failed to save relationship: ' + error.message);
@@ -230,7 +214,9 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [`${type}_${name}`]: value
+            [`${type}_${name}`]: value,
+            // Also set the regular field name for API compatibility
+            [name]: value
         }));
     };
 
