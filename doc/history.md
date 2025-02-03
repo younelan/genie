@@ -14,8 +14,16 @@ Check out [The README file](README.md) for more info
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
 ## current
-     - Retire edit relationship types: using gedcom types
-     - Retire simplicity template: use react interacting with api
+     - Reimplementation of old features as react
+         - Visualization of descendants
+         - Visualization of family tree
+         - Navigation on a tree
+         - Add tree member
+         - fix tags in edit_relationship
+         - fix drop down for member details and spouse details
+         - index.php now only serves the index page, everything is in the api folder
+     - Retired edit relationship types: using gedcom types
+     - Retired simplicity template: use react interacting with api
 ## 20250201
      - Began compatibility effort between Symfony version and This version
          - Database Structure is now compatible
