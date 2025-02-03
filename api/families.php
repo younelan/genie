@@ -1,9 +1,18 @@
 <?php
 require_once '../init.php';
 
+function apachelog($foo) {
+    if(is_array($foo)) {
+        $foo = print_r($foo,true);
+    }
+    $foo .= "\n";
+    file_put_contents('php://stderr', print_r($foo, TRUE));
+}
+
 class FamiliesAPI {
     private $familyModel;
     private $userId;
+    private $requestData;  // Store request data properly
 
     public function __construct($config) {
         $user = new UserModel($config);
@@ -19,6 +28,14 @@ class FamiliesAPI {
     public function handleRequest() {
         header('Content-Type: application/json');
         
+        // Parse request data once
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->requestData = json_decode(file_get_contents('php://input'), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->requestData = $_POST; // Fallback to POST data if JSON parse fails
+            }
+        }
+        
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
                 $this->handleGet();
@@ -29,52 +46,132 @@ class FamiliesAPI {
             case 'DELETE':
                 $this->handleDelete();
                 break;
+            default:
+                http_response_code(405);
+                echo json_encode(['error' => 'Method not allowed']);
+                break;
         }
     }
 
     private function handleGet() {
         $action = $_GET['action'] ?? '';
-        switch ($action) {
-            case 'list':
-                $this->getFamiliesByMember($_GET['member_id']);
-                break;
-            case 'spouses':
-                $this->getSpouseFamilies($_GET['member_id']);
-                break;
-            case 'children':
-                $this->getChildFamilies($_GET['member_id']);
-                break;
+        $memberId = $_GET['member_id'] ?? null;
+
+        if (!$memberId) {
+            echo json_encode(['success' => false, 'message' => 'Member ID required']);
+            return;
+        }
+
+        try {
+            switch ($action) {
+                case 'list':
+                    $families = $this->familyModel->getFamiliesByMember($memberId);
+                    echo json_encode(['success' => true, 'families' => $families]);
+                    break;
+                case 'spouses':
+                case 'get_spouse_families':
+                    $families = $this->familyModel->getSpouseFamilies($memberId);
+                    echo json_encode(['success' => true, 'spouse_families' => $families]);
+                    break;
+                case 'children':
+                    $families = $this->familyModel->getChildFamilies($memberId);
+                    echo json_encode(['success' => true, 'child_families' => $families]);
+                    break;
+                default:
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Invalid action']);
+                    break;
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
     private function handlePost() {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $action = $data['action'] ?? '';
-        
-        switch ($action) {
-            case 'create':
-                $this->createFamily($data);
-                break;
-            case 'addChild':
-                $this->addChildToFamily($data);
-                break;
-            case 'addSpouse':
-                $this->addSpouseToFamily($data);
-                break;
-            case 'updateFamily':
-                $this->updateFamily($data);
-                break;
+        try {
+            if (!isset($this->requestData['type'])) {
+                throw new Exception('Missing relationship type');
+            }
+
+            $result = null;
+            switch ($this->requestData['type']) {
+                case 'create_family':
+                    $result = $this->createFamily($this->requestData);
+                    break;
+                case 'add_child':
+                    $result = $this->addChildToFamily($this->requestData);
+                    break;
+                case 'remove_child':
+                    $result = $this->removeChildFromFamily($this->requestData);
+                    break;
+                default:
+                    throw new Exception('Invalid action type');
+            }
+
+            echo json_encode(['success' => true, 'data' => $result]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
     private function handleDelete() {
         $familyId = $_GET['id'] ?? null;
-        if ($familyId) {
-            $this->deleteFamily($familyId);
+        if (!$familyId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Family ID required']);
+            return;
+        }
+
+        try {
+            $success = $this->familyModel->deleteFamily($familyId);
+            echo json_encode(['success' => $success]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-    // Implementation of specific methods...
+    private function createFamily($data) {
+        if (!isset($data['tree_id'])) {
+            throw new Exception('Tree ID is required');
+        }
+
+        $familyData = [
+            'tree_id' => $data['tree_id'],
+            'husband_id' => $data['husband_id'] ?? null,
+            'wife_id' => $data['wife_id'] ?? null,
+            'marriage_date' => $data['marriage_date'] ?? null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        return $this->familyModel->createFamily($familyData);
+    }
+
+    private function addChildToFamily($data) {
+        if (!isset($data['family_id']) || !isset($data['child_id']) || !isset($data['tree_id'])) {
+            throw new Exception('Missing required data for adding child to family');
+        }
+
+        return $this->familyModel->addChildToFamily(
+            $data['family_id'],
+            $data['child_id'],
+            $data['tree_id']
+        );
+    }
+
+    private function removeChildFromFamily($data) {
+        if (!isset($data['family_id']) || !isset($data['child_id'])) {
+            throw new Exception('Missing required data for removing child from family');
+        }
+
+        return $this->familyModel->removeChildFromFamily(
+            $data['family_id'],
+            $data['child_id']
+        );
+    }
 }
 
 $api = new FamiliesAPI($config);

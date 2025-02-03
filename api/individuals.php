@@ -67,6 +67,25 @@ class IndividualsAPI {
             case 'get_descendants':
                 $this->getDescendants();
                 break;
+            case 'autocomplete_member':
+                $term = $_GET['term'] ?? '';
+                $memberId = $_GET['member_id'] ?? null;
+                $treeId = $_GET['tree_id'] ?? null;
+                $results = $this->memberModel->autocompleteMember($term, $memberId, $treeId);
+                echo json_encode($results);
+                break;
+            case 'get_relationship_types':
+                $treeId = $_GET['tree_id'] ?? 1;
+                $types = $this->memberModel->getRelationshipTypes($treeId);
+                echo json_encode($types);
+                break;
+            case 'get_relationships':
+                $memberId = $_GET['member_id'] ?? null;
+                if ($memberId) {
+                    $relationships = $this->memberModel->getMemberRelationships($memberId);
+                    echo json_encode(['success' => true, 'relationships' => $relationships]);
+                }
+                break;
             default:
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid action']);
@@ -85,6 +104,18 @@ class IndividualsAPI {
                 break;
             case 'delete_tag':
                 $this->deleteTag($data);
+                break;
+            case 'addRelationship':
+                $this->addRelationship($data);
+                break;
+            case 'add_relationship':
+                $this->addRelationship($data);
+                break;
+            case 'swap_relationship':
+                $this->swapRelationship($data);
+                break;
+            case 'update_relationship':
+                $this->updateRelationship($data);
                 break;
             default:
                 http_response_code(400);
@@ -470,6 +501,206 @@ class IndividualsAPI {
         }
 
         return $data;
+    }
+
+    private function addRelationship($data) {
+        try {
+            switch ($data['relationship_type'] ?? '') {
+                case 'spouse':
+                    $response = $this->addSpouse($data);
+                    break;
+                case 'child':
+                    $response = $this->addChild($data);
+                    break;
+                case 'parent':
+                    $response = $this->addParent($data);
+                    break;
+                case 'other':
+                    $response = $this->addOther($data);
+                    break;
+                default:
+                    throw new Exception('Unsupported relationship type');
+            }
+            echo json_encode([
+                'success' => true,
+                'message' => 'Relationship added',
+                'data' => $response
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function addSpouse($data) {
+        $alive = $data['alive'] ?? 1;
+        $marriageDate = $data['marriage_date'] ?? null;
+        $memberId = $data['member_id'];
+        $treeId = $data['tree_id'];
+
+        // If spouse is totally new
+        if (($data['spouse_type'] ?? '') === 'new') {
+            $newSpouseData = [
+                'firstName' => $data['spouse_first_name'] ?? null,
+                'lastName' => $data['spouse_last_name'] ?? null,
+                'treeId' => $treeId,
+                'gender' => $data['spouse_gender'] ?? null,
+                'dateOfBirth' => $data['spouse_birth_date'] ?? null,
+                'alive' => $alive,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $spouseId = $this->memberModel->addMember($newSpouseData);
+            $spouseGender = $newSpouseData['gender'];
+        } else {
+            $spouseId = $data['spouse_id'];
+            $spouse = $this->memberModel->getMemberById($spouseId);
+            $spouseGender = $spouse['gender'] ?? 'M';
+        }
+
+        // Assign husband/wife
+        if ($spouseGender === 'F') {
+            $husband = $memberId;
+            $wife = $spouseId;
+        } else {
+            $husband = $spouseId;
+            $wife = $memberId;
+        }
+
+        // Create family record
+        $familyData = [
+            'tree_id' => $treeId,
+            'husband_id' => $husband,
+            'wife_id' => $wife,
+            'marriage_date' => $marriageDate,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        $familyId = $this->treeModel->createFamily($familyData);
+
+        return ['familyId' => $familyId, 'spouseId' => $spouseId];
+    }
+
+    private function addChild($data) {
+        $alive = $data['alive'] ?? 1;
+        $treeId = $data['tree_id'];
+
+        if (($data['child_type'] ?? '') === 'new') {
+            $childData = [
+                'firstName' => $data['child_first_name'] ?? null,
+                'lastName' => $data['child_last_name'] ?? null,
+                'treeId' => $treeId,
+                'gender' => $data['child_gender'] ?? null,
+                'dateOfBirth' => $data['child_birth_date'] ?? null,
+                'alive' => $alive,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $childId = $this->memberModel->addMember($childData);
+        } else {
+            $childId = $data['child_id'];
+        }
+
+        $familyId = $data['family_id'];
+        // If user indicates a new family
+        if ($familyId === 'new') {
+            $familyData = [
+                'tree_id' => $treeId,
+                'husband_id' => $data['member_id'],
+                'wife_id' => null,
+                'marriage_date' => null,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $familyId = $this->treeModel->createFamily($familyData);
+        }
+        // Link child to family
+        $this->treeModel->addChildToFamily($familyId, $childId, $treeId);
+
+        return ['childId' => $childId, 'familyId' => $familyId];
+    }
+
+    private function addParent($data) {
+        $alive1 = $data['parent1_alive'] ?? 1;
+        $alive2 = $data['parent2_alive'] ?? 1;
+        $childId = $data['member_id'];
+        $treeId = $data['tree_id'];
+
+        // Create or fetch parent1
+        if (($data['parent1_type'] ?? '') === 'new') {
+            $parent1Data = [
+                'firstName' => $data['parent1_first_name'] ?? null,
+                'lastName' => $data['parent1_last_name'] ?? null,
+                'treeId' => $treeId,
+                'birth_date' => $data['parent1_birth_date'] ?? null,
+                'gender' => $data['parent1_gender'] ?? null,
+                'alive' => $alive1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $parent1Id = $this->memberModel->addMember($parent1Data);
+            $parent1Gender = $parent1Data['gender'];
+        } else {
+            $parent1Id = $data['parent1_id'] ?? null;
+            $parent1Gender = null;
+        }
+
+        // Create or fetch parent2
+        if (($data['second_parent_option'] ?? '') === 'new') {
+            $parent2Data = [
+                'firstName' => $data['parent2_first_name'] ?? null,
+                'lastName' => $data['parent2_last_name'] ?? null,
+                'treeId' => $treeId,
+                'birth_date' => $data['parent2_birth_date'] ?? null,
+                'gender' => $data['parent2_gender'] ?? null,
+                'alive' => $alive2,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $parent2Id = $this->memberModel->addMember($parent2Data);
+            $parent2Gender = $parent2Data['gender'];
+        } else {
+            $parent2Id = $data['parent2_id'] ?? null;
+            $parent2Gender = null;
+        }
+
+        // Assign husband/wife
+        $husband = $parent1Id;
+        $wife = $parent2Id;
+        // You can refine logic based on $parent1Gender/$parent2Gender if needed.
+
+        $familyData = [
+            'tree_id' => $treeId,
+            'husband_id' => $husband,
+            'wife_id' => $wife,
+            'marriage_date' => null,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        $familyId = $this->treeModel->createFamily($familyData);
+        $this->treeModel->addChildToFamily($familyId, $childId, $treeId);
+
+        return ['parents' => [$parent1Id, $parent2Id], 'child' => $childId, 'familyId' => $familyId];
+    }
+
+    private function addOther($data) {
+        // For non-parent/spouse relationships
+        // Example: store in person_relationships with type = $data['other_type'] or similar
+        $firstId = $data['member_id'];
+        $secondId = $data['other_id'] ?? null; // or create new if needed
+        // ... e.g. $this->memberModel->addOtherRelationship($firstId, $secondId, $data['relationship_type']);
+        return ['msg' => 'Other relationship linked'];
+    }
+
+    private function swapRelationship($data) {
+        // Implementation for swapping relationships
+    }
+
+    private function updateRelationship($data) {
+        // Implementation for updating relationships
     }
 }
 

@@ -70,8 +70,8 @@ const Navigation = function({ treeId }) {  // Changed to function expression
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
                         onClick: () => setShowTreeMenu(!showTreeMenu)
                     }, [
-                        '🌳 Tree',
-                        React.createElement('span', { key: 'arrow' }, '▼')
+                        React.createElement('span', { key: 'tree-text' }, '🌳 Tree'),
+                        React.createElement('span', { key: 'tree-arrow' }, '▼')
                     ]),
                     showTreeMenu && React.createElement('div', {
                         key: 'tree-menu-dropdown',
@@ -109,13 +109,15 @@ const Navigation = function({ treeId }) {  // Changed to function expression
                     ref: userMenuRef
                 }, [
                     React.createElement('button', {
+                        key: 'user-menu-button',
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
                         onClick: () => setShowUserMenu(!showUserMenu)
                     }, [
-                        '👤 User',
-                        React.createElement('span', { className: 'ml-1' }, '▼')
+                        React.createElement('span', { key: 'user-text' }, '👤 User'),
+                        React.createElement('span', { key: 'user-arrow', className: 'ml-1' }, '▼')
                     ]),
                     showUserMenu && React.createElement('div', {
+                        key: 'user-menu-dropdown',
                         className: 'absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5'
                     },
                         React.createElement('div', {
@@ -137,11 +139,13 @@ const Navigation = function({ treeId }) {  // Changed to function expression
 
         // Mobile menu - shows both tree and user menus
         isMobileMenuOpen && React.createElement('div', {
+            key: 'mobile-menu-container',
             className: 'md:hidden bg-gray-700 mt-2 p-2'
         }, [
             // Tree menu items in mobile view
             treeId && React.createElement('div', { key: 'mobile-tree' }, [
                 React.createElement('div', { 
+                    key: 'mobile-tree-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
                 }, 'Tree Menu'),
                 ...treeMenu.map((item, index) =>
@@ -151,11 +155,12 @@ const Navigation = function({ treeId }) {  // Changed to function expression
                         className: 'block py-2 text-white hover:bg-gray-600 px-4'
                     }, item.label)
                 ),
-                React.createElement('hr', { className: 'my-2 border-gray-600' })
+                React.createElement('hr', { key: 'mobile-tree-divider', className: 'my-2 border-gray-600' })
             ]),
             // User menu items in mobile view
             React.createElement('div', { key: 'mobile-user' }, [
                 React.createElement('div', { 
+                    key: 'mobile-user-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
                 }, 'User Menu'),
                 ...userMenu.map((item, index) =>

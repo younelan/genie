@@ -17,6 +17,8 @@ const MemberDetails = ({ treeId, memberId }) => {
         alive: true,
         source: ''
     });
+    // Add new state for relationship modal
+    const [showRelationshipModal, setShowRelationshipModal] = React.useState(false);
     
     // Get IDs from props or URL as fallback
     const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
@@ -180,6 +182,13 @@ const MemberDetails = ({ treeId, memberId }) => {
         setShowDeathFields(!isAlive);
     };
 
+    const handleAddRelationship = (formData) => {
+        // Handle saving the relationship
+        console.log('Saving relationship:', formData);
+        setShowRelationshipModal(false);
+    };
+
+    // In the renderBasicInfo function, update the Dropdown items array:
     const renderBasicInfo = () => React.createElement(Card, { key: 'basic-info-card' }, [
         React.createElement(Card.Header, { 
             key: 'header',
@@ -196,9 +205,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                     },
                     {
                         label: '➕ Add Relationship',
-                        onClick: () => {
-                            // Handle relationship modal
-                        }
+                        onClick: () => setShowRelationshipModal(true)
                     },
                     {
                         label: '🗑️ Delete Member',
@@ -492,6 +499,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                     ])
                 )
             ])
-        )
+        ),
+        React.createElement(RelationshipModal, {
+            key: 'relationship-modal',
+            show: showRelationshipModal,
+            onHide: () => setShowRelationshipModal(false),
+            member: member,
+            onSave: handleAddRelationship
+        })
     ]);
 };
