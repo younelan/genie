@@ -51,7 +51,8 @@ class FamilyModel {
         $sql = "INSERT INTO families (tree_id, husband_id, wife_id, marriage_date, created_at, updated_at) VALUES (:tree_id, :husband_id, :wife_id, :marriage_date, :created_at, :updated_at)";
         $stmt = $this->db->prepare($sql);
         $marriageDate = $familyData['marriage_date'] ?? null; // Get date or null
-
+        $created_at = $familyData['created_at'] ?? date('Y-m-d H:i:s');
+        $updated_at = $familyData['updated_at'] ?? date('Y-m-d H:i:s');
        if(empty($marriageDate)){
            $marriageDate = null;
        }
@@ -61,8 +62,8 @@ class FamilyModel {
             ':husband_id' => $familyData['husband_id'] ?? null,
             ':wife_id' => $familyData['wife_id'] ?? null,
             ':marriage_date' => $marriageDate,
-            ':created_at' => $familyData['created_at'],
-            ':updated_at' => $familyData['updated_at']
+            ':created_at' => $created_at,
+            ':updated_at' => $updated_at,
         ]);
         return $this->db->lastInsertId();
     }
@@ -104,5 +105,33 @@ class FamilyModel {
     }
     public function addOther($other)
     {
+    }
+
+    public function getFamilyById($familyId) {
+        $query = "SELECT f.*, 
+                         h.first_name as husband_name, h.gender as husband_gender,
+                         w.first_name as wife_name, w.gender as wife_gender
+                  FROM $this->family_table f
+                  LEFT JOIN $this->person_table h ON f.husband_id = h.id
+                  LEFT JOIN $this->person_table w ON f.wife_id = w.id
+                  WHERE f.id = :family_id";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['family_id' => $familyId]);
+        
+        $family = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($family) {
+            // Add children to family data
+            $childrenQuery = "SELECT c.*, p.first_name, p.last_name, p.gender, p.birth_date 
+                            FROM $this->children_table c
+                            JOIN $this->person_table p ON c.child_id = p.id
+                            WHERE c.family_id = :family_id";
+            
+            $childStmt = $this->db->prepare($childrenQuery);
+            $childStmt->execute(['family_id' => $familyId]);
+            $family['children'] = $childStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        
+        return $family;
     }
 }
