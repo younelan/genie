@@ -62,6 +62,11 @@ class TreeAPI {
                     $this->deleteTree();
                     break;
 
+                case 'empty':
+                    if ($method !== 'POST') $this->sendError('Method not allowed', 405);
+                    $this->emptyTree();
+                    break;
+
                 case '':
                     if ($method === 'GET') {
                         $this->getTrees(); // Default action for GET
@@ -236,6 +241,25 @@ class TreeAPI {
         } else {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to delete tree']);
+        }
+    }
+
+    private function emptyTree() {
+        $treeId = $_GET['id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
+            return;
+        }
+
+        try {
+            $success = $this->treeModel->emptyTree($treeId, $this->userId);
+            if ($success) {
+                $this->sendResponse(['success' => true]);
+            } else {
+                $this->sendError('Failed to empty tree');
+            }
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
         }
     }
 }

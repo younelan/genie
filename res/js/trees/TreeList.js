@@ -46,6 +46,23 @@ const TreeList = () => {
     }
   };
 
+  const handleEmptyTree = async (treeId) => {
+    if (!confirm('Are you sure you want to empty this tree? All members and relationships will be deleted. This cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`api/trees.php?action=empty&id=${treeId}`, {
+        method: 'POST'
+      });
+      if (!response.ok) throw new Error('Failed to empty tree');
+      await fetchTrees(); // Refresh the list
+    } catch (err) {
+      console.error('Error emptying tree:', err);
+      alert(err.message);
+    }
+  };
+
   const AddTreeModal = () => {
     if (!showAddModal) return null;
 
@@ -253,6 +270,11 @@ const TreeList = () => {
               href: `#/tree/${tree.id}/edit`,
               className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
             }, 'Edit Settings'),
+            React.createElement('button', {
+              key: 'empty',
+              onClick: () => handleEmptyTree(tree.id),
+              className: 'w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50'
+            }, 'Empty Tree'),
             React.createElement('button', {
               key: 'delete',
               onClick: () => deleteTree(tree.id),

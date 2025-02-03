@@ -251,4 +251,45 @@ class TreeModel extends AppModel
         $stmt = $this->db->prepare($query);
         return $stmt->execute($params);
     }
+
+    public function emptyTree($treeId, $ownerId) {
+        try {
+            $this->db->beginTransaction();
+
+            // Only proceed if user owns the tree
+            $stmt = $this->db->prepare("SELECT id FROM $this->tree_table WHERE id = ? AND owner_id = ?");
+            $stmt->execute([$treeId, $ownerId]);
+            if (!$stmt->fetch()) {
+                return false;
+            }
+
+            // Delete all tags for this tree
+            $stmt = $this->db->prepare("DELETE FROM tags WHERE tree_id = ?");
+            $stmt->execute([$treeId]);
+
+            // Delete all child relationships
+            $stmt = $this->db->prepare("DELETE fc FROM family_children fc
+                                      INNER JOIN families f ON fc.family_id = f.id
+                                      WHERE f.tree_id = ?");
+            $stmt->execute([$treeId]);
+
+            // Delete all families
+            $stmt = $this->db->prepare("DELETE FROM families WHERE tree_id = ?");
+            $stmt->execute([$treeId]);
+
+            // Delete all other relationships
+            $stmt = $this->db->prepare("DELETE FROM person_relationship WHERE tree_id = ?");
+            $stmt->execute([$treeId]);
+
+            // Delete all individuals
+            $stmt = $this->db->prepare("DELETE FROM individuals WHERE tree_id = ?");
+            $stmt->execute([$treeId]);
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
 }
