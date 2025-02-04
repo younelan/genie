@@ -1,12 +1,33 @@
 const Autocomplete = ({ type, memberId, treeId, onSelect }) => {
+    const [query, setQuery] = React.useState('');
     const [suggestions, setSuggestions] = React.useState([]);
-    const [inputValue, setInputValue] = React.useState('');
-    const [selectedId, setSelectedId] = React.useState('');
+    const [selectedPerson, setSelectedPerson] = React.useState(null);
+    const [isOpen, setIsOpen] = React.useState(false);
+    const wrapperRef = React.useRef(null);
 
-    const handleInput = async (e) => {
-        const value = e.target.value;
-        setInputValue(value);
-        if (!value) {
+    // Close dropdown when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Debounce search
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
+
+    const searchPeople = async (searchTerm) => {
+        if (!searchTerm) {
             setSuggestions([]);
             return;
         }
@@ -14,57 +35,81 @@ const Autocomplete = ({ type, memberId, treeId, onSelect }) => {
         try {
             const params = new URLSearchParams({
                 action: 'autocomplete_member',
-                term: value,
+                term: searchTerm,
                 member_id: memberId,
                 tree_id: treeId
             });
 
             const response = await fetch(`api/individuals.php?${params.toString()}`);
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error('Search failed');
             
             const data = await response.json();
             setSuggestions(data);
+            setIsOpen(true);
         } catch (error) {
-            console.error('Autocomplete error:', error);
+            console.error('Search error:', error);
             setSuggestions([]);
         }
     };
 
-    const handleSelect = (e) => {
+    const debouncedSearch = React.useCallback(debounce(searchPeople, 300), []);
+
+    const handleInputChange = (e) => {
         const value = e.target.value;
-        const selectedSuggestion = suggestions.find(s => s.label === value);
-        if (selectedSuggestion) {
-            setSelectedId(selectedSuggestion.id);
-            onSelect(selectedSuggestion);
+        setQuery(value);
+        setSelectedPerson(null);
+        debouncedSearch(value);
+    };
+
+    const handleSelectPerson = (person) => {
+        setSelectedPerson(person);
+        setQuery(person.label);
+        setSuggestions([]);
+        setIsOpen(false);
+        if (onSelect) {
+            onSelect(person);
         }
     };
 
-    return React.createElement('div', { className: 'autocomplete-wrapper' }, [
+    return React.createElement('div', {
+        ref: wrapperRef,
+        className: 'relative'
+    }, [
+        // Input field
         React.createElement('input', {
             key: 'search-input',
             type: 'text',
             className: 'form-control',
-            value: inputValue,
-            onChange: handleInput,
-            onBlur: handleSelect,
+            value: query,
+            onChange: handleInputChange,
             placeholder: `Search for ${type}...`,
-            list: `${type}-suggestions`
+            autoComplete: 'off'
         }),
-        React.createElement('datalist', {
-            key: 'suggestions-list',
-            id: `${type}-suggestions`
-        }, suggestions.map(item => 
-            React.createElement('option', {
-                key: `suggestion-${item.id}`,
-                value: item.label,
-                'data-id': item.id
-            })
-        )),
+
+        // Suggestions dropdown
+        isOpen && suggestions.length > 0 && React.createElement('div', {
+            key: 'suggestions-dropdown',
+            className: 'position-absolute w-100 mt-1 bg-white border rounded shadow-sm z-50'
+        }, 
+            React.createElement('ul', {
+                className: 'list-group'
+            }, 
+                suggestions.map(person => 
+                    React.createElement('li', {
+                        key: person.id,
+                        className: 'list-group-item list-group-item-action cursor-pointer',
+                        onClick: () => handleSelectPerson(person)
+                    }, person.label)
+                )
+            )
+        ),
+
+        // Hidden input for form submission
         React.createElement('input', {
-            key: 'selected-id',
+            key: 'hidden-input',
             type: 'hidden',
             name: `${type}_id`,
-            value: selectedId
+            value: selectedPerson ? selectedPerson.id : ''
         })
     ]);
 };

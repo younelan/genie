@@ -1,40 +1,42 @@
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const App = () => {
+    const [currentComponent, setCurrentComponent] = React.useState(null);
 
-const handleRoute = () => {
-    const hash = window.location.hash;
-    
-    // Add EditTree route pattern
-    const editTreePattern = /^#\/tree\/(\d+)\/edit$/;
-    
-    // Better route pattern matching
-    const treePattern = /^#\/tree\/(\d+)\/members$/;
-    const memberPattern = /^#\/tree\/(\d+)\/member\/(\d+)$/;
-    const descendantsPattern = /^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/;
-    const addMemberPattern = /^#\/tree\/(\d+)\/member\/add$/;
-    const visualizePattern = /^#\/tree\/(\d+)\/visualize$/;
+    const handleRoute = () => {
+        const hash = window.location.hash;
+        let componentToRender = null;
+        
+        if (/^#\/tree\/(\d+)\/visualize$/.test(hash)) {
+            const [, treeId] = hash.match(/^#\/tree\/(\d+)\/visualize$/);
+            componentToRender = React.createElement(FamilyTreeVisualization, { treeId });
+        } else if (/^#\/tree\/(\d+)\/edit$/.test(hash)) {
+            componentToRender = React.createElement(EditTree);
+        } else if (/^#\/tree\/(\d+)\/member\/add$/.test(hash)) {
+            componentToRender = React.createElement(AddMember);
+        } else if (/^#\/tree\/(\d+)\/members$/.test(hash)) {
+            componentToRender = React.createElement(MembersList);
+        } else if (/^#\/tree\/(\d+)\/member\/(\d+)$/.test(hash)) {
+            const [, treeId, memberId] = hash.match(/^#\/tree\/(\d+)\/member\/(\d+)$/);
+            componentToRender = React.createElement(MemberDetails, { treeId, memberId });
+        } else if (/^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/.test(hash)) {
+            const [, treeId, memberId] = hash.match(/^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/);
+            componentToRender = React.createElement(DescendantsView, { treeId, memberId });
+        } else {
+            componentToRender = React.createElement(TreeList);
+        }
+        setCurrentComponent(componentToRender);
+    };
 
-    if (visualizePattern.test(hash)) {
-        const matches = hash.match(visualizePattern);
-        const [, treeId] = matches;
-        root.render(React.createElement(FamilyTreeVisualization, { treeId }));
-    } else if (editTreePattern.test(hash)) {
-        root.render(React.createElement(EditTree));
-    } else if (addMemberPattern.test(hash)) {
-        root.render(React.createElement(AddMember));
-    } else if (treePattern.test(hash)) {
-        root.render(React.createElement(MembersList));
-    } else if (memberPattern.test(hash)) {
-        const matches = hash.match(memberPattern);
-        const [, treeId, memberId] = matches;
-        root.render(React.createElement(MemberDetails, { treeId, memberId }));
-    } else if (descendantsPattern.test(hash)) {
-        const matches = hash.match(descendantsPattern);
-        const [, treeId, memberId] = matches;
-        root.render(React.createElement(DescendantsView, { treeId, memberId }));
-    } else {
-        root.render(React.createElement(TreeList));
-    }
+    React.useEffect(() => {
+        window.addEventListener('hashchange', handleRoute);
+        handleRoute();
+        return () => window.removeEventListener('hashchange', handleRoute);
+    }, []);
+
+    return React.createElement('div', null, currentComponent || 'Loading...');
 };
 
-window.addEventListener('hashchange', handleRoute);
-window.addEventListener('load', handleRoute);
+// Initialize the app when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+});
