@@ -14,8 +14,20 @@ Check out [The README file](README.md) for more info
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
 ## current
+     - updated version to v0.3, ui rewrite
+     - unified navigation component with menus
+     - Fixed autocomplete for parent
+     - Fixed Adding of other relationship
+     - remove child from family
+     - remove parents from individual
+     - remove spouse and delete family work
+     - modal to edit other relationships
+     - api
+         - individuals
+         - families
      - Reimplementation of old features as react
          - Visualization of descendants
+         - Add Relationship modal
          - Visualization of family tree
          - Navigation on a tree
          - Add tree member
