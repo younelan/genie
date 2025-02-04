@@ -159,6 +159,7 @@ class IndividualsAPI {
             return;
         }
 
+        // Add this line to get the members
         $members = $this->treeModel->getMembersByTreeId($treeId, $offset, $limit);
         $totalMembers = $this->treeModel->getPersonCount($treeId);
         $lastUpdates = $this->treeModel->getMembersByTreeId($treeId, 0, 40, 'updated_at DESC');
@@ -166,7 +167,7 @@ class IndividualsAPI {
         echo json_encode([
             'success' => true,
             'data' => [
-                'members' => $members,
+                'members' => $members,  // Now this will contain actual member data
                 'lastUpdates' => $lastUpdates,
                 'totalMembers' => $totalMembers,
                 'totalPages' => ceil($totalMembers / $limit),

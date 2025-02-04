@@ -20,6 +20,10 @@ const MemberDetails = ({ treeId, memberId }) => {
     // Add new state for relationship modal
     const [showRelationshipModal, setShowRelationshipModal] = React.useState(false);
     
+    // Add these new state variables at the top with other state declarations
+    const [relationships, setRelationships] = React.useState([]);
+    const [relationshipTypes, setRelationshipTypes] = React.useState([]);
+
     // Get IDs from props or URL as fallback
     const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
     const currentTreeId = treeId || window.location.hash.split('/')[2];
@@ -27,6 +31,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     React.useEffect(() => {
         if (currentMemberId && /^\d+$/.test(currentMemberId)) {
             loadMemberDetails();
+            loadRelationships();  // Add this line
         } else {
             setError('Invalid member ID');
             setLoading(false);
@@ -82,6 +87,27 @@ const MemberDetails = ({ treeId, memberId }) => {
             setError(error.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Add this new function to load relationships
+    const loadRelationships = async () => {
+        try {
+            // Fetch relationship types
+            const typesResponse = await fetch(`api/individuals.php?action=get_relationship_types&tree_id=${currentTreeId}`);
+            if (!typesResponse.ok) throw new Error('Failed to load relationship types');
+            const typesData = await typesResponse.json();
+            setRelationshipTypes(typesData);
+
+            // Fetch relationships
+            const relResponse = await fetch(`api/individuals.php?action=get_relationships&member_id=${currentMemberId}`);
+            if (!relResponse.ok) throw new Error('Failed to load relationships');
+            const relData = await relResponse.json();
+            if (relData.success) {
+                setRelationships(relData.relationships || []);
+            }
+        } catch (error) {
+            console.error('Error loading relationships:', error);
         }
     };
 
@@ -549,6 +575,26 @@ const MemberDetails = ({ treeId, memberId }) => {
         )
     ]);
 
+    // Add this new handler function
+    const handleDeleteRelationship = async (relationshipId) => {
+        if (!confirm('Are you sure you want to delete this relationship?')) return;
+        
+        try {
+            const response = await fetch(`api/relationships.php?id=${relationshipId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                loadRelationships();  // Reload the relationships
+            } else {
+                throw new Error('Failed to delete relationship');
+            }
+        } catch (error) {
+            console.error('Error deleting relationship:', error);
+            alert('Failed to delete relationship: ' + error.message);
+        }
+    };
+
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
     if (error) {
         // Add home link to error state
@@ -584,7 +630,43 @@ const MemberDetails = ({ treeId, memberId }) => {
                     React.createElement(Card, { key: 'other-card' }, [
                         React.createElement(Card.Header, { key: 'other-header' }, 'Other Relationships'),
                         React.createElement(Card.Body, { key: 'other-body' }, 
-                            'Other relationships will be displayed here'
+                            relationships.length === 0 
+                            ? 'No other relationships found'
+                            : React.createElement('ul', { className: 'list-group' },
+                                relationships.map(rel => 
+                                    React.createElement('li', { 
+                                        key: `rel-${rel.id}`,
+                                        className: 'list-group-item d-flex justify-content-between align-items-center'
+                                    }, [
+                                        React.createElement('span', { key: 'rel-desc' }, [
+                                            `${rel.person1_id === parseInt(currentMemberId) 
+                                                ? rel.person2_first_name + ' ' + rel.person2_last_name 
+                                                : rel.person1_first_name + ' ' + rel.person1_last_name}`,
+                                            React.createElement('small', { 
+                                                key: 'rel-type',
+                                                className: 'text-muted ms-2'
+                                            }, `(${rel.relationship_description})`)
+                                        ]),
+                                        React.createElement('div', { key: 'actions' }, [
+                                            React.createElement('button', {
+                                                key: 'view',
+                                                className: 'btn btn-sm btn-link',
+                                                onClick: () => {
+                                                    const otherId = rel.person1_id === parseInt(currentMemberId) 
+                                                        ? rel.person2_id 
+                                                        : rel.person1_id;
+                                                    window.location.hash = `#/tree/${currentTreeId}/member/${otherId}`;
+                                                }
+                                            }, '👁️'),
+                                            React.createElement('button', {
+                                                key: 'delete',
+                                                className: 'btn btn-sm btn-link text-danger',
+                                                onClick: () => handleDeleteRelationship(rel.id)
+                                            }, '🗑️')
+                                        ])
+                                    ])
+                                )
+                            )
                         )
                     ])
                 )
