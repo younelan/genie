@@ -15,6 +15,7 @@ class IndividualsAPI {
     private $familyModel;
     private $treeModel;
     private $userId;
+    private $db; // Add this line
 
     public function __construct($config) {
         $user = new UserModel($config);
@@ -27,6 +28,7 @@ class IndividualsAPI {
         $this->memberModel = new MemberModel($config);
         $this->treeModel = new TreeModel($config);
         $this->familyModel = new FamilyModel($config);
+        $this->db = $config['connection']; // Add this line
     }
 
     public function handleRequest() {
@@ -925,12 +927,9 @@ class IndividualsAPI {
     }
 
     private function addOther($data) {
-        $response = ['success' => false];
-
         // Validate required data
         if (!isset($data['member_id']) || !isset($data['other_type']) || !isset($data['relationship_type'])) {
-            $response['message'] = 'Missing required data';
-            echo json_encode($response);
+            $this->sendError('Missing required data');
             return;
         }
 
@@ -938,32 +937,40 @@ class IndividualsAPI {
         $treeId = $data['tree_id'];
         $otherId = null;
 
-        // Handle other person based on type
+        $relationshipTypeId = $data['other_type_id'];
+        if (!$relationshipTypeId) {
+            $this->sendError('Invalid relationship type');
+            return;
+        }
+
+        // Handle person creation/selection
         switch ($data['other_type']) {
             case 'existing':
                 if (!isset($data['other_id'])) {
-                    $response['message'] = 'Person ID required for existing person';
-                    echo json_encode($response);
+                    $this->sendError('Person ID required for existing person');
                     return;
                 }
                 $otherId = $data['other_id'];
                 $otherPerson = $this->memberModel->getMemberById($otherId);
                 if (!$otherPerson) {
-                    $response['message'] = 'Selected person not found';
-                    echo json_encode($response);
+                    $this->sendError('Selected person not found');
                     return;
                 }
                 break;
 
             case 'new':
                 if (empty($data['other_first_name']) || empty($data['other_last_name'])) {
-                    $response['message'] = 'First name and last name required for new person';
-                    echo json_encode($response);
+                    $this->sendError('First name and last name required for new person');
                     return;
                 }
+
+                // Clean up the duplicated field names
+                $firstName = $data['other_first_name'] ?? $data['other_other_first_name'] ?? null;
+                $lastName = $data['other_last_name'] ?? $data['other_other_last_name'] ?? null;
+
                 $personData = [
-                    'firstName' => $data['other_first_name'],
-                    'lastName' => $data['other_last_name'],
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
                     'treeId' => $treeId,
                     'gender' => $data['other_gender'] ?? 'M',
                     'dateOfBirth' => $data['other_birth_date'] ?? null,
@@ -971,17 +978,16 @@ class IndividualsAPI {
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
+
                 $otherId = $this->memberModel->addMember($personData);
                 if (!$otherId) {
-                    $response['message'] = 'Failed to create new person';
-                    echo json_encode($response);
+                    $this->sendError('Failed to create new person');
                     return;
                 }
                 break;
 
             default:
-                $response['message'] = 'Invalid person type';
-                echo json_encode($response);
+                $this->sendError('Invalid person type');
                 return;
         }
 
@@ -989,17 +995,16 @@ class IndividualsAPI {
         $relationshipId = $this->memberModel->addRelationship(
             $memberId,
             $otherId,
-            $data['relationship_type'],
+            $relationshipTypeId,
             $treeId
         );
 
         if (!$relationshipId) {
-            $response['message'] = 'Failed to create relationship';
-            echo json_encode($response);
+            $this->sendError('Failed to create relationship');
             return;
         }
 
-        echo json_encode([
+        $this->sendResponse([
             'success' => true,
             'data' => [
                 'relationship_id' => $relationshipId,

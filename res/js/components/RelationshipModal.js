@@ -5,7 +5,7 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         child_type: 'existing',
         parent1_type: 'existing',
         other_type: 'existing',
-        relationship_type: 'spouse'
+        relationship_type: '' // changed from 'spouse'
     });
 
     const [spouseFamilies, setSpouseFamilies] = React.useState([]);
@@ -15,11 +15,32 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         showParent2New: false
     });
 
+    const [relationshipTypes, setRelationshipTypes] = React.useState([]);
+
     React.useEffect(() => {
         if (show && member) {
             loadSpouseFamilies();
         }
     }, [show, member]);
+
+    React.useEffect(() => {
+        // Fetch relationship types for 'other' option
+        const loadRelationshipTypes = async () => {
+            try {
+                const response = await fetch('api/app.php?action=relationship_types');
+                if (!response.ok) throw new Error('Failed to load relationship types');
+                const data = await response.json();
+                if (data.success) {
+                    setRelationshipTypes(data.types);
+                } else {
+                    throw new Error(data.error || 'Failed to load relationship types');
+                }
+            } catch (error) {
+                console.error('Error loading relationship types:', error);
+            }
+        };
+        loadRelationshipTypes();
+    }, []);
 
     const handleAddEmptyFamily = async () => {
         try {
@@ -139,11 +160,12 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
             form.append('member_gender', member.gender);
 
             // Set relationship_type based on activeTab, except for 'other' tab
-            let relationshipType = activeTab;
-            if (activeTab === 'other' && formData.relationship_type) {
-                relationshipType = formData.relationship_type;
+            if (activeTab === 'other') {
+                form.append('relationship_type', 'other');
+                form.append('other_type_id', formData.other_type_id || '');
+            } else {
+                form.append('relationship_type', activeTab);
             }
-            form.append('relationship_type', relationshipType);
 
             switch (activeTab) {
                 case 'spouse':
@@ -445,13 +467,17 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                 React.createElement('select', {
                     key: 'type-select',
                     className: 'form-control',
-                    name: 'relationship_type',
+                    name: 'other_type_id',
+                    value: formData.other_type_id || '',
                     onChange: handleInputChange
                 }, [
-                    React.createElement('option', { key: 'cousin', value: 'COUSIN' }, 'Cousin'),
-                    React.createElement('option', { key: 'sibling', value: 'SIBLING' }, 'Sibling'),
-                    React.createElement('option', { key: 'aunt', value: 'AUNT' }, 'Aunt/Uncle'),
-                    React.createElement('option', { key: 'niece', value: 'NIECE' }, 'Niece/Nephew')
+                    React.createElement('option', { key: 'placeholder', value: '' }, '-- Select Relationship Type --'),
+                    ...relationshipTypes.map(type =>
+                        React.createElement('option', {
+                            key: type.id,
+                            value: type.id
+                        }, type.description)
+                    )
                 ])
             ]),
             React.createElement('div', { key: 'type-selector' }, 
