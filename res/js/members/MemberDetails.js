@@ -195,16 +195,28 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const handleDeleteFamily = async (familyId) => {
-        if (!confirm('Are you sure you want to delete this family?')) return;
+        if (!confirm('Are you sure you want to delete this family? This will remove all relationships.')) return;
         try {
-            const response = await fetch(`api/families.php?id=${familyId}`, {
-                method: 'DELETE'
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'delete_family',
+                    family_id: familyId
+                })
             });
-            if (response.ok) {
+
+            const data = await response.json();
+            if (data.success) {
                 loadMemberDetails();
+            } else {
+                throw new Error(data.error || 'Failed to delete family');
             }
         } catch (error) {
             console.error('Error deleting family:', error);
+            alert('Failed to delete family: ' + error.message);
         }
     };
 
@@ -415,35 +427,41 @@ const MemberDetails = ({ treeId, memberId }) => {
         }
     };
 
-    const renderFamilyTab = (family) => React.createElement('div', {
-        className: 'flex items-center'
-    }, [
-        React.createElement(Nav.Link, {
-            key: 'tab-link',
-            active: activeFamily === family.id,
-            onClick: () => setActiveFamily(family.id),
-            className: 'flex-grow'
-        }, family.spouse_name || 'Unknown Spouse'),
-        React.createElement(Dropdown, {
-            key: 'family-actions',
-            trigger: '⚙️',
-            items: [
-                family.spouse_id && {
-                    label: 'View Spouse',
-                    href: `#/tree/${currentTreeId}/member/${family.spouse_id}`
-                },
-                {
-                    label: 'Edit Family',
-                    onClick: () => handleEditFamily(family.id)
-                },
-                {
-                    label: 'Delete Family',
-                    onClick: () => handleDeleteFamily(family.id),
-                    className: 'text-red-600'
-                }
-            ].filter(Boolean)
-        })
-    ]);
+    const renderFamilyTab = (family) => {
+        const dropdownItems = [
+            family.spouse_id && {
+                label: 'View Spouse',
+                href: `#/tree/${currentTreeId}/member/${family.spouse_id}`
+            },
+            {
+                label: family.spouse_id ? 'Remove Spouse' : 'Add Spouse',
+                onClick: family.spouse_id ? 
+                    () => handleRemoveSpouse(family.id) : 
+                    () => handleEditFamily(family.id)
+            },
+            {
+                label: 'Delete Family',
+                onClick: () => handleDeleteFamily(family.id),
+                className: 'text-danger'
+            }
+        ].filter(Boolean);
+
+        return React.createElement('div', {
+            className: 'flex items-center'
+        }, [
+            React.createElement(Nav.Link, {
+                key: 'tab-link',
+                active: activeFamily === family.id,
+                onClick: () => setActiveFamily(family.id),
+                className: 'flex-grow'
+            }, family.spouse_name || 'Unknown Spouse'),
+            React.createElement(Dropdown, {
+                key: 'family-actions',
+                trigger: '⚙️',
+                items: dropdownItems
+            })
+        ]);
+    };
 
     const renderFamilyTabs = () => React.createElement(Card, { key: 'family-card' }, [
         React.createElement(Card.Header, { key: 'header' }, 'Families'),
@@ -603,6 +621,33 @@ const MemberDetails = ({ treeId, memberId }) => {
     const handleEditOtherRelationship = (relationship) => {
         setEditingRelationship(relationship);
         setShowEditOtherRelationship(true);
+    };
+
+    const handleRemoveSpouse = async (familyId) => {
+        if (!confirm('Are you sure you want to remove the spouse from this family?')) return;
+        try {
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'remove_spouse',
+                    family_id: familyId,
+                    member_id: currentMemberId  // Add this line
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                loadMemberDetails();
+            } else {
+                throw new Error(data.error || 'Failed to remove spouse');
+            }
+        } catch (error) {
+            console.error('Error removing spouse:', error);
+            alert('Failed to remove spouse: ' + error.message);
+        }
     };
 
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');

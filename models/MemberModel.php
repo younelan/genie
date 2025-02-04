@@ -861,4 +861,65 @@ public function updateFamilySpouse($data)
             'id' => $data['id']
         ]);
     }
+
+    public function removeFamilySpouse($familyId, $currentMemberId) {
+        $this->db->beginTransaction();
+        try {
+            // Get the family first to identify which spouse to remove
+            $family = $this->getFamilyById($familyId);
+            if (!$family) {
+                throw new Exception('Family not found');
+            }
+
+            // Set the other spouse to NULL but keep the current member
+            $query = "UPDATE $this->families_table 
+                     SET husband_id = CASE 
+                            WHEN husband_id = :current_id THEN husband_id 
+                            ELSE NULL 
+                         END,
+                         wife_id = CASE 
+                            WHEN wife_id = :current_id THEN wife_id 
+                            ELSE NULL 
+                         END,
+                         updated_at = NOW()
+                     WHERE id = :family_id";
+
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                'family_id' => $familyId,
+                'current_id' => $currentMemberId
+            ]);
+            
+            $this->db->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error removing spouse from family: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function deleteFamily($familyId) {
+        $this->db->beginTransaction();
+        try {
+            // First remove all children from the family
+            $query = "DELETE FROM $this->family_children_table 
+                     WHERE family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute(['family_id' => $familyId]);
+
+            // Then delete the family
+            $query = "DELETE FROM $this->families_table 
+                     WHERE id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute(['family_id' => $familyId]);
+
+            $this->db->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error deleting family: " . $e->getMessage());
+            throw $e;
+        }
+    }
 }

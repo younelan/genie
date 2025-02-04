@@ -128,6 +128,27 @@ class IndividualsAPI {
                 case 'edit_relationship':
                     $this->updateRelationship($_GET['id'] ?? null, $data);
                     break;
+                case 'remove_spouse':
+                    $familyId = $data['family_id'] ?? null;
+                    $currentMemberId = $data['member_id'] ?? null;
+                    if (!$familyId || !$currentMemberId) {
+                        throw new Exception('Family ID and Member ID required');
+                    }
+                    try {
+                        $success = $this->memberModel->removeFamilySpouse($familyId, $currentMemberId);
+                        echo json_encode(['success' => $success]);
+                    } catch (Exception $e) {
+                        throw new Exception('Failed to remove spouse: ' . $e->getMessage());
+                    }
+                    break;
+                case 'delete_family':
+                    $familyId = $data['family_id'] ?? null;
+                    if (!$familyId) {
+                        throw new Exception('Family ID required');
+                    }
+                    $success = $this->memberModel->deleteFamily($familyId);
+                    echo json_encode(['success' => $success]);
+                    break;
             }
         } catch (Exception $e) {
             $this->sendError($e->getMessage());
