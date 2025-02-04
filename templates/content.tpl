@@ -49,5 +49,6 @@
     <script src="res/js/components/Navigation.js"></script>
     <script src="res/js/components/Autocomplete.js"></script>
     <script src="res/js/components/RelationshipModal.js"></script>
+    <script src="res/js/components/EditOtherRelationship.js"></script>
 </body>
 </html>

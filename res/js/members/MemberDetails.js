@@ -24,6 +24,10 @@ const MemberDetails = ({ treeId, memberId }) => {
     const [relationships, setRelationships] = React.useState([]);
     const [relationshipTypes, setRelationshipTypes] = React.useState([]);
 
+    // Add new state variables for edit modal
+    const [showEditOtherRelationship, setShowEditOtherRelationship] = React.useState(false);
+    const [editingRelationship, setEditingRelationship] = React.useState(null);
+
     // Get IDs from props or URL as fallback
     const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
     const currentTreeId = treeId || window.location.hash.split('/')[2];
@@ -595,6 +599,12 @@ const MemberDetails = ({ treeId, memberId }) => {
         }
     };
 
+    // Add edit handler
+    const handleEditOtherRelationship = (relationship) => {
+        setEditingRelationship(relationship);
+        setShowEditOtherRelationship(true);
+    };
+
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
     if (error) {
         // Add home link to error state
@@ -649,6 +659,11 @@ const MemberDetails = ({ treeId, memberId }) => {
                                         ]),
                                         React.createElement('div', { key: 'actions' }, [
                                             React.createElement('button', {
+                                                key: 'edit',
+                                                className: 'btn btn-sm btn-link',
+                                                onClick: () => handleEditOtherRelationship(rel)
+                                            }, '✏️'),
+                                            React.createElement('button', {
                                                 key: 'view',
                                                 className: 'btn btn-sm btn-link',
                                                 onClick: () => {
@@ -678,6 +693,43 @@ const MemberDetails = ({ treeId, memberId }) => {
             onHide: () => setShowRelationshipModal(false),
             member: member,
             onSave: handleAddRelationship
+        }),
+        // Update onSave handler in EditOtherRelationship props
+        React.createElement(EditOtherRelationship, {
+            key: 'edit-relationship-modal',
+            show: showEditOtherRelationship,
+            onHide: () => {
+                setShowEditOtherRelationship(false);
+                setEditingRelationship(null);
+            },
+            relationship: editingRelationship,
+            onSave: async (formData) => {
+                try {
+                    const response = await fetch(`api/individuals.php?action=edit_relationship&id=${editingRelationship.id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            relationship_type_id: formData.relationship_type,
+                            relation_start: formData.relation_start || null,
+                            relation_end: formData.relation_end || null
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (!data.success) {
+                        throw new Error(data.error || 'Failed to update relationship');
+                    }
+                    
+                    loadRelationships();
+                    setShowEditOtherRelationship(false);
+                    setEditingRelationship(null);
+                } catch (error) {
+                    console.error('Error updating relationship:', error);
+                    alert('Failed to update relationship: ' + error.message);
+                }
+            }
         })
     ]);
 };

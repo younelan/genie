@@ -836,4 +836,29 @@ public function updateFamilySpouse($data)
         $stmt->execute(['family_id' => $familyId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function updateRelationship($data) {
+        if (empty($data['id'])) {
+            return false;
+        }
+
+        // Convert empty strings to NULL for dates
+        $startDate = !empty($data['relation_start']) ? $data['relation_start'] : null;
+        $endDate = !empty($data['relation_end']) ? $data['relation_end'] : null;
+
+        $query = "UPDATE $this->relation_table 
+                  SET relationship_type_id = :type_id,
+                      relation_start = :start_date,
+                      relation_end = :end_date,
+                      updated_at = NOW()
+                  WHERE id = :id";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'type_id' => $data['relationship_type_id'],
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'id' => $data['id']
+        ]);
+    }
 }

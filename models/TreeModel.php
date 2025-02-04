@@ -16,6 +16,7 @@ class TreeModel extends AppModel
 {
     private $db,$config;
     private $tree_table = 'trees';
+    private $relation_type_table = 'relationship_type';
     private $person_table = 'individuals';
     private $family_table = 'families';
     private $children_table = 'family_children';
@@ -251,7 +252,13 @@ class TreeModel extends AppModel
         $stmt = $this->db->prepare($query);
         return $stmt->execute($params);
     }
-
+    public function getRelationshipTypes($tree_id = 1)
+    {
+        $query = "SELECT id, description FROM $this->relation_type_table WHERE tree_id = :tree_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['tree_id' => $tree_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public function emptyTree($treeId, $ownerId) {
         try {
             $this->db->beginTransaction();

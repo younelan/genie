@@ -110,7 +110,7 @@ class IndividualsAPI {
             logapache("POST data received:");
             logapache($data);
             
-            $action = $data['action'] ?? '';
+            $action = $data['action'] ?? $_GET['action'] ?? '';
             
             switch ($action) {
                 case 'add_tag':
@@ -124,6 +124,9 @@ class IndividualsAPI {
                     break;
                 case 'add_relationship': // New case to handle relationship additions properly
                     $this->addRelationship($data);
+                    break;
+                case 'edit_relationship':
+                    $this->updateRelationship($_GET['id'] ?? null, $data);
                     break;
             }
         } catch (Exception $e) {
@@ -988,8 +991,25 @@ class IndividualsAPI {
         // Implementation for swapping relationships
     }
 
-    private function updateRelationship($data) {
-        // Implementation for updating relationships
+    private function updateRelationship($id, $data) {
+        if (!$id) {
+            throw new Exception('Relationship ID required');
+        }
+
+        $updateData = [
+            'id' => $id,
+            'relationship_type_id' => $data['relationship_type_id'],
+            'relation_start' => $data['relation_start'] ?? null,
+            'relation_end' => $data['relation_end'] ?? null
+        ];
+
+        $success = $this->memberModel->updateRelationship($updateData);
+        
+        if ($success) {
+            echo json_encode(['success' => true]);
+        } else {
+            throw new Exception('Failed to update relationship');
+        }
     }
 }
 
