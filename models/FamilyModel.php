@@ -21,6 +21,29 @@ class FamilyModel {
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
         
     }
+    public function removeChildFromFamily($childId, $familyId)
+    {
+        $this->db->beginTransaction();
+        try {
+            // Only remove the relationship in family_children table
+            $query = "DELETE FROM $this->family_children_table 
+                      WHERE child_id = :child_id 
+                      AND family_id = :family_id";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([
+                'child_id' => $childId,
+                'family_id' => $familyId
+            ]);
+
+            $this->db->commit();
+            return $result;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error removing child from family: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function addIndividual($new_member)
     {
         apachelog($new_member);

@@ -474,22 +474,66 @@ const MemberDetails = ({ treeId, memberId }) => {
         ])
     ]);
 
+    const handleDeleteFromFamily = async (familyId) => {
+        if (!confirm('Are you sure you want to remove this parent relationship?')) return;
+        try {
+            const response = await fetch('api/families.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'removeChild',
+                    type: 'remove_child',  // Add this line to specify the action type
+                    child_id: currentMemberId,
+                    family_id: familyId
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to remove from family');
+            }
+
+            if (data.success) {
+                loadMemberDetails();
+            } else {
+                throw new Error(data.message || 'Failed to remove from family');
+            }
+        } catch (error) {
+            console.error('Error removing from family:', error);
+            alert('Error removing parent relationship: ' + error.message);
+        }
+    };
+
     const renderParents = () => React.createElement(Card, { key: 'parents-card', className: 'mt-3' }, [
         React.createElement(Card.Header, { key: 'header' }, 'Parents'),
         React.createElement(Card.Body, { key: 'body' },
             childFamilies.map(family => 
-                React.createElement('div', { key: `family-${family.id}`, className: 'd-flex gap-2' }, [
-                    family.husband_id && React.createElement('a', {
-                        key: 'father',
-                        href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
-                        className: 'text-decoration-none'
-                    }, family.husband_name),
-                    (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
-                    family.wife_id && React.createElement('a', {
-                        key: 'mother',
-                        href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
-                        className: 'text-decoration-none'
-                    }, family.wife_name)
+                React.createElement('div', { 
+                    key: `family-${family.id}`, 
+                    className: 'd-flex justify-content-between align-items-center mb-2'
+                }, [
+                    React.createElement('div', { 
+                        key: 'parents-names',
+                        className: 'd-flex gap-2' 
+                    }, [
+                        family.husband_id && React.createElement('a', {
+                            key: 'father',
+                            href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
+                            className: 'text-decoration-none'
+                        }, family.husband_name),
+                        (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
+                        family.wife_id && React.createElement('a', {
+                            key: 'mother',
+                            href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
+                            className: 'text-decoration-none'
+                        }, family.wife_name)
+                    ]),
+                    React.createElement('button', {
+                        key: 'delete-button',
+                        className: 'btn btn-sm btn-danger',
+                        onClick: () => handleDeleteFromFamily(family.id),
+                        title: 'Remove parent relationship'
+                    }, '🗑️')
                 ])
             )
         )

@@ -165,13 +165,15 @@ class FamiliesAPI {
     }
 
     private function removeChildFromFamily($data) {
+        error_log(print_r($data, true));
         if (!isset($data['family_id']) || !isset($data['child_id'])) {
             throw new Exception('Missing required data for removing child from family');
         }
 
+        // Fix parameter order to match FamilyModel::removeChildFromFamily($childId, $familyId)
         return $this->familyModel->removeChildFromFamily(
-            $data['family_id'],
-            $data['child_id']
+            $data['child_id'],    // childId should be first
+            $data['family_id']    // familyId should be second
         );
     }
 }
