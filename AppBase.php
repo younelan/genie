@@ -2,10 +2,10 @@
 class AppBase
 {
     private $config;
-    
+    private $basedir='.';
     function __construct($config) {
         $this->config = $config;
-
+        $this->basedir = __DIR__;
     }
     function render_file($fname, $blocks)
     {

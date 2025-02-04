@@ -26,12 +26,7 @@ function get_translation($i18nstring,$lang=null,$str_translations=null) {
     }
 }
 $page = $_GET['page'] ?? 1;
-$treeController = new TreeController($config);
-$memberController = new MemberController($config);
-$familyController = new FamilyController($config);
-
-
-
+$appBase = new AppBase($config);
 
 $data = [
         "template" => "react_app.tpl",
@@ -41,4 +36,4 @@ $data = [
         "footer_text" => get_translation("Family Tree Manager"),
         "company_name" => $config['company_name'] ?? "Genie"
 ];
-echo $treeController->render($data);
+echo $appBase->render($data);
