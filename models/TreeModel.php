@@ -121,7 +121,7 @@ class TreeModel extends AppModel
         $childrenSql = "SELECT c.id, c.family_id,c.child_id,f.tree_id 
                         FROM $this->children_table c
                         JOIN $this->family_table f ON c.family_id = f.id
-                        WHERE $this->tree_field = :tree_id";
+                        WHERE c.$this->tree_field = :tree_id";
         $childrenStmt = $this->db->prepare($childrenSql);
         $childrenStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
         $childrenStmt->execute();
