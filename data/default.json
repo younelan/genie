@@ -18,7 +18,7 @@
     },
     "tables": {
         "person": "individuals",
-        "relation": "person_relationship",
+        "relation": "other_relationships",
         "synonyms": "synonyms",
         "tree": "trees",
         "relation_type": "relationship_type",

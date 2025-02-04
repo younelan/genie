@@ -5,13 +5,13 @@ class MemberModel extends AppModel
     private $config;
 
     private $person_table = 'individuals';
-    private $relation_table = 'person_relationship';
+    private $relation_table = 'other_relationships';
     private $relation_type_table = 'relationship_type';
-    private $people_tag_table = 'tags';
-    private $tree_table = 'family_tree';
+    private $notes_table = 'tags';
+    private $tree_table = 'trees';
     private $synonym_table;
     private $families_table = 'families';
-    private $family_children_table = 'family_children';
+    private $children_table = 'family_children';
 
 
     public function __construct($config)
@@ -19,11 +19,11 @@ class MemberModel extends AppModel
         $this->config = $config;
         $this->db = $config['connection'];
         $this->person_table = $config['tables']['person'] ?? 'individuals';
-        $this->tree_table = $config['tables']['tree'] ?? 'family_tree';
-        $this->relation_table = $config['tables']['relation'] ?? 'person_relationship';
+        $this->tree_table = $config['tables']['tree'] ?? 'trees';
+        $this->relation_table = $config['tables']['relation'] ?? 'other_relationships';
         $this->synonym_table = $config['tables']['synonyms'] ?? 'synonyms';
         $this->families_table = $config['tables']['families'] ?? 'families';
-        $this->family_children_table = $config['tables']['family_children']??'family_children';
+        $this->children_table = $config['tables']['family_children']??'family_children';
     }
 
 
@@ -111,7 +111,7 @@ class MemberModel extends AppModel
 
     public function getTags($memberId)
     {
-        $query = "SELECT * FROM $this->people_tag_table t
+        $query = "SELECT * FROM $this->notes_table t
         WHERE person_id = :member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':member_id', $memberId);
@@ -142,7 +142,7 @@ class MemberModel extends AppModel
         if(!$tree_id || !$person_id || !$tag) {
             return false;
         };
-        $query = "INSERT INTO $this->people_tag_table (tag,tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
+        $query = "INSERT INTO $this->notes_table (tag,tree_id,person_id) VALUES (:tag_name,:tree_id,:person_id)";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':person_id', $person_id);
@@ -158,7 +158,7 @@ class MemberModel extends AppModel
         if(!$tree_id || !$member_id || !$tag) {
             return false;
         };
-        $query = "DELETE FROM $this->people_tag_table where tag=:tag_name and tree_id=:tree_id and person_id=:member_id";
+        $query = "DELETE FROM $this->notes_table where tag=:tag_name and tree_id=:tree_id and person_id=:member_id";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
         $stmt->bindParam(':member_id', $member_id);
@@ -197,7 +197,7 @@ class MemberModel extends AppModel
         
         try {
             // First delete any family_children relationships
-            $query = "DELETE FROM $this->family_children_table WHERE child_id = :id";
+            $query = "DELETE FROM $this->children_table WHERE child_id = :id";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['id' => $memberId]);
 
@@ -381,7 +381,7 @@ class MemberModel extends AppModel
     foreach ($families as &$family) {
         // Get children for this family
         $childrenQuery = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
-                         FROM $this->family_children_table fc
+                         FROM $this->children_table fc
                          JOIN $this->person_table c ON fc.child_id = c.id
                          WHERE fc.family_id = :family_id
                          ORDER BY c.birth_date";
@@ -406,7 +406,7 @@ class MemberModel extends AppModel
                          w.first_name as wife_name, w.last_name as wife_lastname,
                          h.id as husband_id, w.id as wife_id
                   FROM $this->person_table p
-                  JOIN $this->family_children_table fc ON fc.child_id = p.id
+                  JOIN $this->children_table fc ON fc.child_id = p.id
                   JOIN $this->families_table f ON fc.family_id = f.id
                   LEFT JOIN $this->person_table h ON f.husband_id = h.id
                   LEFT JOIN $this->person_table w ON f.wife_id = w.id
@@ -495,7 +495,7 @@ public function createFamily($familyData)
     }
      public function addChildToFamily($familyId, $childId, $treeId)
     {
-        $query = "INSERT INTO $this->family_children_table (family_id, child_id, tree_id, created_at, updated_at) 
+        $query = "INSERT INTO $this->children_table (family_id, child_id, tree_id, created_at, updated_at) 
                   VALUES (:family_id, :child_id, :tree_id, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
@@ -510,7 +510,7 @@ public function createFamily($familyData)
         $this->db->beginTransaction();
         try {
             // Only remove the relationship in family_children table
-            $query = "DELETE FROM $this->family_children_table 
+            $query = "DELETE FROM $this->children_table 
                       WHERE child_id = :child_id 
                       AND family_id = :family_id";
             $stmt = $this->db->prepare($query);
@@ -533,7 +533,7 @@ public function createFamily($familyData)
         $this->db->beginTransaction();
         try {
             // Check if family has children
-            $query = "SELECT COUNT(*) FROM $this->family_children_table WHERE family_id = :family_id";
+            $query = "SELECT COUNT(*) FROM $this->children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['family_id' => $familyId]);
             $hasChildren = (int)$stmt->fetchColumn() > 0;
@@ -601,20 +601,20 @@ public function createFamily($familyData)
         $this->db->beginTransaction();
         try {
             // Check if family has any children first
-            $query = "SELECT EXISTS(SELECT 1 FROM $this->family_children_table WHERE family_id = :family_id)";
+            $query = "SELECT EXISTS(SELECT 1 FROM $this->children_table WHERE family_id = :family_id)";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['family_id' => $familyId]);
             $hasChildren = (bool)$stmt->fetchColumn();
 
             if ($hasChildren) {
                 // If there are children, delete them first
-                $query = "SELECT child_id FROM $this->family_children_table WHERE family_id = :family_id";
+                $query = "SELECT child_id FROM $this->children_table WHERE family_id = :family_id";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute(['family_id' => $familyId]);
                 $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
                 // Delete the family_children records
-                $query = "DELETE FROM $this->family_children_table WHERE family_id = :family_id";
+                $query = "DELETE FROM $this->children_table WHERE family_id = :family_id";
                 $stmt = $this->db->prepare($query);
                 $stmt->execute(['family_id' => $familyId]);
 
@@ -648,7 +648,7 @@ public function createFamily($familyData)
         $this->db->beginTransaction();
         try {
             // First get all children IDs
-            $query = "SELECT child_id FROM $this->family_children_table WHERE family_id = :family_id";
+            $query = "SELECT child_id FROM $this->children_table WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['family_id' => $familyId]);
             $children = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -827,7 +827,7 @@ public function updateFamilySpouse($data)
     public function getFamilyChildren($familyId)
     {
         $query = "SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender 
-                  FROM $this->family_children_table fc
+                  FROM $this->children_table fc
                   JOIN $this->person_table c ON fc.child_id = c.id
                   WHERE fc.family_id = :family_id
                   ORDER BY c.birth_date";
@@ -903,7 +903,7 @@ public function updateFamilySpouse($data)
         $this->db->beginTransaction();
         try {
             // First remove all children from the family
-            $query = "DELETE FROM $this->family_children_table 
+            $query = "DELETE FROM $this->children_table 
                      WHERE family_id = :family_id";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['family_id' => $familyId]);

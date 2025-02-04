@@ -17,7 +17,7 @@ class GEDCOMExporter
     //     $this->pdo = $config['connection'];
     //     $this->peopleTable = $config['tables']['people'];
     //     $this->tagsTable = $config['tables']['people_tags'];
-    //     $this->relationshipsTable = $config['tables']['person_relationship'];
+    //     $this->relationshipsTable = $config['tables']['other_relationships'];
     //     $this->relationshipTypesTable = $config['tables']['relationship_type'];
     // }
     public function __construct(private $config)
@@ -27,7 +27,7 @@ class GEDCOMExporter
         $this->peopleTable = $config['tables']['person']??'person';
         $this->tagsTable = $config['tables']['people_tags']??'tags';
         $this->treeTable = $config['tables']['tree']??'family_tree';
-        $this->relationshipsTable = $config['tables']['relation']??'person_relationship';
+        $this->relationshipsTable = $config['tables']['relation']??'other_relationships';
         $this->synonymTable = $config['tables']['synonyms']??'synonyms';
         
     }

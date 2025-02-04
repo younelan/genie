@@ -334,7 +334,7 @@ VALUES
     public function fetchChildren($family_tree_id) {
         $sql = "
             SELECT r.person_id1 AS child, r.person_id2 AS parent, r.id AS relation_id, t.code
-            FROM person_relationship r
+            FROM other_relationships r
             LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
             WHERE t.code IN ('FATH', 'MOTH','CHLD') 
             AND r.family_tree_id = :family_tree_id
@@ -534,7 +534,7 @@ VALUES
         // SQL to select husbands and wives
         $sql = "
             SELECT r.person_id1 AS husb, r.person_id2 AS wife, r.id AS relation_id, t.code
-            FROM person_relationship r
+            FROM other_relationships r
             LEFT JOIN relationship_type t ON r.relationship_type_id = t.id
             WHERE t.code IN ('HUSB', 'WIFE','DIV') 
             AND r.family_tree_id = :family_tree_id

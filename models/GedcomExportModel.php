@@ -17,7 +17,7 @@ class GedcomExportModel extends AppModel
         
         // Use table names from config
         $this->person_table = $config['tables']['person'] ?? 'person';
-        $this->relation_table = $config['tables']['relation'] ?? 'person_relationship';
+        $this->relation_table = $config['tables']['relation'] ?? 'other_relationships';
         $this->relation_type_table = $config['tables']['relation_type'] ?? 'relationship_type';
         $this->tree_table = $config['tables']['tree'] ?? 'family_tree';
     }

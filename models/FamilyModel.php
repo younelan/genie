@@ -6,7 +6,7 @@ class FamilyModel {
     private $children_table = 'family_children';
 
     private $person_table = 'individuals';
-    private $relation_table = 'person_relationship';
+    private $relation_table = 'other_relationships';
     private $family_children_table = 'family_children';
 
     private $synonym_table = 'synonyms';
@@ -17,7 +17,7 @@ class FamilyModel {
         $this->db = $config['connection'];
         $this->person_table = $config['tables']['person']??'individuals';
         $this->family_table = $config['tables']['family']??'families';
-        $this->relation_table = $config['tables']['relation']??'person_relationship';
+        $this->relation_table = $config['tables']['relation']??'other_relationship';
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
         
     }
@@ -71,7 +71,7 @@ class FamilyModel {
     }
     public function createFamily(array $familyData): int
     {
-        $sql = "INSERT INTO families (tree_id, husband_id, wife_id, marriage_date, created_at, updated_at) VALUES (:tree_id, :husband_id, :wife_id, :marriage_date, :created_at, :updated_at)";
+        $sql = "INSERT INTO $this->family_table (tree_id, husband_id, wife_id, marriage_date, created_at, updated_at) VALUES (:tree_id, :husband_id, :wife_id, :marriage_date, :created_at, :updated_at)";
         $stmt = $this->db->prepare($sql);
         $marriageDate = $familyData['marriage_date'] ?? null; // Get date or null
         $created_at = $familyData['created_at'] ?? date('Y-m-d H:i:s');

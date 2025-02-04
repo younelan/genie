@@ -16,7 +16,7 @@ class GEDCOMImporter
         $this->peopleTable = $config['tables']['person']??'person';
         $this->tagsTable = $config['tables']['people_tags']??'tags';
         $this->treeTable = $config['tables']['tree']??'family_tree';
-        $this->relationshipsTable = $config['tables']['relation']??'person_relationship';
+        $this->relationshipsTable = $config['tables']['relation']??'other_relationships';
         $this->relationshipTypesTable = $config['tables']['relationship_type']??'relationship_types';
         $this->synonymTable = $config['tables']['synonyms']??'synonyms';
         

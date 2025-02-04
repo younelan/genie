@@ -20,7 +20,8 @@ class TreeModel extends AppModel
     private $person_table = 'individuals';
     private $family_table = 'families';
     private $children_table = 'family_children';
-    private $relation_table = 'person_relationship';
+    private $relation_table = 'other_relationships';
+    private $notes_table = 'tags';
     private $synonym_table = 'synonyms';
     private $tree_field = 'tree_id';
     public function __construct($config)
@@ -29,9 +30,9 @@ class TreeModel extends AppModel
         $this->db = $config['connection'];
         $this->person_table = $config['tables']['person']??'individuals';
         $this->tree_table = $config['tables']['tree']??'family_tree';
-        $this->relation_table = $config['tables']['relation']??'person_relationship';
+        $this->relation_table = $config['tables']['relation']??'other_relationships';
         $this->synonym_table = $config['tables']['synonyms']??'synonyms';
-        
+        $this->notes_table = $config['tables']['notes']??'tags';        
     }
 
     public function getAllTreesByOwner($ownerId)
@@ -271,25 +272,25 @@ class TreeModel extends AppModel
             }
 
             // Delete all tags for this tree
-            $stmt = $this->db->prepare("DELETE FROM tags WHERE tree_id = ?");
+            $stmt = $this->db->prepare("DELETE FROM $this->notes_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 
             // Delete all child relationships
-            $stmt = $this->db->prepare("DELETE fc FROM family_children fc
-                                      INNER JOIN families f ON fc.family_id = f.id
+            $stmt = $this->db->prepare("DELETE fc FROM $this->children_table fc
+                                      INNER JOIN $this->family_table f ON fc.family_id = f.id
                                       WHERE f.tree_id = ?");
             $stmt->execute([$treeId]);
 
             // Delete all families
-            $stmt = $this->db->prepare("DELETE FROM families WHERE tree_id = ?");
+            $stmt = $this->db->prepare("DELETE FROM $this->family_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 
             // Delete all other relationships
-            $stmt = $this->db->prepare("DELETE FROM person_relationship WHERE tree_id = ?");
+            $stmt = $this->db->prepare("DELETE FROM $this->relation_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 
             // Delete all individuals
-            $stmt = $this->db->prepare("DELETE FROM individuals WHERE tree_id = ?");
+            $stmt = $this->db->prepare("DELETE FROM $this->person_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 
             $this->db->commit();
