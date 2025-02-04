@@ -122,7 +122,9 @@ class IndividualsAPI {
                 case 'create': // Added case for creating a member
                     $this->createMember($data);
                     break;
-                // ... rest of cases ...
+                case 'add_relationship': // New case to handle relationship additions properly
+                    $this->addRelationship($data);
+                    break;
             }
         } catch (Exception $e) {
             $this->sendError($e->getMessage());
