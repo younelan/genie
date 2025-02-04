@@ -157,4 +157,66 @@ class FamilyModel {
         
         return $family;
     }
+
+    public function addSpouseToFamily($data) {
+        $familyId = $data['family_id'];
+        $spousePosition = $data['spouse_position'];
+        $spouseType = $data['spouse_type'];
+        $treeId = $data['tree_id'];
+
+        if (!$familyId || !$spousePosition || !$treeId) {
+            throw new Exception('Missing required parameters');
+        }
+
+        $this->db->beginTransaction();
+        try {
+            // For existing person
+            if ($spouseType === 'existing') {
+                if (empty($data['spouse_id'])) {
+                    throw new Exception('spouse_id is required for existing person');
+                }
+                
+                $sql = "UPDATE {$this->family_table} SET {$spousePosition}_id = ? WHERE id = ?";
+                $stmt = $this->db->prepare($sql);
+                $result = $stmt->execute([$data['spouse_id'], $familyId]);
+                
+                if (!$result) {
+                    throw new Exception('Failed to update family with existing spouse');
+                }
+            }
+            // For new person
+            else if ($spouseType === 'new') {
+                if (empty($data['spouse_first_name']) || empty($data['spouse_last_name'])) {
+                    throw new Exception('First name and last name are required for new person');
+                }
+
+                // Insert new person
+                $stmt = $this->db->prepare(
+                    "INSERT INTO {$this->person_table} (first_name, last_name, gender, birth_date, tree_id) 
+                     VALUES (?, ?, ?, ?, ?)"
+                );
+                $stmt->execute([
+                    $data['spouse_first_name'],
+                    $data['spouse_last_name'],
+                    $data['spouse_gender'] ?: ($spousePosition === 'husband' ? 'M' : 'F'),
+                    $data['spouse_birth_date'] ?: null,
+                    $treeId
+                ]);
+                
+                $newSpouseId = $this->db->lastInsertId();
+                
+                // Update family with new spouse
+                $sql = "UPDATE {$this->family_table} SET {$spousePosition}_id = ? WHERE id = ?";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([$newSpouseId, $familyId]);
+            }
+            
+            $this->db->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
 }

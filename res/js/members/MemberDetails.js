@@ -28,6 +28,10 @@ const MemberDetails = ({ treeId, memberId }) => {
     const [showEditOtherRelationship, setShowEditOtherRelationship] = React.useState(false);
     const [editingRelationship, setEditingRelationship] = React.useState(null);
 
+    // Add new state for add spouse modal
+    const [showAddSpouseModal, setShowAddSpouseModal] = React.useState(false);
+    const [editingFamily, setEditingFamily] = React.useState(null);
+
     // Get IDs from props or URL as fallback
     const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
     const currentTreeId = treeId || window.location.hash.split('/')[2];
@@ -427,6 +431,17 @@ const MemberDetails = ({ treeId, memberId }) => {
         }
     };
 
+    const handleEditFamily = async (familyId) => {
+        const family = spouseFamilies.find(f => f.id === familyId);
+        if (!family) return;
+    
+        setEditingFamily({
+            id: familyId,
+            spousePosition: !family.husband_id ? 'husband' : 'wife'
+        });
+        setShowAddSpouseModal(true);
+    };
+
     const renderFamilyTab = (family) => {
         const dropdownItems = [
             family.spouse_id && {
@@ -782,6 +797,17 @@ const MemberDetails = ({ treeId, memberId }) => {
                     alert('Failed to update relationship: ' + error.message);
                 }
             }
+        }),
+        React.createElement(AddSpouseModal, {
+            key: 'add-spouse-modal',
+            show: showAddSpouseModal,
+            onHide: () => {
+                setShowAddSpouseModal(false);
+                setEditingFamily(null);
+            },
+            member: member,
+            familyId: editingFamily?.id,
+            spousePosition: editingFamily?.spousePosition
         })
     ]);
 };

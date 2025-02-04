@@ -107,6 +107,9 @@ class FamiliesAPI {
                 case 'remove_child':
                     $result = $this->removeChildFromFamily($this->requestData);
                     break;
+                case 'add_spouse_to_family':
+                    $result = $this->addSpouseToFamily($this->requestData);
+                    break;
                 default:
                     throw new Exception('Invalid action type');
             }
@@ -175,6 +178,20 @@ class FamiliesAPI {
             $data['child_id'],    // childId should be first
             $data['family_id']    // familyId should be second
         );
+    }
+
+    private function addSpouseToFamily($data) {
+        try {
+            if (!isset($data['family_id'], $data['spouse_position'], $data['tree_id'], $data['spouse_type'])) {
+                throw new Exception('Missing required parameters');
+            }
+
+            $result = $this->familyModel->addSpouseToFamily($data);
+            return ['message' => 'Spouse added successfully'];
+        } catch (Exception $e) {
+            error_log("Error adding spouse: " . $e->getMessage());
+            throw $e;
+        }
     }
 }
 

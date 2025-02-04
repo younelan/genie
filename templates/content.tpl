@@ -50,5 +50,6 @@
     <script src="res/js/components/Autocomplete.js"></script>
     <script src="res/js/components/RelationshipModal.js"></script>
     <script src="res/js/components/EditOtherRelationship.js"></script>
+    <script src="res/js/components/AddSpouseModal.js"></script>
 </body>
 </html>
