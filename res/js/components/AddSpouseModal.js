@@ -4,7 +4,7 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
         spouse_first_name: '',
         spouse_last_name: '',
         spouse_birth_date: '',
-        spouse_gender: ''
+        spouse_gender: spousePosition === 'husband' ? 'M' : 'F'
     });
 
     const handleSpouseTypeChange = (e) => {
@@ -12,7 +12,16 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
         console.log("Setting spouse type to:", newType); // Debug
         setFormData(prev => ({
             ...prev,
-            spouse_type: newType
+            spouse_type: newType,
+            // Reset fields based on type
+            ...(newType === 'existing' ? {
+                spouse_first_name: '',
+                spouse_last_name: '',
+                spouse_birth_date: '',
+                spouse_id: null
+            } : {
+                spouse_id: null
+            })
         }));
     };
 
@@ -62,55 +71,54 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
         }
     };
 
-    const renderContent = () => {
-        console.log("Current spouse type:", formData.spouse_type); // Debug
-        return React.createElement('div', { className: 'tab-pane active' }, [
+    const renderContent = () => (
+        React.createElement('div', { className: 'tab-pane active' }, [
             React.createElement('div', { key: 'type-selector', className: 'mb-3' },
                 React.createElement('div', { className: 'btn-group w-100' }, [
                     React.createElement('input', {
                         key: 'existing',
                         type: 'radio',
                         className: 'btn-check',
-                        name: 'spouse_type',
-                        id: 'existing_spouse',
+                        name: 'add_spouse_type', // Changed to be unique
+                        id: 'add_spouse_existing', // Changed to be unique
                         value: 'existing',
                         checked: formData.spouse_type === 'existing',
-                        onChange: handleSpouseTypeChange
+                        onChange: handleSpouseTypeChange,
+                        autoComplete: 'off'
                     }),
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
-                        htmlFor: 'existing_spouse'
+                        htmlFor: 'add_spouse_existing' // Match new ID
                     }, 'Existing Person'),
                     React.createElement('input', {
                         key: 'new',
                         type: 'radio',
                         className: 'btn-check',
-                        name: 'spouse_type',
-                        id: 'new_spouse',
+                        name: 'add_spouse_type', // Changed to be unique
+                        id: 'add_spouse_new', // Changed to be unique
                         value: 'new',
                         checked: formData.spouse_type === 'new',
-                        onChange: handleSpouseTypeChange
+                        onChange: handleSpouseTypeChange,
+                        autoComplete: 'off'
                     }),
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
-                        htmlFor: 'new_spouse'
+                        htmlFor: 'add_spouse_new' // Match new ID
                     }, 'New Person')
                 ])
             ),
-            formData.spouse_type === 'existing' ? 
-                renderExistingPersonSection() : 
-                renderNewPersonSection()
-        ]);
-    };
+            formData.spouse_type === 'existing' ? renderExistingPersonSection() : renderNewPersonSection()
+        ])
+    );
 
     const renderExistingPersonSection = () => {
-        return React.createElement('div', { 
-            key: 'spouse-existing-section',
-            className: 'form-group mb-3' 
+        return React.createElement('div', {
+            key: 'add-spouse-existing-section',
+            className: 'form-group mb-3'
         }, [
-            React.createElement('label', { 
+            React.createElement('label', {
                 key: 'spouse-label',
-                htmlFor: 'spouse_autocomplete'
+                htmlFor: 'add_spouse_autocomplete' // Changed to be unique
             }, 'Select Existing Person:'),
             React.createElement(Autocomplete, {
                 key: 'spouse-autocomplete',
@@ -211,7 +219,7 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
                     React.createElement('h5', { 
                         key: 'modal-title',
                         className: 'modal-title'
-                    }, `Add ${spousePosition === 'husband' ? 'Husband' : 'Wife'} to Family`),
+                    }, 'Add Spouse to Family'), // Changed title to be generic
                     React.createElement('button', {
                         key: 'close-button',
                         type: 'button',

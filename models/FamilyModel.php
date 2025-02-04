@@ -190,10 +190,11 @@ class FamilyModel {
                     throw new Exception('First name and last name are required for new person');
                 }
 
-                // Insert new person
+                // Insert new person with default values
                 $stmt = $this->db->prepare(
-                    "INSERT INTO {$this->person_table} (first_name, last_name, gender, birth_date, tree_id) 
-                     VALUES (?, ?, ?, ?, ?)"
+                    "INSERT INTO {$this->person_table} 
+                    (first_name, last_name, gender, birth_date, tree_id, alive, created_at, updated_at) 
+                    VALUES (?, ?, ?, ?, ?, 1, NOW(), NOW())"
                 );
                 $stmt->execute([
                     $data['spouse_first_name'],
