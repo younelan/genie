@@ -151,6 +151,14 @@ class IndividualsAPI {
                     $success = $this->memberModel->deleteFamily($familyId);
                     echo json_encode(['success' => $success]);
                     break;
+                case 'delete_relationship':
+                    $relationshipId = $data['relationship_id'] ?? null;
+                    if (!$relationshipId) {
+                        throw new Exception('Relationship ID required');
+                    }
+                    $success = $this->memberModel->deleteRelationship($relationshipId);
+                    echo json_encode(['success' => $success]);
+                    break;
             }
         } catch (Exception $e) {
             $this->sendError($e->getMessage());

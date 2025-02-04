@@ -602,8 +602,15 @@ const MemberDetails = ({ treeId, memberId }) => {
         if (!confirm('Are you sure you want to delete this relationship?')) return;
         
         try {
-            const response = await fetch(`api/relationships.php?id=${relationshipId}`, {
-                method: 'DELETE'
+            const response = await fetch('api/individuals.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'delete_relationship',
+                    relationship_id: relationshipId
+                })
             });
             
             if (response.ok) {
