@@ -186,15 +186,25 @@ const MemberDetails = ({ treeId, memberId }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'removeChild',
+                    type: 'remove_child',  // Add this line to match API expectation
                     child_id: childId,
                     family_id: familyId
                 })
             });
-            if (response.ok) {
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to remove child from family');
+            }
+
+            if (data.success) {
                 loadMemberDetails();
+            } else {
+                throw new Error(data.message || 'Failed to remove child from family');
             }
         } catch (error) {
             console.error('Error removing child:', error);
+            alert('Error removing child: ' + error.message);
         }
     };
 
