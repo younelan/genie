@@ -137,9 +137,14 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
             form.append('member_id', member.id);
             form.append('tree_id', member.tree_id);
             form.append('member_gender', member.gender);
-            form.append('relationship_type', activeTab);
 
-            // Add form data based on active tab
+            // Set relationship_type based on activeTab, except for 'other' tab
+            let relationshipType = activeTab;
+            if (activeTab === 'other' && formData.relationship_type) {
+                relationshipType = formData.relationship_type;
+            }
+            form.append('relationship_type', relationshipType);
+
             switch (activeTab) {
                 case 'spouse':
                     form.append('spouse_type', formData.spouse_type);
@@ -181,7 +186,65 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                         });
                     }
                     break;
-                // ... other cases remain the same ...
+                case 'parent':
+                    form.append('parent1_type', formData.parent1_type);
+                    if (formData.parent1_type === 'existing') {
+                        if (!formData.parent1_id) {
+                            throw new Error('Please select first parent');
+                        }
+                        form.append('parent1_id', formData.parent1_id);
+                    } else {
+                        // For new parent1
+                        if (!formData.parent1_first_name || !formData.parent1_last_name) {
+                            throw new Error('Parent first and last name are required');
+                        }
+                        Object.entries(formData).forEach(([key, value]) => {
+                            if (key.startsWith('parent1_') && value) {
+                                form.append(key, value);
+                            }
+                        });
+                    }
+
+                    // Handle second parent if selected
+                    if (formData.second_parent_option && formData.second_parent_option !== 'none') {
+                        form.append('second_parent_option', formData.second_parent_option);
+                        
+                        if (formData.second_parent_option === 'existing') {
+                            if (!formData.parent2_id) {
+                                throw new Error('Please select second parent');
+                            }
+                            form.append('parent2_id', formData.parent2_id);
+                        } else if (formData.second_parent_option === 'new') {
+                            if (!formData.parent2_first_name || !formData.parent2_last_name) {
+                                throw new Error('Second parent first and last name are required');
+                            }
+                            Object.entries(formData).forEach(([key, value]) => {
+                                if (key.startsWith('parent2_') && value) {
+                                    form.append(key, value);
+                                }
+                            });
+                        }
+                    }
+                    break;
+
+                case 'other':
+                    form.append('other_type', formData.other_type);
+                    if (formData.other_type === 'existing') {
+                        if (!formData.other_id) {
+                            throw new Error('Please select a person');
+                        }
+                        form.append('other_id', formData.other_id);
+                    } else {
+                        if (!formData.other_first_name || !formData.other_last_name) {
+                            throw new Error('Person first and last name are required');
+                        }
+                        Object.entries(formData).forEach(([key, value]) => {
+                            if (key.startsWith('other_') && value) {
+                                form.append(key, value);
+                            }
+                        });
+                    }
+                    break;
             }
 
             const response = await fetch('api/individuals.php', {
@@ -189,13 +252,18 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                 body: form
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Server response:', errorText);
-                throw new Error('Server response was not ok');
+            let result;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                result = await response.json();
+            } else {
+                throw new Error('Expected JSON response but got ' + contentType);
             }
 
-            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'Server response was not ok');
+            }
+
             if (!result.success) {
                 throw new Error(result.message || 'Failed to add relationship');
             }
@@ -421,6 +489,11 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
     };
 
     const renderNewPersonSection = (type) => {
+        const prefix = type === 'spouse' ? 'spouse_' : 
+                      type === 'child' ? 'child_' :
+                      type === 'parent1' ? 'parent1_' :
+                      type === 'parent2' ? 'parent2_' : 'other_';
+
         return React.createElement('div', { 
             key: `${type}-new-section`,
             className: 'form-group mb-3' 
@@ -429,7 +502,7 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                 key: `${type}-first-name`,
                 type: 'text',
                 className: 'form-control mb-2',
-                name: 'first_name',
+                name: `${prefix}first_name`,
                 placeholder: 'First Name',
                 onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
@@ -438,7 +511,7 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                 key: `${type}-last-name`,
                 type: 'text',
                 className: 'form-control mb-2',
-                name: 'last_name',
+                name: `${prefix}last_name`,
                 placeholder: 'Last Name',
                 onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
@@ -447,15 +520,15 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
                 key: `${type}-birth-date`,
                 type: 'date',
                 className: 'form-control mb-2',
-                name: 'birth_date',
+                name: `${prefix}birth_date`,
                 onChange: (e) => handleNewPersonInputChange(e, type)
             }),
             React.createElement('select', {
                 key: `${type}-gender`,
                 className: 'form-control',
-                name: 'gender',
+                name: `${prefix}gender`,
                 onChange: (e) => handleNewPersonInputChange(e, type),
-                value: formData[`${type}_gender`] || ''
+                value: formData[`${prefix}gender`] || ''
             }, [
                 React.createElement('option', { key: 'select', value: '' }, 'Select Gender'),
                 React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
