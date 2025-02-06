@@ -59,7 +59,15 @@ Happy tracking
 
 ## Screenshots
 
-- ![Family List](screenshot/family_list.jpg)
-- ![Relationships](screenshot/relationships.jpg)
-- ![List Trees](screenshot/list_trees.jpg)
+## Family Tree Screenshots
+
+Here are some screenshots related to the Family Tree application:
+
+*   ![Add Parents Dialog](screenshots/AddParentsDialog.jpg)
+*   ![Family Tree Member List](screenshots/FamilyTeeMemberList.jpg)
+*   ![Add Relationship](screenshots/AddRelationship.jpg)
+*   ![Family Tree List](screenshots/FamilyTreeList.jpg)
+*   ![Edit Individual Details](screenshots/EditIndividualDetails.jpg)
+*   ![Individual Families and Parents](screenshots/IndividualFamiliesAndParents.jpg)
+
 
