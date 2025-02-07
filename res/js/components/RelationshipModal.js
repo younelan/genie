@@ -450,27 +450,11 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     onChange: handleSecondParentOptionChange
                 }, [
                     React.createElement('option', { key: 'none', value: 'none' }, 'Single Parent'),
-                    formData.parent1_type === 'existing' && React.createElement('option', { 
-                        key: 'existing', 
-                        value: 'existing_family' 
-                    }, 'Existing Family'),
+                    React.createElement('option', { key: 'existing', value: 'existing' }, 'Existing Person'),
                     React.createElement('option', { key: 'new', value: 'new' }, 'New Parent')
-                ].filter(Boolean)),
+                ]),
 
-                visibilityState.showExistingFamilySelect && React.createElement(Autocomplete, {
-                    key: 'family-autocomplete',
-                    type: 'family',
-                    memberId: member.id,
-                    treeId: member.tree_id,
-                    onSelect: (selected) => {
-                        setFormData(prev => ({
-                            ...prev,
-                            existing_family_id: selected.id
-                        }));
-                    }
-                }),
-
-                visibilityState.showParent2Fields && formData.second_parent_option === 'existing' && 
+                formData.second_parent_option === 'existing' && 
                 React.createElement(Autocomplete, {
                     key: 'parent2-autocomplete',
                     type: 'parent2',
@@ -484,7 +468,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     }
                 }),
 
-                visibilityState.showParent2New && renderNewPersonSection('parent2', true)
+                formData.second_parent_option === 'new' && renderNewPersonSection('parent2', true)
             ])
         ]);
     };
