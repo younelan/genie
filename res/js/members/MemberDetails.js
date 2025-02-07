@@ -747,10 +747,31 @@ const MemberDetails = ({ treeId, memberId }) => {
                 ]),
                 React.createElement(Col, { key: 'col-other', lg: 4 }, 
                     React.createElement(Card, { key: 'other-card' }, [
-                        React.createElement(Card.Header, { key: 'other-header' }, 'Other Relationships'),
+                        React.createElement(Card.Header, { 
+                            key: 'other-header',
+                            className: 'flex justify-between items-center'
+                        }, [
+                            React.createElement('h4', { key: 'title' }, 'Other Relationships'),
+                            React.createElement(Dropdown, {
+                                key: 'other-actions',
+                                trigger: '⚙️',
+                                items: [
+                                    {
+                                        label: '➕ Add Other Relationship',
+                                        onClick: () => {
+                                            setRelationshipModalData({
+                                                tab: 'other',
+                                                prefilledData: null
+                                            });
+                                            setShowRelationshipModal(true);
+                                        }
+                                    }
+                                ]
+                            })
+                        ]),
                         React.createElement(Card.Body, { key: 'other-body' }, 
                             relationships.length === 0 
-                            ? 'No other relationships found'
+                            ? React.createElement('div', { className: 'text-muted' }, 'No other relationships found')
                             : React.createElement('ul', { className: 'list-group' },
                                 relationships.map(rel => 
                                     React.createElement('li', { 
