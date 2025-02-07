@@ -597,37 +597,60 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const renderParents = () => React.createElement(Card, { key: 'parents-card', className: 'mt-3' }, [
-        React.createElement(Card.Header, { key: 'header' }, 'Parents'),
+        React.createElement(Card.Header, { 
+            key: 'header',
+            className: 'flex justify-between items-center'
+        }, [
+            React.createElement('h4', { key: 'title' }, 'Parents'),
+            React.createElement(Dropdown, {
+                key: 'parents-actions',
+                trigger: '⚙️',
+                items: [
+                    {
+                        label: '➕ Add Parents',
+                        onClick: () => {
+                            setRelationshipModalData({
+                                tab: 'parent',
+                                prefilledData: null
+                            });
+                            setShowRelationshipModal(true);
+                        }
+                    }
+                ]
+            })
+        ]),
         React.createElement(Card.Body, { key: 'body' },
-            childFamilies.map(family => 
-                React.createElement('div', { 
-                    key: `family-${family.id}`, 
-                    className: 'd-flex justify-content-between align-items-center mb-2'
-                }, [
+            childFamilies.length === 0 ?
+                React.createElement('div', { className: 'text-muted' }, 'No parents added') :
+                childFamilies.map(family => 
                     React.createElement('div', { 
-                        key: 'parents-names',
-                        className: 'd-flex gap-2' 
+                        key: `family-${family.id}`, 
+                        className: 'd-flex justify-between align-items-center mb-2'
                     }, [
-                        family.husband_id && React.createElement('a', {
-                            key: 'father',
-                            href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
-                            className: 'text-decoration-none'
-                        }, family.husband_name),
-                        (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
-                        family.wife_id && React.createElement('a', {
-                            key: 'mother',
-                            href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
-                            className: 'text-decoration-none'
-                        }, family.wife_name)
-                    ]),
-                    React.createElement('button', {
-                        key: 'delete-button',
-                        className: 'btn btn-sm btn-danger',
-                        onClick: () => handleDeleteFromFamily(family.id),
-                        title: 'Remove parent relationship'
-                    }, '🗑️')
-                ])
-            )
+                        React.createElement('div', { 
+                            key: 'parents-names',
+                            className: 'd-flex gap-2' 
+                        }, [
+                            family.husband_id && React.createElement('a', {
+                                key: 'father',
+                                href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
+                                className: 'text-decoration-none'
+                            }, family.husband_name),
+                            (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
+                            family.wife_id && React.createElement('a', {
+                                key: 'mother',
+                                href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
+                                className: 'text-decoration-none'
+                            }, family.wife_name)
+                        ]),
+                        React.createElement('button', {
+                            key: 'delete-button',
+                            className: 'btn btn-sm btn-danger',
+                            onClick: () => handleDeleteFromFamily(family.id),
+                            title: 'Remove parent relationship'
+                        }, '🗑️')
+                    ])
+                )
         )
     ]);
 
