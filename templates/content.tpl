@@ -7,8 +7,24 @@
     <!-- Add Bootstrap CSS for Card, ListGroup components -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+.card-header {
+ background-color: #1e0a76;
+color: white;
+font-weight: 500;
+font-size: 1.2em;
+}
+.ceard-body {
+background: #a7a2c5
+}
+.bg-primary {
+background: rgb(94 9 113) !important
+}
+.list-group-item {
+background: #dcd8e0;
+color: #2c0a2a;
+}
         body {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
             min-height: 100vh;
             margin: 0;
             padding: 0;
