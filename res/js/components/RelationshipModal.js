@@ -392,6 +392,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     key: 'family-select',
                     className: 'form-control',
                     name: 'family_id',
+                    value: formData.family_id || '', // Add value binding here
                     onChange: handleInputChange
                 }, [
                     React.createElement('option', { 
