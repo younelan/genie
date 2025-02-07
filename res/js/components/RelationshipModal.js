@@ -3,9 +3,10 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
     const [formData, setFormData] = React.useState({
         spouse_type: 'existing',
         child_type: 'existing',
-        parent1_type: 'existing',
+        parent1_type: 'new',  // Changed from 'existing'
         other_type: 'existing',
-        relationship_type: '' // changed from 'spouse'
+        relationship_type: '',
+        second_parent_option: 'new'  // Added this default
     });
 
     const [spouseFamilies, setSpouseFamilies] = React.useState([]);
@@ -446,7 +447,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     key: 'second-parent-select',
                     className: 'form-control mb-3',
                     name: 'second_parent_option',
-                    value: formData.second_parent_option,
+                    value: formData.second_parent_option || 'new', // Default to 'new'
                     onChange: handleSecondParentOptionChange
                 }, [
                     React.createElement('option', { key: 'none', value: 'none' }, 'Single Parent'),
@@ -533,6 +534,11 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                       type === 'parent1' ? 'parent1_' :
                       type === 'parent2' ? 'parent2_' : 'other_';
 
+        // Set default gender for parents
+        const defaultGender = type === 'parent1' ? 'M' : 
+                            type === 'parent2' ? 'F' : 
+                            formData[`${prefix}gender`] || '';
+
         return React.createElement('div', { 
             key: `${type}-new-section`,
             className: 'form-group mb-3' 
@@ -567,7 +573,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 className: 'form-control',
                 name: `${prefix}gender`,
                 onChange: (e) => handleNewPersonInputChange(e, type),
-                value: formData[`${prefix}gender`] || ''
+                value: defaultGender
             }, [
                 React.createElement('option', { key: 'select', value: '' }, 'Select Gender'),
                 React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
