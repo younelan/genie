@@ -1,4 +1,5 @@
-const Dropdown = ({ trigger, items }) => {
+// Rename the component to CustomDropdown to avoid naming conflicts
+const CustomDropdown = ({ trigger, items }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const dropdownRef = React.useRef(null);
 
@@ -41,3 +42,6 @@ const Dropdown = ({ trigger, items }) => {
         ))
     ]);
 };
+
+// Export the renamed component
+window.Dropdown = CustomDropdown;
