@@ -1,5 +1,5 @@
-const RelationshipModal = ({ show, onHide, member, onSave }) => {
-    const [activeTab, setActiveTab] = React.useState('spouse');
+const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse', prefilledData = null }) => {
+    const [activeTab, setActiveTab] = React.useState(initialTab);
     const [formData, setFormData] = React.useState({
         spouse_type: 'existing',
         child_type: 'existing',
@@ -41,6 +41,21 @@ const RelationshipModal = ({ show, onHide, member, onSave }) => {
         };
         loadRelationshipTypes();
     }, []);
+
+    // Add effect to handle prefilled data
+    React.useEffect(() => {
+        if (prefilledData) {
+            setFormData(prev => ({
+                ...prev,
+                ...prefilledData
+            }));
+        }
+    }, [prefilledData]);
+
+    // Add effect to handle initial tab
+    React.useEffect(() => {
+        setActiveTab(initialTab);
+    }, [initialTab]);
 
     const handleAddEmptyFamily = async () => {
         try {

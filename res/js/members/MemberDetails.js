@@ -32,6 +32,12 @@ const MemberDetails = ({ treeId, memberId }) => {
     const [showAddSpouseModal, setShowAddSpouseModal] = React.useState(false);
     const [editingFamily, setEditingFamily] = React.useState(null);
 
+    // Add new state for relationship modal data
+    const [relationshipModalData, setRelationshipModalData] = React.useState({
+        tab: 'spouse',
+        prefilledData: null
+    });
+
     // Get IDs from props or URL as fallback
     const currentMemberId = memberId || window.location.hash.split('/').find(part => /^\d+$/.test(part));
     const currentTreeId = treeId || window.location.hash.split('/')[2];
@@ -442,11 +448,24 @@ const MemberDetails = ({ treeId, memberId }) => {
         setShowAddSpouseModal(true);
     };
 
+    // Update the renderFamilyTab function
     const renderFamilyTab = (family) => {
         const dropdownItems = [
             family.spouse_id && {
                 label: 'View Spouse',
                 href: `#/tree/${currentTreeId}/member/${family.spouse_id}`
+            },
+            {
+                label: 'Add Child',
+                onClick: () => {
+                    setRelationshipModalData({
+                        tab: 'child',
+                        prefilledData: {
+                            family_id: family.id
+                        }
+                    });
+                    setShowRelationshipModal(true);
+                }
             },
             {
                 label: family.spouse_id ? 'Remove Spouse' : 'Add Spouse',
@@ -757,8 +776,13 @@ const MemberDetails = ({ treeId, memberId }) => {
         React.createElement(RelationshipModal, {
             key: 'relationship-modal',
             show: showRelationshipModal,
-            onHide: () => setShowRelationshipModal(false),
+            onHide: () => {
+                setShowRelationshipModal(false);
+                setRelationshipModalData({ tab: 'spouse', prefilledData: null });
+            },
             member: member,
+            initialTab: relationshipModalData.tab,
+            prefilledData: relationshipModalData.prefilledData,
             onSave: handleAddRelationship
         }),
         // Update onSave handler in EditOtherRelationship props
