@@ -57,6 +57,26 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
         setActiveTab(initialTab);
     }, [initialTab]);
 
+    // Update effect to set default family when spouseFamilies load
+    React.useEffect(() => {
+        if (spouseFamilies.length > 0) {
+            setFormData(prev => ({
+                ...prev,
+                family_id: prev.family_id || spouseFamilies[0].id
+            }));
+        }
+    }, [spouseFamilies]);
+
+    // Update effect to set default relationship type when types load
+    React.useEffect(() => {
+        if (relationshipTypes.length > 0) {
+            setFormData(prev => ({
+                ...prev,
+                other_type_id: prev.other_type_id || relationshipTypes[0].id
+            }));
+        }
+    }, [relationshipTypes]);
+
     const handleAddEmptyFamily = async () => {
         try {
             const response = await fetch('api/individuals.php', {
@@ -395,10 +415,6 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     value: formData.family_id || '', // Add value binding here
                     onChange: handleInputChange
                 }, [
-                    React.createElement('option', { 
-                        key: 'select-family',
-                        value: ''
-                    }, '-- Select Family --'),
                     ...familyOptions,
                     React.createElement('option', {
                         key: 'new-family',
@@ -486,15 +502,12 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     name: 'other_type_id',
                     value: formData.other_type_id || '',
                     onChange: handleInputChange
-                }, [
-                    React.createElement('option', { key: 'placeholder', value: '' }, '-- Select Relationship Type --'),
-                    ...relationshipTypes.map(type =>
-                        React.createElement('option', {
-                            key: type.id,
-                            value: type.id
-                        }, type.description)
-                    )
-                ])
+                }, relationshipTypes.map(type =>
+                    React.createElement('option', {
+                        key: type.id,
+                        value: type.id
+                    }, type.description)
+                ))
             ]),
             React.createElement('div', { key: 'type-selector' }, 
                 renderPersonTypeSelector('other')
