@@ -3,8 +3,7 @@
 <head>
     <title>{{ app_title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Add Bootstrap CSS for Card, ListGroup components -->
+    <script src="res/vendor/tailwind/tailwind.js"></script>
     <link href="res/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
 .card-header {
