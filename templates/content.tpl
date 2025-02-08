@@ -30,11 +30,17 @@ background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
             font-family: system-ui, -apple-system, sans-serif;
         }
     </style>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Replace CDN D3 with local version -->
+    <!-- Move D3 before all component scripts -->
+    <script src="res/vendor/d3/d3.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
     <script>
+        // Add D3 check
+        if (typeof d3 === 'undefined') {
+            console.error('D3 library failed to load!');
+        }
         // Pass PHP variables to JavaScript
         window.appTitle = "{{ app_title }}";
         window.appLogo = "{{ app_logo }}";
