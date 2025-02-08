@@ -39,7 +39,37 @@ class TreeAPI {
 
                 case 'get_families':
                     if ($method !== 'GET') $this->sendError('Method not allowed', 405);
-                    $this->getFamilies();
+                    if (!isset($_GET['tree_id'])) {
+                        $this->sendError('tree_id parameter is required', 400);
+                    }
+                    $treeId = intval($_GET['tree_id']);
+                    
+                    // Verify user has access to this tree
+                    $trees = $this->treeModel->getAllTreesByOwner($this->userId);
+                    $hasAccess = false;
+                    foreach ($trees as $tree) {
+                        if ($tree['id'] == $treeId) {
+                            $hasAccess = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!$hasAccess) {
+                        $this->sendError('Access denied', 403);
+                    }
+                    
+                    try {
+                        $result = $this->treeModel->getFamilies($treeId);
+                        // Debug log should use the correct data structure
+                        error_log("API response data: " . json_encode([
+                            'individuals' => count($result['data']['individuals']),
+                            'families' => count($result['data']['families']),
+                            'children' => count($result['data']['children'])
+                        ]));
+                        $this->sendResponse($result); // Already contains success and data keys
+                    } catch (Exception $e) {
+                        $this->sendError($e->getMessage(), 500);
+                    }
                     break;
 
                 case 'details':
@@ -79,7 +109,7 @@ class TreeAPI {
                     $this->sendError('Invalid action', 400);
             }
         } catch (Exception $e) {
-            $this->sendError($e->getMessage());
+            $this->sendError($e->getMessage(), 500);
         }
     }
 

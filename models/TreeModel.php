@@ -104,33 +104,68 @@ class TreeModel extends AppModel
     }    
     public function getFamilies($familyTreeId)
     {
-        // Fetching nodes
-        $nodesSql = "SELECT id, first_name, last_name,gender FROM $this->person_table  WHERE $this->tree_field = :tree_id";
-        $nodesStmt = $this->db->prepare($nodesSql);
-        $nodesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
-        $nodesStmt->execute();
-        $individuals = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            error_log("Getting families for tree: $familyTreeId");
 
-        $familiesSql = "SELECT id,husband_id,wife_id FROM $this->family_table  WHERE $this->tree_field = :tree_id";
-        $familiesStmt = $this->db->prepare($familiesSql);
-        $familiesStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
-        $familiesStmt->execute();
-        $families = $familiesStmt->fetchAll(PDO::FETCH_ASSOC);
+            // Verify tree exists
+            $treeSql = "SELECT * FROM trees WHERE id = :tree_id LIMIT 1";
+            $treeStmt = $this->db->prepare($treeSql);
+            $treeStmt->execute(['tree_id' => $familyTreeId]);
+            if (!$treeStmt->fetch()) {
+                throw new Exception('Tree not found');
+            }
 
+            // Get all individuals
+            $nodesSql = "SELECT id, first_name, last_name, gender, birth_date 
+                        FROM individuals 
+                        WHERE tree_id = :tree_id";
+            $nodesStmt = $this->db->prepare($nodesSql);
+            $nodesStmt->execute(['tree_id' => $familyTreeId]);
+            $individuals = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Found " . count($individuals) . " individuals");
 
-        // Fetching links
-        $childrenSql = "SELECT c.id, c.family_id,c.child_id,f.tree_id 
-                        FROM $this->children_table c
-                        JOIN $this->family_table f ON c.family_id = f.id
-                        WHERE c.$this->tree_field = :tree_id";
-        $childrenStmt = $this->db->prepare($childrenSql);
-        $childrenStmt->bindParam(':tree_id', $familyTreeId, PDO::PARAM_INT);
-        $childrenStmt->execute();
-        $children = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
-        //print_r($children);exit;
-        return ['individuals' => $individuals, 'families' => $families,'children'=>$children];
+            // Get all family relationships
+            $familiesSql = "SELECT f.id, f.husband_id, f.wife_id, f.marriage_date,
+                           h.first_name as husband_first_name, h.last_name as husband_last_name,
+                           w.first_name as wife_first_name, w.last_name as wife_last_name
+                           FROM families f
+                           LEFT JOIN individuals h ON f.husband_id = h.id
+                           LEFT JOIN individuals w ON f.wife_id = w.id
+                           WHERE f.tree_id = :tree_id";
+            $familiesStmt = $this->db->prepare($familiesSql);
+            $familiesStmt->execute(['tree_id' => $familyTreeId]);
+            $families = $familiesStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Found " . count($families) . " families");
+
+            // Get all children relationships
+            $childrenSql = "SELECT fc.id, fc.family_id, fc.child_id,
+                           c.first_name, c.last_name, c.gender, c.birth_date
+                           FROM family_children fc
+                           INNER JOIN families f ON fc.family_id = f.id
+                           INNER JOIN individuals c ON fc.child_id = c.id
+                           WHERE f.tree_id = :tree_id";
+            $childrenStmt = $this->db->prepare($childrenSql);
+            $childrenStmt->execute(['tree_id' => $familyTreeId]);
+            $children = $childrenStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Found " . count($children) . " child relationships");
+
+            return [
+                'success' => true,
+                'data' => [
+                    'individuals' => $individuals,
+                    'families' => $families,
+                    'children' => $children
+                ]
+            ];
+
+        } catch (PDOException $e) {
+            error_log("Database error in getFamilies: " . $e->getMessage());
+            error_log("SQL State: " . $e->errorInfo[0]);
+            error_log("Error Code: " . $e->errorInfo[1]);
+            error_log("Message: " . $e->errorInfo[2]);
+            throw $e;
+        }
     }
-
 
     private function buildTree(array &$elements, $parentId = null)
     {
@@ -289,7 +324,7 @@ class TreeModel extends AppModel
             $stmt = $this->db->prepare("DELETE FROM $this->relation_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 
-            // Delete all individuals
+            // Delete all individuals - Fix the syntax error here
             $stmt = $this->db->prepare("DELETE FROM $this->person_table WHERE tree_id = ?");
             $stmt->execute([$treeId]);
 

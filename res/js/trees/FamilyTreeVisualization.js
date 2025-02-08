@@ -12,8 +12,11 @@ const FamilyTreeVisualization = ({ treeId }) => {
         try {
             const response = await fetch(`api/trees.php?action=get_families&tree_id=${treeId}`);
             if (!response.ok) throw new Error('Failed to fetch family data');
-            const jsonData = await response.json();
-            setData(jsonData);
+            const jsonResponse = await response.json();
+            if (!jsonResponse.success) {
+                throw new Error(jsonResponse.error || 'Failed to fetch family data');
+            }
+            setData(jsonResponse.data); // Extract the data from the response
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -21,8 +24,33 @@ const FamilyTreeVisualization = ({ treeId }) => {
         }
     };
 
+    const loadTreeData = async () => {
+        try {
+            const response = await fetch(`api/trees.php?action=get_families&tree_id=${treeId}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to load tree data');
+            }
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load tree data');
+            }
+            return data.data;
+        } catch (error) {
+            console.error('Error loading tree:', error);
+            setError(`Error loading tree: ${error.message}`);
+            return null;
+        }
+    };
+
     React.useEffect(() => {
         if (!data || !svgRef.current) return;
+
+        // Add D3 check
+        if (typeof d3 === 'undefined') {
+            setError('D3 library is not loaded');
+            return;
+        }
 
         try {
             d3.select(svgRef.current).selectAll("*").remove();
