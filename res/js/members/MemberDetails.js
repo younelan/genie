@@ -730,26 +730,28 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     // Move renderRelationship here to access relationshipTypes from state
     const renderRelationship = (rel) => {
-        console.log("Relationship data:", rel); // Debug relationship object
-        console.log("Available types:", relationshipTypes); // Debug available types
-
         const otherPerson = rel.person_id1 === parseInt(currentMemberId) 
             ? `${rel.person2_first_name} ${rel.person2_last_name}`
             : `${rel.person1_first_name} ${rel.person1_last_name}`;
 
-        const relType = relationshipTypes[rel.relcode];
-        console.log("Found relationship type:", relType); // Debug found type
+        const otherPersonId = rel.person_id1 === parseInt(currentMemberId) 
+            ? rel.person_id2 
+            : rel.person_id1;
 
         return React.createElement('li', {
             key: `rel-${rel.id}`,
             className: 'list-group-item d-flex justify-content-between align-items-center'
         }, [
             React.createElement('div', { key: 'info' }, [
-                React.createElement('span', { key: 'name' }, otherPerson),
+                React.createElement('a', {
+                    key: 'name',
+                    href: `#/tree/${currentTreeId}/member/${otherPersonId}`,
+                    className: 'text-decoration-none'
+                }, otherPerson),
                 React.createElement('span', { 
                     key: 'type', 
                     className: 'text-muted ms-2' 
-                }, `(${rel.description})`) // Use description directly from relationship object
+                }, `(${rel.description})`)
             ]),
             React.createElement('div', { key: 'actions' }, [
                 React.createElement('button', {
