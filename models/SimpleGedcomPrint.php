@@ -98,10 +98,10 @@ class GEDCOMImporter
 $importer = new GEDCOMImporter($config);
 
 // Specify the path to the GEDCOM file
-$filePath = 'test.ged';
+$filePath = 'kennedy.ged';
 
 // Specify the family tree ID you want to import into
-$familyTreeId = 1; // Example ID
+$familyTreeId = 10; // Example ID
 
 // Import the GEDCOM content
 $importer->import($filePath, $familyTreeId);

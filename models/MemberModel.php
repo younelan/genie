@@ -33,10 +33,12 @@ class MemberModel extends AppModel
         $lastName = $new_member['lastName'] ?? null;
         $dateOfBirth = $new_member['dateOfBirth'] ?? null;
         $placeOfBirth = $new_member['placeOfBirth'] ?? null;
+        $dateOfDeath = $new_member['dateOfDeath'] ?? null;  // Add this line
+        $placeOfDeath = $new_member['placeOfDeath'] ?? null;  // Add this line
         $gender = $new_member['gender'] ?? null;  // Changed from gender_id to gender
         $alive = $new_member['alive'] ?? 1;
 
-        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, gender, alive, created_at, updated_at) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :gender, :alive, NOW(), NOW())";
+        $query = "INSERT INTO $this->person_table  (tree_id, first_name, last_name, birth_date, birth_place, death_date, death_place, gender, alive, created_at, updated_at) VALUES (:tree_id, :first_name, :last_name, :birth_date, :birth_place, :death_date, :death_place, :gender, :alive, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         $result = $stmt->execute([
             'tree_id' => $treeId,
@@ -44,6 +46,8 @@ class MemberModel extends AppModel
             'last_name' => $lastName,
             'birth_date' => $dateOfBirth ? $dateOfBirth : null,
             'birth_place' => $placeOfBirth ? $placeOfBirth : null,
+            'death_date' => $dateOfDeath ? $dateOfDeath : null,  // Add this line
+            'death_place' => $placeOfDeath ? $placeOfDeath : null,  // Add this line
             'gender' => $gender,
             'alive' => $alive,
         ]);
