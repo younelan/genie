@@ -17,6 +17,7 @@ require_once "$basedir/AppBase.php";
 //require_once "$basedir/models/Auth.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
+require_once "$basedir/models/GedcomModel.php";
 require_once "$basedir/models/MemberModel.php";
 require_once "$basedir/models/FamilyModel.php";
 #require_once "$basedir/controllers/TreeController.php";
