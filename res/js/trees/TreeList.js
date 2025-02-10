@@ -1,11 +1,4 @@
-const AppFooter = () => {
-  return React.createElement('footer', {
-    className: 'bg-white border-t border-gray-200 fixed bottom-0 w-full'
-  }, React.createElement('div', {
-    className: 'max-w-7xl mx-auto px-4 py-3 text-center text-sm text-gray-600'
-  }, `© ${new Date().getFullYear()} ${window.companyName} - ${window.footerText}`));
-};
-
+// Remove AppFooter component
 const TreeList = () => {
   const [trees, setTrees] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -318,7 +311,7 @@ const TreeList = () => {
   const mainContent = [
     React.createElement('main', {
       key: 'main',
-      className: 'container mx-auto px-4 py-8 mt-16 mb-16'
+      className: 'container mx-auto px-4 py-8 mt-16 flex-grow' // Add flex-grow here
     }, [
       // Remove header section completely
       React.createElement('div', {
@@ -349,20 +342,25 @@ const TreeList = () => {
         'Create New Family Tree'
       ]))
     ]),
-    React.createElement(AppFooter, { key: 'footer' }),
+    React.createElement(Footer, { key: 'footer' }),
     React.createElement(AddTreeModal, { key: 'modal' })
   ];
 
   if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
   if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
 
-  return React.createElement('div', { className: 'container-fluid' }, [
+  return React.createElement('div', { 
+    className: 'min-h-screen flex flex-col' // Keep min-height and flex
+  }, [
     React.createElement(Navigation, { 
         key: 'nav',
         title: 'Family Trees',
         rightMenuItems: Navigation.createUserMenu()
     }),
-    React.createElement(React.Fragment, null, mainContent)
+    React.createElement('div', { 
+        key: 'content',
+        className: 'flex flex-col flex-grow' // Add flex-grow here
+    }, mainContent)
   ]);
 };
 

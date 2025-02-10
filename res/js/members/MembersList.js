@@ -103,7 +103,7 @@ const MembersList = () => {
     const mainContent = [
         React.createElement('main', { 
             key: 'main',
-            className: 'container mx-auto px-4 py-16 mt-16 mb-16'
+            className: 'container mx-auto px-4 py-16 mt-16 flex-grow' // Add flex-grow here
         }, [
             React.createElement(Row, { key: 'row' }, [
                 // Members List Column
@@ -178,19 +178,24 @@ const MembersList = () => {
                 )
             ])
         ]),
-        React.createElement(AppFooter, { key: 'footer' })
+        React.createElement(Footer, { key: 'footer' })
     ];
 
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
     if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
 
-    return React.createElement('div', { className: 'container-fluid' }, [
+    return React.createElement('div', { 
+        className: 'min-h-screen flex flex-col' // Keep min-height and flex
+    }, [
         React.createElement(Navigation, { 
             key: 'nav',
             title: 'Family Members',
             leftMenuItems: Navigation.createTreeMenu(treeId),
             rightMenuItems: Navigation.createUserMenu()
         }),
-        React.createElement(React.Fragment, null, mainContent)
+        React.createElement('div', { 
+            key: 'content',
+            className: 'flex flex-col flex-grow' // Add flex-grow here
+        }, mainContent)
     ]);
 };

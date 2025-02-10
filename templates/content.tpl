@@ -74,6 +74,7 @@ background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
     <!-- Load custom components after global declarations -->
     <script src="res/js/components/Dropdown.js"></script>
     <script src="res/js/components/Navigation.js"></script>
+    <script src="res/js/components/Footer.js"></script>
     <script src="res/js/components/TagInput.js"></script>
     <script src="res/js/components/Autocomplete.js"></script>
     <script src="res/js/components/ErrorBoundary.js"></script>
