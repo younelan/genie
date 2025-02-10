@@ -220,37 +220,49 @@ const TreeList = () => {
 
   // Move createDropdownItems before treeCard
   const createDropdownItems = (tree) => [
-    React.createElement('a', {
-      key: 'view',
-      href: `#/tree/${tree.id}/members`,
-      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
-    }, 'View Members'),
-    React.createElement('a', {
-      key: 'edit',
-      href: `#/tree/${tree.id}/edit`,
-      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
-    }, 'Edit Settings'),
-    React.createElement('a', {
-      key: 'synonyms',
-      href: `#/tree/${tree.id}/synonyms`,
-      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
-    }, 'Manage Synonyms'),
-    React.createElement('a', {
-      key: 'export',
-      href: `api/trees.php?action=export_gedcom&tree_id=${tree.id}`,
-      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
-    }, 'Export GEDCOM'),
-    React.createElement('button', {
-      key: 'empty',
+    {
+      label: 'View Members',
+      onClick: (e) => {
+        e.preventDefault();
+        window.location.hash = `#/tree/${tree.id}/members`;
+      }
+    },
+    {
+      label: 'Edit Settings',
+      onClick: (e) => {
+        e.preventDefault();
+        window.location.hash = `#/tree/${tree.id}/edit`;
+      }
+    },
+    {
+      label: 'Manage Synonyms',
+      onClick: (e) => {
+        e.preventDefault();
+        window.location.hash = `#/tree/${tree.id}/synonyms`;
+      }
+    },
+    {
+      label: 'Export GEDCOM',
+      onClick: (e) => {
+        e.preventDefault();
+        window.location = `api/trees.php?action=export_gedcom&tree_id=${tree.id}`;
+      }
+    },
+    {
+      label: 'Empty Tree',
       onClick: () => handleEmptyTree(tree.id),
-      className: 'w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50'
-    }, 'Empty Tree'),
-    React.createElement('button', {
-      key: 'delete',
+      className: 'text-orange-600 hover:bg-orange-50'
+    },
+    {
+      label: 'Delete Tree',
       onClick: () => deleteTree(tree.id),
-      className: 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50'
-    }, 'Delete Tree')
-  ];
+      className: 'text-red-600 hover:bg-red-50'
+    }
+  ].map(item => React.createElement('button', {
+    key: item.label,
+    onClick: item.onClick,
+    className: `w-full text-left px-4 py-2 text-sm ${item.className || 'text-gray-700 hover:bg-gray-100'}`
+  }, item.label));
 
   const treeCard = (tree) => React.createElement('div', {
     key: tree.id,
