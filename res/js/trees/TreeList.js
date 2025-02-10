@@ -270,6 +270,11 @@ const TreeList = () => {
               href: `#/tree/${tree.id}/edit`,
               className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
             }, 'Edit Settings'),
+            React.createElement('a', {
+              key: 'export',
+              href: `api/trees.php?action=export_gedcom&tree_id=${tree.id}`,
+              className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+            }, 'Export GEDCOM'),
             React.createElement('button', {
               key: 'empty',
               onClick: () => handleEmptyTree(tree.id),

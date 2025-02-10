@@ -202,6 +202,14 @@ Navigation.createTreeMenu = (treeId) => ([
             e.preventDefault();
             window.location.hash = `#/tree/${treeId}/edit`;
         }
+    },
+    { 
+        label: 'Export GEDCOM', 
+        href: `api/trees.php?action=export_gedcom&tree_id=${treeId}`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.href = `api/trees.php?action=export_gedcom&tree_id=${treeId}`;
+        }
     }
 ]);
 

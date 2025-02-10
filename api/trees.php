@@ -3,6 +3,7 @@ require_once '../init.php';
 
 class TreeAPI {
     private $treeModel;
+    private $gedcomModel;  // Add GedcomModel property
     private $userId;
 
     public function __construct($config) {
@@ -13,6 +14,7 @@ class TreeAPI {
             exit;
         }
         $this->treeModel = new TreeModel($config);
+        $this->gedcomModel = new GedcomModel($config);
     }
 
     private function sendError($message, $code = 400) {
@@ -95,6 +97,11 @@ class TreeAPI {
                 case 'empty':
                     if ($method !== 'POST') $this->sendError('Method not allowed', 405);
                     $this->emptyTree();
+                    break;
+
+                case 'export_gedcom':
+                    if ($method !== 'GET') $this->sendError('Method not allowed', 405);
+                    $this->exportGedcom();
                     break;
 
                 case '':
@@ -290,6 +297,45 @@ class TreeAPI {
             }
         } catch (Exception $e) {
             $this->sendError($e->getMessage());
+        }
+    }
+
+    private function exportGedcom() {
+        $treeId = $_GET['tree_id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
+        }
+
+        // Verify user has access to this tree
+        $trees = $this->treeModel->getAllTreesByOwner($this->userId);
+        $tree = null;
+        foreach ($trees as $t) {
+            if ($t['id'] == $treeId) {
+                $tree = $t;
+                break;
+            }
+        }
+        
+        if (!$tree) {
+            $this->sendError('Access denied', 403);
+        }
+
+        try {
+            $gedcom = $this->gedcomModel->exportGedcom($treeId);
+            
+            // Set headers for file download
+            header('Content-Type: text/plain');
+            header('Content-Disposition: attachment; filename="' . 
+                   preg_replace('/[^a-zA-Z0-9_-]/', '', $tree['name']) . 
+                   '_export.ged"');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            
+            echo $gedcom;
+            exit;
+
+        } catch (Exception $e) {
+            $this->sendError('Failed to export GEDCOM: ' . $e->getMessage(), 500);
         }
     }
 }

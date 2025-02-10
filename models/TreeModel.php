@@ -115,8 +115,9 @@ class TreeModel extends AppModel
                 throw new Exception('Tree not found');
             }
 
-            // Get all individuals
-            $nodesSql = "SELECT id, first_name, last_name, gender, birth_date 
+            // Update individual query to include all relevant fields
+            $nodesSql = "SELECT id, first_name, last_name, gender, birth_date, birth_place, 
+                               death_date, death_place, alive, data
                         FROM individuals 
                         WHERE tree_id = :tree_id";
             $nodesStmt = $this->db->prepare($nodesSql);
@@ -124,10 +125,11 @@ class TreeModel extends AppModel
             $individuals = $nodesStmt->fetchAll(PDO::FETCH_ASSOC);
             error_log("Found " . count($individuals) . " individuals");
 
-            // Get all family relationships
-            $familiesSql = "SELECT f.id, f.husband_id, f.wife_id, f.marriage_date,
-                           h.first_name as husband_first_name, h.last_name as husband_last_name,
-                           w.first_name as wife_first_name, w.last_name as wife_last_name
+            // Update families query to include all relevant fields
+            $familiesSql = "SELECT f.id, f.husband_id, f.wife_id, f.marriage_date, 
+                                  f.marriage_place_id, f.divorce_date, f.divorce_place_id, f.data,
+                                  h.first_name as husband_first_name, h.last_name as husband_last_name,
+                                  w.first_name as wife_first_name, w.last_name as wife_last_name
                            FROM families f
                            LEFT JOIN individuals h ON f.husband_id = h.id
                            LEFT JOIN individuals w ON f.wife_id = w.id
