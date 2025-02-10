@@ -2,15 +2,25 @@
 
 class GedcomModel extends AppModel {
     private $treeModel;
+    private $individualModel;
+    private $familyModel;
+    private $db;
     private $appSource = "GEDCOM";
     private $appName = "Genie";
     private $appCorp = "Opensitez";
     private $appVersion = "5.5";
+    private $tree_table = "trees";
+    private $individual_table = "individuals";
+    private $family_table = "families";
+    private $child_table = "family_children";
     private $appEncoding = "UTF-8";
     private $warnings = [];
 
     public function __construct($config) {
+        $this->db = $config['connection'];
         $this->treeModel = new TreeModel($config);
+        $this->individualModel = new MemberModel($config);
+        $this->familyModel = new FamilyModel($config);
     }
 
     private function sanitizeGedcomString($string) {
@@ -175,4 +185,167 @@ class GedcomModel extends AppModel {
 
         return $gedcom;
     }
+
+    public function import($filePath, $options=[]) 
+    {
+        $treeId = $options['tree_id'] ?? null;
+        if (!$treeId) throw new Exception('Tree ID is required');
+
+        try {
+            $parser = new \Gedcom\Parser();
+            $gedcom = $parser->parse($filePath);
+        } catch (Exception $e) {
+            error_log("GEDCOM Parse error: " . $e->getMessage());
+            throw new Exception("Failed to parse GEDCOM file: " . $e->getMessage());
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            $idMap = []; // Maps GEDCOM IDs to new database IDs
+            $stats = ['individuals' => 0, 'families' => 0];
+
+            // First pass: Create all individuals
+            foreach ($gedcom->getIndi() as $individual) {
+                try {
+                    $names = $individual->getName();
+                    if (empty($names)) {
+                        error_log("Skipping individual without name: " . $individual->getId());
+                        continue;
+                    }
+
+                    $name = reset($names);
+                    $events = $individual->getAllEven();
+                    
+                    $birthDate = null;
+                    $birthPlace = null;
+                    $deathDate = null;
+                    $deathPlace = null;
+                    
+                    foreach ($events as $event) {
+                        if (is_array($event)) $event = reset($event);
+                        try {
+                            switch ($event->getType()) {
+                                case 'BIRT':
+                                    $birthDate = $event->getDate();
+                                    $plac = $event->getPlac();
+                                    $birthPlace = $plac ? $plac->getPlac() : null;
+                                    // Convert date to proper format if needed
+                                    if ($birthDate) {
+                                        $birthDate = date('Y-m-d', strtotime($birthDate));
+                                    }
+                                    break;
+                                case 'DEAT':
+                                    $deathDate = $event->getDate();
+                                    $plac = $event->getPlac();
+                                    $deathPlace = $plac ? $plac->getPlac() : null;
+                                    // Convert date to proper format if needed
+                                    if ($deathDate) {
+                                        $deathDate = date('Y-m-d', strtotime($deathDate));
+                                    }
+                                    break;
+                            }
+                        } catch (Exception $e) {
+                            error_log("Error processing event for individual {$individual->getId()}: " . $e->getMessage());
+                        }
+                    }
+
+                    // Create new member using MemberModel
+                    $newMember = [
+                        'treeId' => $treeId,
+                        'firstName' => $name->getGivn() ?: '',
+                        'lastName' => $name->getSurn() ?: '',
+                        'gender' => $individual->getSex() ?: 'U',
+                        'dateOfBirth' => $birthDate,
+                        'placeOfBirth' => $birthPlace,
+                        'dateOfDeath' => $deathDate,
+                        'placeOfDeath' => $deathPlace,
+                        'alive' => empty($deathDate) ? 1 : 0,
+                        'gedcom_id' => $individual->getId()
+                    ];
+
+                    error_log("Adding individual: " . json_encode($newMember));
+                    $newId = $this->individualModel->addMember($newMember);
+                    
+                    if (!$newId) {
+                        throw new Exception("Failed to create individual record");
+                    }
+                    
+                    $idMap[$individual->getId()] = $newId;
+                    $stats['individuals']++;
+
+                } catch (Exception $e) {
+                    error_log("Error processing individual {$individual->getId()}: " . $e->getMessage());
+                    throw $e;
+                }
+            }
+
+            // Second pass: Create families
+            foreach ($gedcom->getFam() as $family) {
+                try {
+                    $husbId = $family->getHusb();
+                    $wifeId = $family->getWife();
+                    
+                    // Get marriage info
+                    $marriageDate = null;
+                    $events = $family->getAllEven();
+                    foreach ($events as $event) {
+                        if (is_array($event)) $event = reset($event);
+                        if ($event->getType() === 'MARR') {
+                            $marriageDate = $event->getDate();
+                            if ($marriageDate) {
+                                $marriageDate = date('Y-m-d', strtotime($marriageDate));
+                            }
+                        }
+                    }
+
+                    // Create family using FamilyModel
+                    $familyData = [
+                        'tree_id' => $treeId,
+                        'husband_id' => $husbId ? ($idMap[$husbId] ?? null) : null,
+                        'wife_id' => $wifeId ? ($idMap[$wifeId] ?? null) : null,
+                        'marriage_date' => $marriageDate
+                    ];
+
+                    error_log("Creating family: " . json_encode($familyData));
+                    $familyId = $this->familyModel->createFamily($familyData);
+                    
+                    if (!$familyId) {
+                        throw new Exception("Failed to create family record");
+                    }
+
+                    $stats['families']++;
+
+                    // Add children to family
+                    foreach ($family->getChil() as $childId) {
+                        if (isset($idMap[$childId])) {
+                            $success = $this->familyModel->addChildToFamily(
+                                $familyId, 
+                                $idMap[$childId],
+                                $treeId
+                            );
+                            if (!$success) {
+                                error_log("Failed to add child $childId to family $familyId");
+                            }
+                        } else {
+                            error_log("Child ID $childId not found in ID map");
+                        }
+                    }
+
+                } catch (Exception $e) {
+                    error_log("Error processing family: " . $e->getMessage());
+                    throw $e;
+                }
+            }
+
+            $this->db->commit();
+            return $stats;
+
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("GEDCOM Import failed: " . $e->getMessage());
+            throw new Exception("GEDCOM Import failed: " . $e->getMessage());
+        }
+    }
+
 }

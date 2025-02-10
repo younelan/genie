@@ -104,6 +104,11 @@ class TreeAPI {
                     $this->exportGedcom();
                     break;
 
+                case 'import_gedcom':
+                    if ($method !== 'POST') $this->sendError('Method not allowed', 405);
+                    $this->importGedcom();
+                    break;
+
                 case 'get_synonyms':
                     if ($method !== 'GET') $this->sendError('Method not allowed', 405);
                     $this->getSynonyms();
@@ -360,6 +365,49 @@ class TreeAPI {
 
         } catch (Exception $e) {
             $this->sendError('Failed to export GEDCOM: ' . $e->getMessage(), 500);
+        }
+    }
+
+    private function importGedcom() {
+        if (empty($_FILES['file']) || $_FILES['file']['error']) {
+            $this->sendError('No file uploaded or upload error');
+        }
+
+        if (empty($_POST['name'])) {
+            $this->sendError('Tree name is required');
+        }
+
+        try {
+            // Create new tree
+            $treeId = $this->treeModel->addTree(
+                $this->userId,
+                $_POST['name'],
+                'Imported from GEDCOM file'
+            );
+
+            if (!$treeId) {
+                throw new Exception('Failed to create tree');
+            }
+
+            // Import GEDCOM data
+            $result = $this->gedcomModel->import($_FILES['file']['tmp_name'], [
+                'tree_id' => $treeId
+            ]);
+
+            $this->sendResponse([
+                'success' => true,
+                'data' => [
+                    'tree_id' => $treeId,
+                    'stats' => $result
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            // If import fails, try to delete the tree
+            if (isset($treeId)) {
+                $this->treeModel->deleteTreeWithData($treeId, $this->userId);
+            }
+            $this->sendError($e->getMessage());
         }
     }
 

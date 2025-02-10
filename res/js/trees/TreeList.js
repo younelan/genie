@@ -4,6 +4,7 @@ const TreeList = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [showAddModal, setShowAddModal] = React.useState(false);
+  const [showImportModal, setShowImportModal] = React.useState(false);
 
   React.useEffect(() => {
     fetchTrees();
@@ -188,6 +189,108 @@ const TreeList = () => {
     );
   };
 
+  const ImportTreeModal = () => {
+    if (!showImportModal) return null;
+
+    const [formData, setFormData] = React.useState({ 
+      name: '',
+      file: null
+    });
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('file', formData.file);
+
+      try {
+        const response = await fetch('api/trees.php?action=import_gedcom', {
+          method: 'POST',
+          body: data
+        });
+        
+        if (!response.ok) throw new Error('Failed to import GEDCOM');
+        const result = await response.json();
+        
+        if (result.success) {
+          setShowImportModal(false);
+          setFormData({ name: '', file: null });
+          fetchTrees();
+        }
+      } catch (err) {
+        console.error('Error importing GEDCOM:', err);
+        alert(err.message);
+      }
+    };
+
+    return React.createElement('div', {
+      className: 'fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50'
+    },
+      React.createElement('div', {
+        className: 'bg-white rounded-xl shadow-2xl w-full max-w-md mx-4'
+      }, [
+        React.createElement('div', {
+          key: 'modal-header',
+          className: 'px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl'
+        }, [
+          React.createElement('h3', {
+            className: 'text-xl font-semibold text-white'
+          }, 'Import GEDCOM File'),
+          React.createElement('button', {
+            onClick: () => setShowImportModal(false),
+            className: 'text-white hover:text-blue-100 text-2xl font-bold'
+          }, '×')
+        ]),
+        React.createElement('form', {
+          onSubmit: handleSubmit,
+          className: 'p-6 space-y-4'
+        }, [
+          React.createElement('div', {
+            className: 'space-y-2'
+          }, [
+            React.createElement('label', {
+              className: 'text-sm font-medium text-gray-700'
+            }, 'Tree Name'),
+            React.createElement('input', {
+              type: 'text',
+              value: formData.name,
+              onChange: (e) => setFormData(prev => ({ ...prev, name: e.target.value })),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-md',
+              required: true
+            })
+          ]),
+          React.createElement('div', {
+            className: 'space-y-2'
+          }, [
+            React.createElement('label', {
+              className: 'text-sm font-medium text-gray-700'
+            }, 'GEDCOM File'),
+            React.createElement('input', {
+              type: 'file',
+              accept: '.ged',
+              onChange: (e) => setFormData(prev => ({ ...prev, file: e.target.files[0] })),
+              className: 'w-full',
+              required: true
+            })
+          ]),
+          React.createElement('div', {
+            className: 'flex justify-end gap-3 mt-6'
+          }, [
+            React.createElement('button', {
+              type: 'button',
+              onClick: () => setShowImportModal(false),
+              className: 'px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md'
+            }, 'Cancel'),
+            React.createElement('button', {
+              type: 'submit',
+              className: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md'
+            }, 'Import')
+          ])
+        ])
+      ])
+    );
+  };
+
   const Dropdown = ({ children }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const dropdownRef = React.useRef(null);
@@ -339,29 +442,49 @@ const TreeList = () => {
 
       // New Tree button moved below grid
       React.createElement('div', {
-        key: 'add-button-container',
-        className: 'text-center'
-      }, React.createElement('button', {
-        className: 'inline-flex items-center px-6 py-3 bg-primary hover:opacity-90 text-white rounded shadow transition-colors',
-        onClick: () => setShowAddModal(true)
+        key: 'buttons-container',
+        className: 'flex justify-center gap-4'
       }, [
-        React.createElement('svg', {
-          key: 'icon',
-          className: 'w-5 h-5 mr-2',
-          fill: 'none',
-          viewBox: '0 0 24 24',
-          stroke: 'currentColor'
-        }, React.createElement('path', {
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-          strokeWidth: 2,
-          d: 'M12 4v16m8-8H4'
-        })),
-        'Create New Family Tree'
-      ]))
+        React.createElement('button', {
+          className: 'inline-flex items-center px-6 py-3 bg-primary hover:opacity-90 text-white rounded shadow transition-colors',
+          onClick: () => setShowAddModal(true)
+        }, [
+          React.createElement('svg', {
+            key: 'icon',
+            className: 'w-5 h-5 mr-2',
+            fill: 'none',
+            viewBox: '0 0 24 24',
+            stroke: 'currentColor'
+          }, React.createElement('path', {
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            strokeWidth: 2,
+            d: 'M12 4v16m8-8H4'
+          })),
+          'Create New Family Tree'
+        ]),
+        React.createElement('button', {
+          className: 'inline-flex items-center px-6 py-3 bg-green-600 hover:opacity-90 text-white rounded shadow',
+          onClick: () => setShowImportModal(true)
+        }, [
+          React.createElement('svg', {
+            className: 'w-5 h-5 mr-2',
+            fill: 'none',
+            viewBox: '0 0 24 24',
+            stroke: 'currentColor'
+          }, React.createElement('path', {
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            strokeWidth: 2,
+            d: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'
+          })),
+          'Import GEDCOM'
+        ])
+      ])
     ]),
     React.createElement(Footer, { key: 'footer' }),
-    React.createElement(AddTreeModal, { key: 'modal' })
+    React.createElement(AddTreeModal, { key: 'add-modal' }),
+    showImportModal && React.createElement(ImportTreeModal, { key: 'import-modal' })
   ];
 
   if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
