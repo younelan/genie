@@ -6,17 +6,19 @@ Check out [The README file](README.md) for more info
 	* tags for relationships
 	* User registration 
 	* Add permission for users
-	* gedcom write
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
 
 # current
     - No simplicity for auth, now react
-    - closed: gedcom read
+    - Gedcom Support
+        - closed: gedcom import
+        - closed: gedcom export
 	- Simplicity
 		- Auth
 		- Config
+    - Bump to 0.4 as Gedcom Support works
 ## 20250210
      - updated version to v0.3, ui rewrite
      - unified navigation component with menus
