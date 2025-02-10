@@ -259,8 +259,11 @@ DROP TABLE IF EXISTS `tags`;
 CREATE TABLE `tags` (
   `tag_id` int NOT NULL AUTO_INCREMENT,
   `tag` varchar(100)  NOT NULL,
-  `person_id` int DEFAULT NULL,
+  `tag_type` varchar(100)  NOT NULL,
+  `row_id` int DEFAULT NULL,
   `tree_id` int NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
   PRIMARY KEY (`tag_id`)
 );
 

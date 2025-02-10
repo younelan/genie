@@ -1,20 +1,19 @@
-const TagInput = ({ memberId, treeId }) => {
+const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
     const [tags, setTags] = React.useState([]);
     const [inputValue, setInputValue] = React.useState('');
 
     React.useEffect(() => {
-        if (memberId) {
+        if (rowId) {
             loadTags();
-            setInputValue(''); // Reset input value when member changes
+            setInputValue('');
         }
-    }, [memberId]);
+    }, [rowId]);
 
     const loadTags = async () => {
         try {
-            const response = await fetch(`api/individuals.php?action=tags&member_id=${memberId}`);
+            const response = await fetch(`api/individuals.php?action=tags&member_id=${rowId}&tag_type=${tagType}`);
             const data = await response.json();
             if (data.success && data.data.tags) {
-                // Split tags and filter out empty strings
                 const tagArray = data.data.tags.split(',')
                     .map(t => t.trim())
                     .filter(Boolean);
@@ -33,8 +32,9 @@ const TagInput = ({ memberId, treeId }) => {
             const postData = {
                 action: 'add_tag',
                 tag: tag.trim(),
-                member_id: memberId,
-                tree_id: treeId
+                member_id: rowId,
+                tree_id: treeId,
+                tag_type: tagType
             };
 
             const response = await fetch('api/individuals.php', {
@@ -62,8 +62,9 @@ const TagInput = ({ memberId, treeId }) => {
             const postData = {
                 action: 'delete_tag',
                 tag: tagToDelete.trim(),
-                member_id: memberId,
-                tree_id: treeId
+                member_id: rowId,
+                tree_id: treeId,
+                tag_type: tagType
             };
 
             const response = await fetch('api/individuals.php', {

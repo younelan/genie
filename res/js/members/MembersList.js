@@ -8,6 +8,7 @@ const MembersList = () => {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
     const treeId = window.location.hash.split('/')[2];
+    const [activeTab, setActiveTab] = React.useState(0);
 
     React.useEffect(() => {
         loadMembers();
@@ -103,9 +104,36 @@ const MembersList = () => {
     const mainContent = [
         React.createElement('main', { 
             key: 'main',
-            className: 'container mx-auto px-4 py-16 mt-16 flex-grow' // Add flex-grow here
+            // Remove top margin and reduce padding
+            className: 'container mx-auto px-0 lg:px-4 py-2 flex-grow'
         }, [
-            React.createElement(Row, { key: 'row' }, [
+            // Mobile tabs - adjust position to stick right under nav
+            React.createElement('div', {
+                key: 'mobile-tabs',
+                // Adjust top position to align with navigation
+                className: 'lg:hidden sticky top-[3.5rem] bg-white z-10 shadow-sm'
+            }, [
+                React.createElement('div', {
+                    className: 'flex bg-gray-100'
+                }, [
+                    ['Members', 'Statistics', 'Updates'].map((tab, index) =>
+                        React.createElement('button', {
+                            key: `tab-${index}`,
+                            onClick: () => setActiveTab(index),
+                            className: `flex-1 py-3 ${activeTab === index 
+                                ? 'bg-primary text-white font-medium' 
+                                : 'text-gray-600 hover:bg-gray-200'}`
+                        }, tab)
+                    )
+                ])
+            ]),
+
+            // Desktop view (3 columns)
+            React.createElement(Row, { 
+                key: 'desktop-view',
+                // Add top margin for desktop view only
+                className: 'hidden lg:flex lg:gap-4 lg:mt-16'
+            }, [
                 // Members List Column
                 React.createElement(Col, { key: 'members-col', lg: 4, className: 'mb-4' },
                     React.createElement(Card, { key: 'members-card' }, [
@@ -170,6 +198,89 @@ const MembersList = () => {
                 // Recent Updates Column
                 React.createElement(Col, { key: 'updates-col', lg: 4, className: 'mb-4' },
                     React.createElement(Card, { key: 'updates-card' }, [
+                        React.createElement(Card.Header, { key: 'updates-header' }, 'Recent Updates'),
+                        React.createElement(Card.Body, { key: 'updates-body' },
+                            renderRecentUpdates()
+                        )
+                    ])
+                )
+            ]),
+
+            // Mobile view - adjust padding to account for new tab position
+            React.createElement('div', {
+                key: 'mobile-view',
+                className: 'lg:hidden pt-12'
+            }, [
+                activeTab === 0 && React.createElement('div', { className: 'w-full' },
+                    React.createElement(Card, { 
+                        key: 'members-card',
+                        className: 'border-0 rounded-none'
+                    }, [
+                        React.createElement(Card.Header, { key: 'members-header' }, 'Family Members'),
+                        React.createElement(Card.Body, { key: 'members-body' }, [
+                            React.createElement('input', {
+                                key: 'search-input',
+                                type: 'text',
+                                placeholder: 'Search by name...',
+                                value: searchQuery,
+                                onChange: handleSearch,
+                                className: 'form-control mb-3'
+                            }),
+                            React.createElement(ListGroup, { key: 'members-list' },
+                                members.map(member =>
+                                    React.createElement(ListGroup.Item, {
+                                        key: `member-${member.id}`,
+                                        action: true,
+                                        onClick: () => handleMemberClick(member.id)
+                                    }, `${member.gender === 'M' ? '♂️' : '♀️'} ${member.first_name} ${member.last_name}`)
+                                )
+                            ),
+                            totalPages > 1 && React.createElement(Nav, { key: 'pagination', className: 'mt-3' },
+                                [...Array(totalPages)].map((_, i) =>
+                                    React.createElement(Nav.Item, { key: `page-${i}` },
+                                        React.createElement(Nav.Link, {
+                                            onClick: () => setPage(i + 1),
+                                            disabled: page === i + 1
+                                        }, i + 1)
+                                    )
+                                )
+                            )
+                        ])
+                    ])
+                ),
+                activeTab === 1 && React.createElement('div', { className: 'w-full' },
+                    React.createElement(Card, { 
+                        key: 'stats-card',
+                        className: 'border-0 rounded-none'
+                    }, [
+                        React.createElement(Card.Header, { key: 'stats-header' }, 'Statistics'),
+                        React.createElement(Card.Body, { key: 'stats-body' },
+                            Object.entries(stats).map(([category, data], index) =>
+                                React.createElement('div', { key: `stat-category-${index}` },
+                                    React.createElement('h6', { key: `stat-title-${index}` }, category),
+                                    React.createElement(ListGroup, { key: `stat-list-${index}`, className: 'mb-3' },
+                                        Object.entries(data).map(([key, value], subIndex) =>
+                                            React.createElement(ListGroup.Item, {
+                                                key: `stat-item-${index}-${subIndex}`,
+                                                className: 'd-flex justify-content-between align-items-center'
+                                            }, 
+                                            key, 
+                                            React.createElement('span', {
+                                                key: `stat-value-${index}-${subIndex}`,
+                                                className: 'badge bg-primary rounded-pill'
+                                            }, value))
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ])
+                ),
+                activeTab === 2 && React.createElement('div', { className: 'w-full' },
+                    React.createElement(Card, { 
+                        key: 'updates-card',
+                        className: 'border-0 rounded-none'
+                    }, [
                         React.createElement(Card.Header, { key: 'updates-header' }, 'Recent Updates'),
                         React.createElement(Card.Body, { key: 'updates-body' },
                             renderRecentUpdates()
