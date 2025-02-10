@@ -31,8 +31,14 @@ const TreeList = () => {
       const response = await fetch(`api/trees.php?action=delete&id=${treeId}`, {
         method: 'DELETE'
       });
-      if (!response.ok) throw new Error('Failed to delete tree');
-      await fetchTrees();
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to delete tree');
+      }
+      
+      await fetchTrees(); // Only refresh if deletion was successful
+      
     } catch (err) {
       console.error('Error deleting tree:', err);
       alert(err.message);

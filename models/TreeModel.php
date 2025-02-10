@@ -66,11 +66,15 @@ class TreeModel extends AppModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function deleteTree($treeId, $ownerId)
-    {
-        $query = "DELETE FROM $this->tree_table  WHERE id = :tree_id AND owner_id = :owner_id";
-        $stmt = $this->db->prepare($query);
-        return $stmt->execute(['tree_id' => $treeId, 'owner_id' => $ownerId]);
+    public function deleteTree($treeId, $ownerId) {
+        try {
+            // Only delete the tree if it exists and belongs to the owner
+            $stmt = $this->db->prepare("DELETE FROM $this->tree_table WHERE id = ? AND owner_id = ?");
+            $result = $stmt->execute([$treeId, $ownerId]);
+            return $result && $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function getMembersByTreeId($treeId, $offset, $limit, $orderby='')
@@ -301,34 +305,46 @@ class TreeModel extends AppModel
         try {
             $this->db->beginTransaction();
 
-            // Only proceed if user owns the tree
+            // First verify ownership
             $stmt = $this->db->prepare("SELECT id FROM $this->tree_table WHERE id = ? AND owner_id = ?");
             $stmt->execute([$treeId, $ownerId]);
             if (!$stmt->fetch()) {
+                $this->db->rollBack();
                 return false;
             }
 
-            // Delete all tags for this tree
-            $stmt = $this->db->prepare("DELETE FROM $this->notes_table WHERE tree_id = ?");
-            $stmt->execute([$treeId]);
+            // Delete family_children through families join first
+            $stmt = $this->db->prepare("
+                DELETE fc 
+                FROM family_children fc
+                INNER JOIN families f ON fc.family_id = f.id
+                WHERE f.tree_id = ?
+            ");
+            if (!$stmt->execute([$treeId])) {
+                $this->db->rollBack();
+                return false;
+            }
 
-            // Delete all child relationships
-            $stmt = $this->db->prepare("DELETE fc FROM $this->children_table fc
-                                      INNER JOIN $this->family_table f ON fc.family_id = f.id
-                                      WHERE f.tree_id = ?");
-            $stmt->execute([$treeId]);
+            // Then delete remaining data in specific order
+            $tables = [
+                'synonyms',
+                'citations',
+                'notes',
+                'media',
+                //'source_links',
+                'tags',
+                'families',
+                'other_relationships',
+                'individuals'
+            ];
 
-            // Delete all families
-            $stmt = $this->db->prepare("DELETE FROM $this->family_table WHERE tree_id = ?");
-            $stmt->execute([$treeId]);
-
-            // Delete all other relationships
-            $stmt = $this->db->prepare("DELETE FROM $this->relation_table WHERE tree_id = ?");
-            $stmt->execute([$treeId]);
-
-            // Delete all individuals - Fix the syntax error here
-            $stmt = $this->db->prepare("DELETE FROM $this->person_table WHERE tree_id = ?");
-            $stmt->execute([$treeId]);
+            foreach ($tables as $table) {
+                $stmt = $this->db->prepare("DELETE FROM $table WHERE $this->tree_field = ?");
+                if (!$stmt->execute([$treeId])) {
+                    $this->db->rollBack();
+                    return false;
+                }
+            }
 
             $this->db->commit();
             return true;
@@ -377,5 +393,32 @@ class TreeModel extends AppModel
         $stmt = $this->db->prepare($query);
         $stmt->execute(['tree_id' => $treeId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deleteTreeWithData($treeId, $ownerId) {
+        try {
+            // First verify ownership
+            $stmt = $this->db->prepare("SELECT id FROM $this->tree_table WHERE id = ? AND owner_id = ?");
+            $stmt->execute([$treeId, $ownerId]);
+            if (!$stmt->fetch()) {
+                return false;
+            }
+
+            // First empty all related data
+            $emptied = $this->emptyTree($treeId, $ownerId);
+            if (!$emptied) {
+                return false;
+            }
+            
+            // Then delete the tree record itself
+            $stmt = $this->db->prepare("DELETE FROM $this->tree_table WHERE id = ? AND owner_id = ?");
+            $deleted = $stmt->execute([$treeId, $ownerId]);
+            
+            return $deleted && $stmt->rowCount() > 0;
+            
+        } catch (Exception $e) {
+            error_log("Error deleting tree: " . $e->getMessage());
+            return false;
+        }
     }
 }

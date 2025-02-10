@@ -286,18 +286,22 @@ class TreeAPI {
         $treeId = $_GET['id'] ?? null;
         
         if (!$treeId) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Tree ID required']);
+            $this->sendError('Tree ID required', 400);
             return;
         }
-        
-        $success = $this->treeModel->deleteTree($treeId, $this->userId);
-        
-        if ($success) {
-            echo json_encode(['success' => true]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['error' => 'Failed to delete tree']);
+
+        try {
+            // Let the model handle all the logic
+            $success = $this->treeModel->deleteTreeWithData($treeId, $this->userId);
+            
+            if (!$success) {
+                throw new Exception('Failed to delete tree');
+            }
+            
+            $this->sendResponse(['success' => true]);
+            
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage(), 500);
         }
     }
 
