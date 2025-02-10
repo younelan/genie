@@ -87,6 +87,7 @@ background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
     <script src="res/js/trees/FamilyTreeVisualization.js"></script>
     <script src="res/js/members/DescendantsView.js"></script>
     <script src="res/js/trees/EditTree.js"></script>
+    <script src="res/js/trees/SynonymManager.js"></script>
     <script src="res/js/members/AddMember.js"></script>
     <script src="res/js/app.js"></script>
 </body>

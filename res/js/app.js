@@ -20,6 +20,8 @@ const App = () => {
         } else if (/^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/.test(hash)) {
             const [, treeId, memberId] = hash.match(/^#\/tree\/(\d+)\/member\/(\d+)\/descendants$/);
             componentToRender = React.createElement(DescendantsView, { treeId, memberId });
+        } else if (/^#\/tree\/(\d+)\/synonyms$/.test(hash)) {
+            componentToRender = React.createElement(SynonymManager);
         } else {
             componentToRender = React.createElement(TreeList);
         }

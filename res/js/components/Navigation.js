@@ -196,6 +196,14 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
+        label: 'Manage Synonyms', 
+        href: `#/tree/${treeId}/synonyms`,
+        onClick: (e) => {
+            e.preventDefault();
+            window.location.hash = `#/tree/${treeId}/synonyms`;
+        }
+    },
+    { 
         label: 'Tree Settings', 
         href: `#/tree/${treeId}/edit`,
         onClick: (e) => {

@@ -104,6 +104,26 @@ class TreeAPI {
                     $this->exportGedcom();
                     break;
 
+                case 'get_synonyms':
+                    if ($method !== 'GET') $this->sendError('Method not allowed', 405);
+                    $this->getSynonyms();
+                    break;
+
+                case 'add_synonym':
+                    if ($method !== 'POST') $this->sendError('Method not allowed', 405);
+                    $this->addSynonym();
+                    break;
+
+                case 'update_synonym':
+                    if ($method !== 'PUT') $this->sendError('Method not allowed', 405);
+                    $this->updateSynonym();
+                    break;
+
+                case 'delete_synonym':
+                    if ($method !== 'DELETE') $this->sendError('Method not allowed', 405);
+                    $this->deleteSynonym();
+                    break;
+
                 case '':
                     if ($method === 'GET') {
                         $this->getTrees(); // Default action for GET
@@ -336,6 +356,89 @@ class TreeAPI {
 
         } catch (Exception $e) {
             $this->sendError('Failed to export GEDCOM: ' . $e->getMessage(), 500);
+        }
+    }
+
+    private function getSynonyms() {
+        $treeId = $_GET['tree_id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
+        }
+
+        try {
+            $synonyms = $this->treeModel->getAllSynonyms($treeId);
+            $this->sendResponse([
+                'success' => true,
+                'data' => $synonyms
+            ]);
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
+        }
+    }
+
+    private function addSynonym() {
+        $treeId = $_GET['tree_id'] ?? null;
+        if (!$treeId) {
+            $this->sendError('Tree ID is required');
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data['key']) || !isset($data['value'])) {
+            $this->sendError('Key and value are required');
+        }
+
+        try {
+            $success = $this->treeModel->addSynonym($treeId, $data['key'], $data['value']);
+            if ($success) {
+                $this->sendResponse(['success' => true]);
+            } else {
+                $this->sendError('Failed to add synonym');
+            }
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
+        }
+    }
+
+    private function updateSynonym() {
+        $synonymId = $_GET['id'] ?? null;
+        $treeId = $_GET['tree_id'] ?? null;
+        if (!$synonymId || !$treeId) {
+            $this->sendError('Synonym ID and Tree ID are required');
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data['key']) || !isset($data['value'])) {
+            $this->sendError('Key and value are required');
+        }
+
+        try {
+            $success = $this->treeModel->updateSynonym($synonymId, $treeId, $data['key'], $data['value']);
+            if ($success) {
+                $this->sendResponse(['success' => true]);
+            } else {
+                $this->sendError('Failed to update synonym');
+            }
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
+        }
+    }
+
+    private function deleteSynonym() {
+        $synonymId = $_GET['id'] ?? null;
+        $treeId = $_GET['tree_id'] ?? null;
+        if (!$synonymId || !$treeId) {
+            $this->sendError('Synonym ID and Tree ID are required');
+        }
+
+        try {
+            $success = $this->treeModel->deleteSynonym($synonymId, $treeId);
+            if ($success) {
+                $this->sendResponse(['success' => true]);
+            } else {
+                $this->sendError('Failed to delete synonym');
+            }
+        } catch (Exception $e) {
+            $this->sendError($e->getMessage());
         }
     }
 }

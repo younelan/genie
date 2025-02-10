@@ -337,4 +337,45 @@ class TreeModel extends AppModel
             throw $e;
         }
     }
+
+    public function addSynonym($treeId, $key, $value) {
+        $query = "INSERT INTO $this->synonym_table (tree_id, `key`, `value`) 
+                  VALUES (:tree_id, :key, :value)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'tree_id' => $treeId,
+            'key' => trim($key),
+            'value' => trim($value)
+        ]);
+    }
+
+    public function updateSynonym($synonymId, $treeId, $key, $value) {
+        $query = "UPDATE $this->synonym_table 
+                  SET `key` = :key, `value` = :value 
+                  WHERE syn_id = :id AND tree_id = :tree_id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'id' => $synonymId,
+            'tree_id' => $treeId,
+            'key' => trim($key),
+            'value' => trim($value)
+        ]);
+    }
+
+    public function deleteSynonym($synonymId, $treeId) {
+        $query = "DELETE FROM $this->synonym_table 
+                  WHERE syn_id = :id AND tree_id = :tree_id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'id' => $synonymId,
+            'tree_id' => $treeId
+        ]);
+    }
+
+    public function getAllSynonyms($treeId) {
+        $query = "SELECT * FROM $this->synonym_table WHERE tree_id = :tree_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['tree_id' => $treeId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
