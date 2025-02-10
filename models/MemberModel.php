@@ -6,7 +6,6 @@ class MemberModel extends AppModel
 
     private $person_table = 'individuals';
     private $relation_table = 'other_relationships';
-    private $relation_type_table = 'relationship_type';
     private $notes_table = 'tags';
     private $tree_table = 'trees';
     private $synonym_table;
@@ -92,12 +91,18 @@ class MemberModel extends AppModel
         $stmt->bindParam(':alive', $alive);
         return $stmt->execute();
     }
+
     public function getRelationshipTypes($tree_id = 1)
     {
-        $query = "SELECT id, description FROM $this->relation_type_table WHERE tree_id = :tree_id";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['tree_id' => $tree_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Instead of querying DB, just return formatted config array
+        $types = [];
+        foreach ($this->config['relationship_types'] as $code => $info) {
+            $types[] = [
+                'code' => $code,
+                'description' => $info['description']
+            ];
+        }
+        return $types;
     }
 
     public function getMemberById($memberId)
@@ -224,31 +229,50 @@ class MemberModel extends AppModel
         }
     }
 
-    public function getMemberRelationships($memberId)
-    {
-        $query = "SELECT pr.id, p1.first_name AS person1_first_name, p1.last_name AS person1_last_name, 
-                         p2.first_name AS person2_first_name, p2.last_name AS person2_last_name, 
-                         pr.relationship_type_id,
-                         p1.id as person1_id, p2.id as person2_id, pr.relation_start, pr.relation_end,
-                         rt.description AS relationship_description
-                  FROM $this->relation_table  pr
-                  INNER JOIN $this->person_table p1 ON pr.person_id1 = p1.id
-                  INNER JOIN $this->person_table p2 ON pr.person_id2 = p2.id
-                  INNER JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
-                  WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
+    public function getMemberRelationships($memberId) {
+        $query = "SELECT r.id, 
+                         r.person_id1, r.person_id2,
+                         p1.first_name as person1_first_name, 
+                         p1.last_name as person1_last_name,
+                         p2.first_name as person2_first_name, 
+                         p2.last_name as person2_last_name,
+                         r.relcode,
+                         r.relation_start,
+                         r.relation_end
+                  FROM $this->relation_table r
+                  JOIN $this->person_table p1 ON r.person_id1 = p1.id
+                  JOIN $this->person_table p2 ON r.person_id2 = p2.id
+                  WHERE r.person_id1 = :memberId 
+                  OR r.person_id2 = :memberId";
+    
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':memberId', $memberId);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute(['memberId' => $memberId]);
+        $relationships = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        error_log("Available relationship types: " . print_r($this->config['relationship_types'], true));
+        
+        foreach ($relationships as &$rel) {
+            error_log("Processing relationship with relcode: " . $rel['relcode']);
+            if (isset($this->config['relationship_types'][$rel['relcode']])) {
+                $rel['description'] = $this->config['relationship_types'][$rel['relcode']]['description'];
+                error_log("Found description: " . $rel['description']);
+            } else {
+                error_log("No description found for relcode: " . $rel['relcode']);
+                $rel['description'] = 'Unknown';
+            }
+        }
+    
+        return $relationships;
     }
+
     public function updateMemberRelationship($relationship)
     {
         $relationshipId = $relationship['relationshipId'] ?? null;
-        $relationshipTypeId = $relationship['relationshipTypeId'] ?? null;
+        $relcode = $relationship['relcode'] ?? null;
         $relationStart = $relationship['relationStart'] ?? null;
         $relationEnd = $relationship['relationEnd'] ?? null;
 
-        if (!$relationshipId || !$relationshipTypeId) {
+        if (!$relationshipId || !$relcode) {
             return false;
         }
 
@@ -257,13 +281,13 @@ class MemberModel extends AppModel
         $relationEnd = $relationEnd ?: null;
 
         $query = "UPDATE $this->relation_table 
-                  SET relationship_type_id = :relationship_type_id, 
+                  SET relcode = :relcode, 
                       relation_start = :relation_start, 
                       relation_end = :relation_end,
                       updated_at = NOW()
                   WHERE id = :id";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':relationship_type_id', $relationshipTypeId);
+        $stmt->bindParam(':relcode', $relcode);
         $stmt->bindParam(':relation_start', $relationStart);
         $stmt->bindParam(':relation_end', $relationEnd);
         $stmt->bindParam(':id', $relationshipId);
@@ -273,26 +297,37 @@ class MemberModel extends AppModel
 
     public function getRelationships($memberId)
     {
-        $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, rt.description, 
+        $query = "SELECT pr.id, p1.first_name as person1_name, p2.first_name as person2_name, pr.relcode,
                          p1.id as person1_id, p2.id as person2_id
-                  FROM $this->relation_table  pr
-                  JOIN $this->person_table  p1 ON pr.person_id1 = p1.id
-                  JOIN $this->person_table  p2 ON pr.person_id2 = p2.id
-                  JOIN $this->relation_type_table  rt ON pr.relationship_type_id = rt.id
-                  ORDER BY pr.relationship_type_id 
+                  FROM $this->relation_table pr
+                  JOIN $this->person_table p1 ON pr.person_id1 = p1.id
+                  JOIN $this->person_table p2 ON pr.person_id2 = p2.id
+                  ORDER BY pr.relcode
                   WHERE pr.person_id1 = :memberId OR pr.person_id2 = :memberId";
         $stmt = $this->db->prepare($query);
         $stmt->execute(['memberId' => $memberId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Add relationship description from config lookup
+        foreach ($rows as &$row) {
+            $row['description'] = $this->config['relationship_types'][$row['relcode']]['description'] ?? 'Unknown';
+        }
+        return $rows;
     }
-    public function addRelationship($personId1, $personId2, $relationshipTypeId, $treeId)
+
+    public function addRelationship($personId1, $personId2, $relcode, $treeId)
     {
-        $query = "INSERT INTO $this->relation_table  (person_id1, person_id2, relationship_type_id,tree_id,created_at, updated_at) VALUES (:person_id1, :person_id2, :relationship_type_id,:tree_id, NOW(), NOW())";
+        // Validate relcode exists in config
+        if (!isset($this->config['relationship_types'][$relcode])) {
+            throw new Exception('Invalid relationship code');
+        }
+
+        $query = "INSERT INTO $this->relation_table (person_id1, person_id2, relcode, tree_id, created_at, updated_at) 
+                  VALUES (:person_id1, :person_id2, :relcode, :tree_id, NOW(), NOW())";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([
             'person_id1' => $personId1,
             'person_id2' => $personId2,
-            'relationship_type_id' => $relationshipTypeId,
+            'relcode' => $relcode,
             'tree_id' => $treeId
         ]);
     }
@@ -347,6 +382,31 @@ class MemberModel extends AppModel
     public function getSpouseFamilies($memberId) {
     // First get the families
     $query = "SELECT 
+        f.*,
+        CASE 
+            WHEN p.id = f.husband_id THEN 
+                COALESCE(CONCAT(w.first_name, ' ', w.last_name), 'Unknown Spouse')
+            ELSE 
+                COALESCE(CONCAT(h.first_name, ' ', h.last_name), 'Unknown Spouse')
+        END as spouse_name,
+        CASE 
+            WHEN p.id = f.husband_id THEN w.id
+            ELSE h.id
+        END as spouse_id,
+        CASE 
+            WHEN p.id = f.husband_id THEN 'F'
+            ELSE 'M'
+        END as spouse_gender,
+        f.marriage_date, 
+        f.divorce_date
+    FROM $this->person_table p
+    JOIN $this->families_table f ON (f.husband_id = p.id OR f.wife_id = p.id)
+    LEFT JOIN $this->person_table h ON f.husband_id = h.id
+    LEFT JOIN $this->person_table w ON f.wife_id = w.id
+    WHERE p.id = :member_id 
+    AND f.tree_id = p.tree_id";
+    
+    $stmt = $query = "SELECT 
         f.*,
         CASE 
             WHEN p.id = f.husband_id THEN 
@@ -838,28 +898,32 @@ public function updateFamilySpouse($data)
     }
 
     public function updateRelationship($data) {
-        if (empty($data['id'])) {
+        error_log("Updating relationship with data: " . print_r($data, true));
+        
+        if (empty($data['id']) || empty($data['relcode'])) {
+            error_log("Missing required data for update");
             return false;
         }
-
-        // Convert empty strings to NULL for dates
-        $startDate = !empty($data['relation_start']) ? $data['relation_start'] : null;
-        $endDate = !empty($data['relation_end']) ? $data['relation_end'] : null;
-
+    
         $query = "UPDATE $this->relation_table 
-                  SET relationship_type_id = :type_id,
+                  SET relcode = :relcode,
                       relation_start = :start_date,
-                      relation_end = :end_date,
-                      updated_at = NOW()
+                      relation_end = :end_date
                   WHERE id = :id";
-
+    
+        $params = [
+            'id' => $data['id'],
+            'relcode' => $data['relcode'],
+            'start_date' => $data['relation_start'],
+            'end_date' => $data['relation_end']
+        ];
+    
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([
-            'type_id' => $data['relationship_type_id'],
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'id' => $data['id']
-        ]);
+        $result = $stmt->execute($params);
+        
+        error_log("Update result: " . ($result ? 'success' : 'failure'));
+        
+        return $result;
     }
 
     public function removeFamilySpouse($familyId, $currentMemberId) {
@@ -921,5 +985,42 @@ public function updateFamilySpouse($data)
             error_log("Error deleting family: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    public function getRelationshipDetail($relationshipId) {
+        $stmt = $this->db->prepare("SELECT relcode, relation_start, relation_end, person1_first_name, person1_last_name, person2_first_name, person2_last_name FROM relationships WHERE id = ?");
+        $stmt->execute([$relationshipId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+        // Use relcode from row for lookup. If not available, fall back if needed.
+        $relcode = $row['relcode'] ?? null;
+        $relationshipInfo = $this->config['relationship_types'][$relcode] ?? ['description' => 'Unknown'];
+    
+        return [
+            'relcode'        => $relcode,
+            'description'    => $relationshipInfo['description'],
+            'relation_start' => $row['relation_start'],
+            'relation_end'   => $row['relation_end'],
+            'person1'        => trim($row['person1_first_name'] . ' ' . $row['person1_last_name']),
+            'person2'        => trim($row['person2_first_name'] . ' ' . $row['person2_last_name'])
+        ];
+    }
+
+    protected function convertRelationshipRecord($row) {
+        $relcode = $row['relcode'] ?? null;
+        $relationshipInfo = $this->config['relationship_types'][$relcode] ?? ['description' => 'Unknown'];
+        return [
+            'id'             => $row['id'],
+            'relcode'        => $relcode,
+            'description'    => $relationshipInfo['description'],
+            'relation_start' => $row['relation_start'],
+            'relation_end'   => $row['relation_end'],
+            'person1_first_name' => $row['person1_first_name'],
+            'person1_last_name'  => $row['person1_last_name'],
+            'person2_first_name' => $row['person2_first_name'],
+            'person2_last_name'  => $row['person2_last_name']
+        ];
     }
 }

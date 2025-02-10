@@ -22,7 +22,8 @@ const MemberDetails = ({ treeId, memberId }) => {
     
     // Add these new state variables at the top with other state declarations
     const [relationships, setRelationships] = React.useState([]);
-    const [relationshipTypes, setRelationshipTypes] = React.useState([]);
+    // NEW: add relationship types state as a lookup object keyed by code
+    const [relationshipTypes, setRelationshipTypes] = React.useState({});
 
     // Add new state variables for edit modal
     const [showEditOtherRelationship, setShowEditOtherRelationship] = React.useState(false);
@@ -76,6 +77,19 @@ const MemberDetails = ({ treeId, memberId }) => {
             setShowDeathFields(!aliveValue);
         }
     }, [member]);
+
+    React.useEffect(() => {
+        // Load relationship types from app endpoint
+        fetch('api/app.php?action=relationship_types')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.types) {
+                    // data.types is already an object with code => {description} structure
+                    setRelationshipTypes(data.types);
+                }
+            })
+            .catch(err => console.error('Error loading relationship types:', err));
+    }, []);
 
     const loadMemberDetails = async () => {
         try {
@@ -714,6 +728,44 @@ const MemberDetails = ({ treeId, memberId }) => {
         }
     };
 
+    // Move renderRelationship here to access relationshipTypes from state
+    const renderRelationship = (rel) => {
+        console.log("Relationship data:", rel); // Debug relationship object
+        console.log("Available types:", relationshipTypes); // Debug available types
+
+        const otherPerson = rel.person_id1 === parseInt(currentMemberId) 
+            ? `${rel.person2_first_name} ${rel.person2_last_name}`
+            : `${rel.person1_first_name} ${rel.person1_last_name}`;
+
+        const relType = relationshipTypes[rel.relcode];
+        console.log("Found relationship type:", relType); // Debug found type
+
+        return React.createElement('li', {
+            key: `rel-${rel.id}`,
+            className: 'list-group-item d-flex justify-content-between align-items-center'
+        }, [
+            React.createElement('div', { key: 'info' }, [
+                React.createElement('span', { key: 'name' }, otherPerson),
+                React.createElement('span', { 
+                    key: 'type', 
+                    className: 'text-muted ms-2' 
+                }, `(${rel.description})`) // Use description directly from relationship object
+            ]),
+            React.createElement('div', { key: 'actions' }, [
+                React.createElement('button', {
+                    key: 'edit',
+                    className: 'btn btn-sm btn-link',
+                    onClick: () => handleEditOtherRelationship(rel)
+                }, '✏️'),
+                React.createElement('button', {
+                    key: 'delete',
+                    className: 'btn btn-sm btn-link text-danger',
+                    onClick: () => handleDeleteRelationship(rel.id)
+                }, '🗑️')
+            ])
+        ]);
+    };
+
     if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
     if (error) {
         // Add home link to error state
@@ -774,42 +826,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                             ? React.createElement('div', { className: 'text-muted' }, 'No other relationships found')
                             : React.createElement('ul', { className: 'list-group' },
                                 relationships.map(rel => 
-                                    React.createElement('li', { 
-                                        key: `rel-${rel.id}`,
-                                        className: 'list-group-item d-flex justify-content-between align-items-center'
-                                    }, [
-                                        React.createElement('span', { key: 'rel-desc' }, [
-                                            `${rel.person1_id === parseInt(currentMemberId) 
-                                                ? rel.person2_first_name + ' ' + rel.person2_last_name 
-                                                : rel.person1_first_name + ' ' + rel.person1_last_name}`,
-                                            React.createElement('small', { 
-                                                key: 'rel-type',
-                                                className: 'text-muted ms-2'
-                                            }, `(${rel.relationship_description})`)
-                                        ]),
-                                        React.createElement('div', { key: 'actions' }, [
-                                            React.createElement('button', {
-                                                key: 'edit',
-                                                className: 'btn btn-sm btn-link',
-                                                onClick: () => handleEditOtherRelationship(rel)
-                                            }, '✏️'),
-                                            React.createElement('button', {
-                                                key: 'view',
-                                                className: 'btn btn-sm btn-link',
-                                                onClick: () => {
-                                                    const otherId = rel.person1_id === parseInt(currentMemberId) 
-                                                        ? rel.person2_id 
-                                                        : rel.person1_id;
-                                                    window.location.hash = `#/tree/${currentTreeId}/member/${otherId}`;
-                                                }
-                                            }, '👁️'),
-                                            React.createElement('button', {
-                                                key: 'delete',
-                                                className: 'btn btn-sm btn-link text-danger',
-                                                onClick: () => handleDeleteRelationship(rel.id)
-                                            }, '🗑️')
-                                        ])
-                                    ])
+                                    renderRelationship(rel)
                                 )
                             )
                         )
@@ -846,7 +863,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            relationship_type_id: formData.relationship_type,
+                            relcode: formData.relcode,  // Changed from relationship_type_id
                             relation_start: formData.relation_start || null,
                             relation_end: formData.relation_end || null
                         })

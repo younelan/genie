@@ -141,9 +141,9 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
             className: 'form-group mb-3' 
         }, [
             React.createElement('div', { key: 'name-fields', className: 'mb-3' }, [
-                React.createElement('label', { key: 'first-name-label' }, 'First Name'),
+                React.createElement('label', { key: 'first-name-label', htmlFor: 'spouse_first_name' }, 'First Name'),
                 React.createElement('input', {
-                    key: 'first-name',
+                    key: 'first-name-input',
                     type: 'text',
                     className: 'form-control mb-2',
                     name: 'spouse_first_name',
@@ -152,9 +152,9 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
                     onChange: handleInputChange,
                     required: true
                 }),
-                React.createElement('label', { key: 'last-name-label' }, 'Last Name'),
+                React.createElement('label', { key: 'last-name-label', htmlFor: 'spouse_last_name' }, 'Last Name'),
                 React.createElement('input', {
-                    key: 'last-name',
+                    key: 'last-name-input',
                     type: 'text',
                     className: 'form-control',
                     name: 'spouse_last_name',
@@ -167,7 +167,7 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
             React.createElement('div', { key: 'birth-date-field', className: 'mb-3' }, [
                 React.createElement('label', { key: 'birth-date-label' }, 'Birth Date'),
                 React.createElement('input', {
-                    key: 'birth-date',
+                    key: 'birth-date-input',
                     type: 'date',
                     className: 'form-control',
                     name: 'spouse_birth_date',
@@ -178,7 +178,7 @@ const AddSpouseModal = ({ show, onHide, member, familyId, spousePosition }) => {
             React.createElement('div', { key: 'gender-field', className: 'mb-3' }, [
                 React.createElement('label', { key: 'gender-label' }, 'Gender'),
                 React.createElement('select', {
-                    key: 'gender',
+                    key: 'gender-select',
                     className: 'form-control',
                     name: 'spouse_gender',
                     value: formData.spouse_gender || (spousePosition === 'husband' ? 'M' : 'F'),

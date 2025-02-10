@@ -280,6 +280,31 @@ $keys = array_keys($translations['fr']);
 $translations['en'] = array_combine($keys, $keys);
 
 $config['translations'] = $translations;
+
+// Add relationship types configuration
+$config['relationship_types'] = [
+    'SIBL' => ['id' => 1,  'description' => 'Sibling'],
+    'FATH' => ['id' => 2,  'description' => 'Father'],
+    'MOTH' => ['id' => 3,  'description' => 'Mother'],
+    'HALF' => ['id' => 4,  'description' => 'Half Sibling'],
+    'HUSB' => ['id' => 5,  'description' => 'Husband'],
+    'WIFE' => ['id' => 6,  'description' => 'Wife'],
+    'CHLD' => ['id' => 7,  'description' => 'Enfant'],
+    'CUSN' => ['id' => 8,  'description' => 'Cousin'],
+    'DIV'  => ['id' => 9,  'description' => 'Ex Epoux'],
+    'PART' => ['id' => 10, 'description' => 'Partner'],
+    'FIAN' => ['id' => 11, 'description' => 'Fiance'],
+    'ADOP' => ['id' => 12, 'description' => 'Adopted'],
+    'ILLE' => ['id' => 13, 'description' => 'Illegitimate'],
+    '1ST'  => ['id' => 14, 'description' => '1st Cousin'],
+    '2ND'  => ['id' => 15, 'description' => '2nd Cousin'],
+    '3RD'  => ['id' => 16, 'description' => 'Third Cousin'],
+    'GONE' => ['id' => 17, 'description' => 'Gone Cousin'],
+    'ONCE' => ['id' => 18, 'description' => 'Once Removed Cousin'],
+    'STEP' => ['id' => 19, 'description' => 'Step Sibling'],
+    'UNKN' => ['id' => 20, 'description' => 'Unknown']
+];
+
 $root_dir = __DIR__;
 $config['paths'] = [
    'frontend' => $root_dir . "/frontend",

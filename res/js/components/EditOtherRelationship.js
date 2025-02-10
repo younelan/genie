@@ -1,39 +1,32 @@
 const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
     const [formData, setFormData] = React.useState({
         relationship_id: '',
-        relationship_type: '',
+        relcode: '',  // Keep original relcode
         relation_start: '',
         relation_end: '',
         person1: '',
         person2: ''
     });
-    const [relationshipTypes, setRelationshipTypes] = React.useState([]);
+    const [relationshipTypes, setRelationshipTypes] = React.useState({});  // Keep as object for direct lookup
 
-    // Update the loadRelationshipTypes function
+    // Load relationship types once
     React.useEffect(() => {
-        const loadRelationshipTypes = async () => {
-            try {
-                const response = await fetch('api/app.php?action=relationship_types');
-                if (!response.ok) throw new Error('Failed to load relationship types');
-                const data = await response.json();
-                if (data.success) {
-                    setRelationshipTypes(data.types);
-                } else {
-                    throw new Error(data.error || 'Failed to load relationship types');
+        fetch('api/app.php?action=relationship_types')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.types) {
+                    setRelationshipTypes(data.types);  // Store the raw object for lookup
                 }
-            } catch (error) {
-                console.error('Error loading relationship types:', error);
-            }
-        };
-        loadRelationshipTypes();
+            })
+            .catch(err => console.error('Error loading relationship types:', err));
     }, []);
 
-    // Update form when relationship data changes
+    // Set form data from relationship prop
     React.useEffect(() => {
         if (relationship) {
             setFormData({
                 relationship_id: relationship.id,
-                relationship_type: relationship.relationship_type_id, // Use relationship_type_id instead
+                relcode: relationship.relcode,
                 relation_start: relationship.relation_start || '',
                 relation_end: relationship.relation_end || '',
                 person1: `${relationship.person1_first_name} ${relationship.person1_last_name}`,
@@ -44,7 +37,13 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        console.log("Submitting relationship data:", formData); // Debug
+        onSave({
+            id: formData.relationship_id,
+            relcode: formData.relcode,
+            relation_start: formData.relation_start || null,
+            relation_end: formData.relation_end || null
+        });
     };
 
     if (!show) return null;
@@ -128,19 +127,19 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             React.createElement('select', {
                                 key: 'select',
                                 id: 'edit_relationship_type',
-                                name: 'relationship_type',
+                                name: 'relcode',
                                 className: 'form-control',
-                                value: formData.relationship_type,
+                                value: formData.relcode,
                                 onChange: (e) => setFormData(prev => ({
                                     ...prev,
-                                    relationship_type: e.target.value
+                                    relcode: e.target.value
                                 })),
                                 required: true
-                            }, relationshipTypes.map(type => 
+                            }, Object.entries(relationshipTypes).map(([code, info]) => 
                                 React.createElement('option', {
-                                    key: type.id,
-                                    value: type.id
-                                }, type.description)
+                                    key: code,
+                                    value: code
+                                }, info.description)
                             ))
                         ]),
                         React.createElement('div', {

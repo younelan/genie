@@ -91,7 +91,9 @@ class IndividualsAPI {
             case 'get_relationships':
                 $memberId = $_GET['member_id'] ?? null;
                 if ($memberId) {
+                    error_log("Loading relationships for member: " . $memberId);
                     $relationships = $this->memberModel->getMemberRelationships($memberId);
+                    error_log("Relationships loaded: " . print_r($relationships, true));
                     echo json_encode(['success' => true, 'relationships' => $relationships]);
                 }
                 break;
@@ -936,7 +938,7 @@ class IndividualsAPI {
 
     private function addOther($data) {
         // Validate required data
-        if (!isset($data['member_id']) || !isset($data['other_type']) || !isset($data['relationship_type'])) {
+        if (!isset($data['member_id']) || !isset($data['other_type']) || !isset($data['relcode'])) {
             $this->sendError('Missing required data');
             return;
         }
@@ -944,10 +946,10 @@ class IndividualsAPI {
         $memberId = $data['member_id'];
         $treeId = $data['tree_id'];
         $otherId = null;
+        $relcode = $data['relcode'];
 
-        $relationshipTypeId = $data['other_type_id'];
-        if (!$relationshipTypeId) {
-            $this->sendError('Invalid relationship type');
+        if (empty($relcode)) {
+            $this->sendError('Relationship type is required');
             return;
         }
 
@@ -971,23 +973,18 @@ class IndividualsAPI {
                     $this->sendError('First name and last name required for new person');
                     return;
                 }
-
-                // Clean up the duplicated field names
-                $firstName = $data['other_first_name'] ?? $data['other_other_first_name'] ?? null;
-                $lastName = $data['other_last_name'] ?? $data['other_other_last_name'] ?? null;
-
-                $personData = [
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'treeId' => $treeId,
+                
+                // Create new person
+                $newPersonData = [
+                    'firstName' => $data['other_first_name'],
+                    'lastName' => $data['other_last_name'],
                     'gender' => $data['other_gender'] ?? 'M',
                     'dateOfBirth' => $data['other_birth_date'] ?? null,
-                    'alive' => 1,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
+                    'treeId' => $treeId,
+                    'alive' => 1
                 ];
-
-                $otherId = $this->memberModel->addMember($personData);
+                
+                $otherId = $this->memberModel->addMember($newPersonData);
                 if (!$otherId) {
                     $this->sendError('Failed to create new person');
                     return;
@@ -999,15 +996,15 @@ class IndividualsAPI {
                 return;
         }
 
-        // Create relationship
-        $relationshipId = $this->memberModel->addRelationship(
+        // Create relationship using relcode
+        $success = $this->memberModel->addRelationship(
             $memberId,
             $otherId,
-            $relationshipTypeId,
+            $relcode,
             $treeId
         );
 
-        if (!$relationshipId) {
+        if (!$success) {
             $this->sendError('Failed to create relationship');
             return;
         }
@@ -1015,7 +1012,6 @@ class IndividualsAPI {
         $this->sendResponse([
             'success' => true,
             'data' => [
-                'relationship_id' => $relationshipId,
                 'other_id' => $otherId
             ]
         ]);
@@ -1030,12 +1026,18 @@ class IndividualsAPI {
             throw new Exception('Relationship ID required');
         }
 
+        error_log("Updating relationship with data: " . print_r($data, true));
+
         $updateData = [
             'id' => $id,
-            'relationship_type_id' => $data['relationship_type_id'],
+            'relcode' => $data['relcode'] ?? null,
             'relation_start' => $data['relation_start'] ?? null,
             'relation_end' => $data['relation_end'] ?? null
         ];
+
+        if (!$updateData['relcode']) {
+            throw new Exception('Relationship code is required');
+        }
 
         $success = $this->memberModel->updateRelationship($updateData);
         

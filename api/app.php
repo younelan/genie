@@ -2,11 +2,13 @@
 require_once '../init.php';
 
 class AppAPI {
+    private $config;
     private $memberModel;
     private $treeModel;
     private $userId;
 
     public function __construct($config) {
+        $this->config = $config;
         $user = new UserModel($config);
         $this->userId = $user->getCurrentUserId();
         if (!$this->userId) {
@@ -19,32 +21,28 @@ class AppAPI {
     }
 
     public function handleRequest() {
-        header('Content-Type: application/json');
-        
-        switch ($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
-                $this->handleGet();
-                break;
-            case 'POST':
-                $this->handlePost();
-                break;
-            default:
-                http_response_code(405);
-                echo json_encode(['error' => 'Method not allowed']);
-                break;
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->handleGet();
+        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->handlePost();
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error'   => 'Method not allowed'
+            ]);
+            exit;
         }
     }
 
     private function handleGet() {
         $action = $_GET['action'] ?? '';
-        
         switch ($action) {
             case 'relationship_types':
-                $treeId = $_GET['tree_id'] ?? 1;
-                $types = $this->treeModel->getRelationshipTypes($treeId);
+                // Return the raw config relationship types object
                 echo json_encode([
                     'success' => true,
-                    'types' => $types
+                    'types' => $this->config['relationship_types']  // This is already an object with code => {description} structure
                 ]);
                 break;
                 
@@ -56,6 +54,7 @@ class AppAPI {
                 ]);
                 break;
         }
+        exit;
     }
 
     private function handlePost() {
@@ -97,6 +96,7 @@ class AppAPI {
                 ]);
                 break;
         }
+        exit;
     }
 }
 

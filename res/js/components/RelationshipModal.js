@@ -5,7 +5,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
         child_type: 'existing',
         parent1_type: 'new',  // Changed from 'existing'
         other_type: 'existing',
-        relationship_type: '',
+        relcode: '',  // Initialize relcode
         second_parent_option: 'new'  // Added this default
     });
 
@@ -31,8 +31,16 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 const response = await fetch('api/app.php?action=relationship_types');
                 if (!response.ok) throw new Error('Failed to load relationship types');
                 const data = await response.json();
-                if (data.success) {
+                console.log("Loaded relationship types:", data); // Debug
+                if (data.success && data.types) {
                     setRelationshipTypes(data.types);
+                    // Set initial relcode to first available type
+                    if (Object.keys(data.types).length > 0) {
+                        setFormData(prev => ({
+                            ...prev,
+                            relcode: Object.keys(data.types)[0]
+                        }));
+                    }
                 } else {
                     throw new Error(data.error || 'Failed to load relationship types');
                 }
@@ -287,6 +295,12 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
 
                 case 'other':
                     form.append('other_type', formData.other_type);
+                    // Add relcode here
+                    if (!formData.relcode) {
+                        throw new Error('Please select a relationship type');
+                    }
+                    form.append('relcode', formData.relcode);
+                    
                     if (formData.other_type === 'existing') {
                         if (!formData.other_id) {
                             throw new Error('Please select a person');
@@ -484,14 +498,14 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 React.createElement('select', {
                     key: 'type-select',
                     className: 'form-control',
-                    name: 'other_type_id',
-                    value: formData.other_type_id || '',
+                    name: 'relcode', // Changed from other_type_id
+                    value: formData.relcode || '', // Changed from other_type_id
                     onChange: handleInputChange
-                }, relationshipTypes.map(type =>
+                }, Object.entries(relationshipTypes).map(([code, info]) => // Changed to use relationshipTypes object directly
                     React.createElement('option', {
-                        key: type.id,
-                        value: type.id
-                    }, type.description)
+                        key: code,
+                        value: code
+                    }, info.description)
                 ))
             ]),
             React.createElement('div', { key: 'type-selector' }, 
