@@ -1,22 +1,31 @@
 # Genie - Genealogy php web app
 
-Genie is a rudimentary php web app to track ancestors, genealogy tree and relationships.
-
-**NOTE**: This app was rewritten to be more compliant with GEDCOM format. The migrate functionality is being deprecated and all one to one structure deprecated
-
-As is, no warranties. This is being rewritten to be more gedcom compliant and as a result
+Genie is a rudimentary php web app to track ancestors, genealogy tree and relationships with **GEDCOM** Import/Export.
 
 You can have multiple trees and in theory once auth is enabled, you can use it collaboratively. for now meant to be local. Not recommend putting this on the internet as is
+
+**NOTE**: This app was rewritten to be more compliant with GEDCOM format. 
+
+As is, no warranties. This is being rewritten to be more gedcom compliant and as a result
 
 Until I have vetted the app more carefully, I have removed auth.
 
 checkout [The history file](history.md) for changes
 
 ## Latest stable version
-- the latest stable version: v0.3 (git tag)
+- the latest stable version: v0.4 (git tag)
 - current version is in doc/version
 
 ## Version History:
+     - Version 0.4
+         - Gedcom Read
+         - Gedcom Write
+         - Fixed Adding new other relationships
+         - use relcode instead of relationship_type_id
+         - local react, tailwind
+         - Footer everywhere/component
+         - Empty Tree before delete
+         - Synonym Editor
      - Bump to Version 0.3
          - 0.3 ui rewrite + api fetch
          - 0.2 families/gedcom compliant
