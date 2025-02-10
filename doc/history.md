@@ -3,19 +3,26 @@ Check out [The README file](README.md) for more info
 
 ## Backlog
 	* Edit Synonyms
-	* Simplicity
-		* Auth
-		* Config
 	* tags for relationships
 	* User registration 
 	* Add permission for users
-	* gedcom write/read
+	* gedcom write
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
-## current
+
+# current
+    - No simplicity for auth, now react
+    - closed: gedcom read
+	- Simplicity
+		- Auth
+		- Config
+## 20250210
      - updated version to v0.3, ui rewrite
      - unified navigation component with menus
+     - using relcode and api provided relationship types from api
+     - Bug Fix: Creating a new other wasn't creating person
+     - GedcomModel: successful exports to gedcom
      - Fixed autocomplete for parent
      - Fixed Adding of other relationship
      - remove child from family
