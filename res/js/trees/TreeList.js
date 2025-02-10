@@ -80,7 +80,7 @@ const TreeList = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...formData,
-            is_public: formData.is_public ? 1 : 0
+            is_public: formData.is_public // Keep as boolean, don't convert
           })
         });
         
@@ -219,15 +219,48 @@ const TreeList = () => {
     ]);
   };
 
+  // Move createDropdownItems before treeCard
+  const createDropdownItems = (tree) => [
+    React.createElement('a', {
+      key: 'view',
+      href: `#/tree/${tree.id}/members`,
+      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+    }, 'View Members'),
+    React.createElement('a', {
+      key: 'edit',
+      href: `#/tree/${tree.id}/edit`,
+      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+    }, 'Edit Settings'),
+    React.createElement('a', {
+      key: 'synonyms',
+      href: `#/tree/${tree.id}/synonyms`,
+      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+    }, 'Manage Synonyms'),
+    React.createElement('a', {
+      key: 'export',
+      href: `api/trees.php?action=export_gedcom&tree_id=${tree.id}`,
+      className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+    }, 'Export GEDCOM'),
+    React.createElement('button', {
+      key: 'empty',
+      onClick: () => handleEmptyTree(tree.id),
+      className: 'w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50'
+    }, 'Empty Tree'),
+    React.createElement('button', {
+      key: 'delete',
+      onClick: () => deleteTree(tree.id),
+      className: 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50'
+    }, 'Delete Tree')
+  ];
+
   const treeCard = (tree) => React.createElement('div', {
     key: tree.id,
-    className: 'bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100'
+    className: 'bg-white rounded shadow hover:shadow-lg transition-all duration-200'
   }, [
-    // Header section with gradient background - make it clickable
     React.createElement('a', {
       key: `header-${tree.id}`,
       href: `#/tree/${tree.id}/members`,
-      className: 'block p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-xl hover:from-blue-700 hover:to-indigo-700 transition-all cursor-pointer'
+      className: 'block p-3 bg-primary rounded-t cursor-pointer hover:opacity-90'
     }, [
       React.createElement('h3', {
         key: `title-${tree.id}`,
@@ -235,14 +268,15 @@ const TreeList = () => {
       }, tree.name),
       React.createElement('div', {
         key: 'meta',
-        className: 'flex items-center gap-3 text-blue-100 text-sm'
+        className: 'flex items-center gap-3 text-white text-sm font-medium'
       }, [
         React.createElement('span', null, [
-          '📅 Created: ',
+          '📅 ',
           new Date(tree.created_at).toLocaleDateString()
         ]),
-        tree.is_public && React.createElement('span', {
-          className: 'flex items-center gap-1'
+        // Fix public icon display - only show if true, don't convert to number
+        Boolean(tree.is_public) && React.createElement('span', {
+          className: 'flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded'
         }, [
           '🌍 Public'
         ])
@@ -251,81 +285,69 @@ const TreeList = () => {
 
     React.createElement('div', { 
       key: `content-${tree.id}`,
-      className: 'p-6' 
+      className: 'p-3 bg-[#dcd8e0]' 
     }, [
       React.createElement('p', { 
         key: `desc-${tree.id}`,
-        className: 'text-gray-600 mb-4 h-20 overflow-hidden' 
-      }, tree.description || 'No description available'),
-      React.createElement('a', {
+        className: 'text-[#2c0a2a] mb-2 h-10 md:h-14 overflow-hidden text-base' // Increased height and font size
+      }, tree.description || ''),
+      React.createElement('div', {
         key: `stats-${tree.id}`,
-        href: `#/tree/${tree.id}/members`,
-        className: 'flex items-center justify-between gap-4 pt-4 border-t border-gray-100 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors'
+        className: 'flex items-center justify-between gap-4 pt-3 border-t border-gray-300 px-3 py-2'
       }, [
-        React.createElement('div', {
-          className: 'flex items-center text-blue-600 hover:text-blue-800 font-medium'
+        // Make stats clickable separately from dropdown
+        React.createElement('a', {
+          href: `#/tree/${tree.id}/members`,
+          className: 'flex items-center text-[#2c0a2a] hover:text-[#1e0a76] font-medium hover:bg-[#a7a2c5] rounded-lg px-3 py-2 transition-colors'
         }, [
           React.createElement('span', {
-            className: 'bg-blue-100 text-blue-600 px-3 py-1 rounded-md mr-2 text-lg font-bold'
+            className: 'bg-primary text-white px-3 py-1 rounded-md mr-2 text-lg font-bold'
           }, tree.member_count || 0),
           'Members'
         ]),
-        React.createElement(Dropdown, { key: 'dropdown' }, [
-          // ...existing dropdown items...
-        ])
+        // Stop event propagation on dropdown click
+        React.createElement('div', {
+          onClick: (e) => e.preventDefault(),
+          className: 'z-10'
+        }, React.createElement(Dropdown, { key: 'dropdown' }, createDropdownItems(tree)))
       ])
     ])
   ]);
 
-  // Main content wrapper
+  // Main content wrapper with reorganized layout
   const mainContent = [
     React.createElement('main', {
       key: 'main',
-      className: 'container mx-auto px-4 py-16 mt-16 mb-16'
+      className: 'container mx-auto px-4 py-8 mt-16 mb-16'
     }, [
-      // Header section with background
-      React.createElement('div', {
-        key: 'header-section',
-        className: 'bg-gradient-to-r from-blue-700 to-indigo-800 -mx-4 px-4 py-8 mb-8 shadow-md'
-      }, [
-        React.createElement('div', {
-          className: 'container mx-auto flex justify-between items-center'
-        }, [
-          React.createElement('div', null, [
-            React.createElement('h2', {
-              className: 'text-3xl font-bold text-white mb-2'
-            }, 'Your Family Trees'),
-            React.createElement('p', {
-              className: 'text-blue-100'
-            }, `Managing ${trees.length} family ${trees.length === 1 ? 'tree' : 'trees'}`)
-          ]),
-          React.createElement('button', {
-            key: 'add-button',
-            className: 'inline-flex items-center px-4 py-2 bg-white hover:bg-blue-50 text-blue-700 rounded-md shadow-sm transition-colors',
-            onClick: () => setShowAddModal(true)
-          }, [
-            React.createElement('svg', {
-              key: 'icon',
-              className: 'w-5 h-5 mr-2',
-              fill: 'none',
-              viewBox: '0 0 24 24',
-              stroke: 'currentColor'
-            }, React.createElement('path', {
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round',
-              strokeWidth: 2,
-              d: 'M12 4v16m8-8H4'
-            })),
-            'New Tree'
-          ])
-        ])
-      ]),
-
-      // Grid of tree cards
+      // Remove header section completely
       React.createElement('div', {
         key: 'tree-grid',
-        className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-      }, trees.map(tree => treeCard(tree)))
+        className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6' // Added bottom margin
+      }, trees.map(tree => treeCard(tree))),
+
+      // New Tree button moved below grid
+      React.createElement('div', {
+        key: 'add-button-container',
+        className: 'text-center'
+      }, React.createElement('button', {
+        className: 'inline-flex items-center px-6 py-3 bg-primary hover:opacity-90 text-white rounded shadow transition-colors',
+        onClick: () => setShowAddModal(true)
+      }, [
+        React.createElement('svg', {
+          key: 'icon',
+          className: 'w-5 h-5 mr-2',
+          fill: 'none',
+          viewBox: '0 0 24 24',
+          stroke: 'currentColor'
+        }, React.createElement('path', {
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          strokeWidth: 2,
+          d: 'M12 4v16m8-8H4'
+        })),
+        'Create New Family Tree'
+      ]))
     ]),
     React.createElement(AppFooter, { key: 'footer' }),
     React.createElement(AddTreeModal, { key: 'modal' })
