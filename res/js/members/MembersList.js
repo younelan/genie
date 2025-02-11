@@ -70,7 +70,7 @@ const MembersList = () => {
     };
 
     const renderParents = () => React.createElement(Card, { className: 'mt-3' }, [
-        React.createElement(Card.Header, { key: 'header' }, 'Parents'),
+        React.createElement(Card.Header, { key: 'header' }, T('Parents')),
         React.createElement(Card.Body, { key: 'body' },
             childFamilies.map(family => 
                 React.createElement('div', { 
@@ -137,12 +137,12 @@ const MembersList = () => {
                 // Members List Column
                 React.createElement(Col, { key: 'members-col', lg: 4, className: 'mb-4' },
                     React.createElement(Card, { key: 'members-card' }, [
-                        React.createElement(Card.Header, { key: 'members-header' }, 'Family Members'),
+                        React.createElement(Card.Header, { key: 'members-header' }, T('Family Members')),
                         React.createElement(Card.Body, { key: 'members-body' }, [
                             React.createElement('input', {
                                 key: 'search-input',
                                 type: 'text',
-                                placeholder: 'Search by name...',
+                                placeholder: T('Search by name...'),
                                 value: searchQuery,
                                 onChange: handleSearch,
                                 className: 'form-control mb-3'
@@ -172,7 +172,7 @@ const MembersList = () => {
                 // Statistics Column
                 React.createElement(Col, { key: 'stats-col', lg: 4, className: 'mb-4' },
                     React.createElement(Card, { key: 'stats-card' }, [
-                        React.createElement(Card.Header, { key: 'stats-header' }, 'Statistics'),
+                        React.createElement(Card.Header, { key: 'stats-header' }, T('Statistics')),
                         React.createElement(Card.Body, { key: 'stats-body' },
                             Object.entries(stats).map(([category, data], index) =>
                                 React.createElement('div', { key: `stat-category-${index}` },
@@ -198,7 +198,7 @@ const MembersList = () => {
                 // Recent Updates Column
                 React.createElement(Col, { key: 'updates-col', lg: 4, className: 'mb-4' },
                     React.createElement(Card, { key: 'updates-card' }, [
-                        React.createElement(Card.Header, { key: 'updates-header' }, 'Recent Updates'),
+                        React.createElement(Card.Header, { key: 'updates-header' }, T('Recent Updates')),
                         React.createElement(Card.Body, { key: 'updates-body' },
                             renderRecentUpdates()
                         )
@@ -216,12 +216,12 @@ const MembersList = () => {
                         key: 'members-card',
                         className: 'border-0 rounded-none'
                     }, [
-                        React.createElement(Card.Header, { key: 'members-header' }, 'Family Members'),
+                        React.createElement(Card.Header, { key: 'members-header' }, T('Family Members')),
                         React.createElement(Card.Body, { key: 'members-body' }, [
                             React.createElement('input', {
                                 key: 'search-input',
                                 type: 'text',
-                                placeholder: 'Search by name...',
+                                placeholder: T('Search by name...'),
                                 value: searchQuery,
                                 onChange: handleSearch,
                                 className: 'form-control mb-3'
@@ -253,7 +253,7 @@ const MembersList = () => {
                         key: 'stats-card',
                         className: 'border-0 rounded-none'
                     }, [
-                        React.createElement(Card.Header, { key: 'stats-header' }, 'Statistics'),
+                        React.createElement(Card.Header, { key: 'stats-header' }, T('Statistics')),
                         React.createElement(Card.Body, { key: 'stats-body' },
                             Object.entries(stats).map(([category, data], index) =>
                                 React.createElement('div', { key: `stat-category-${index}` },
@@ -281,7 +281,7 @@ const MembersList = () => {
                         key: 'updates-card',
                         className: 'border-0 rounded-none'
                     }, [
-                        React.createElement(Card.Header, { key: 'updates-header' }, 'Recent Updates'),
+                        React.createElement(Card.Header, { key: 'updates-header' }, T('Recent Updates')),
                         React.createElement(Card.Body, { key: 'updates-body' },
                             renderRecentUpdates()
                         )

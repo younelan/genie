@@ -56,7 +56,7 @@ const SynonymManager = () => {
     };
 
     const handleDelete = async (synonymId) => {
-        if (!confirm('Are you sure you want to delete this synonym?')) return;
+        if (!confirm(T('Are you sure you want to delete this synonym?'))) return;
         
         try {
             const response = await fetch(`api/trees.php?action=delete_synonym&id=${synonymId}&tree_id=${treeId}`, {
@@ -96,7 +96,7 @@ const SynonymManager = () => {
                     React.createElement('h2', { 
                         key: 'title',
                         className: 'text-2xl font-bold mb-6' 
-                    }, 'Manage Synonyms'),
+                    }, T('Manage Synonyms')),
                     
                     // Add new synonym form
                     React.createElement('form', {
@@ -111,7 +111,7 @@ const SynonymManager = () => {
                             React.createElement('input', {
                                 key: 'key-input',
                                 type: 'text',
-                                placeholder: 'Original Term',
+                                placeholder: T('Original Term'),
                                 value: newSynonym.key,
                                 onChange: (e) => setNewSynonym(prev => ({ ...prev, key: e.target.value })),
                                 className: 'border p-2 rounded'
@@ -119,7 +119,7 @@ const SynonymManager = () => {
                             React.createElement('input', {
                                 key: 'value-input',
                                 type: 'text',
-                                placeholder: 'Replacement Term',
+                                placeholder: T('Replacement Term'),
                                 value: newSynonym.value,
                                 onChange: (e) => setNewSynonym(prev => ({ ...prev, value: e.target.value })),
                                 className: 'border p-2 rounded'
@@ -128,7 +128,7 @@ const SynonymManager = () => {
                                 key: 'submit-button',
                                 type: 'submit',
                                 className: 'bg-blue-500 text-white p-2 rounded hover:bg-blue-600'
-                            }, 'Add Synonym')
+                            }, T('Add Synonym'))
                         ])
                     ]),
 
@@ -145,9 +145,9 @@ const SynonymManager = () => {
                                 key: 'thead',
                                 className: 'bg-gray-50'
                             }, React.createElement('tr', {}, [
-                                React.createElement('th', { className: 'px-6 py-3 text-left' }, 'Original Term'),
-                                React.createElement('th', { className: 'px-6 py-3 text-left' }, 'Replacement Term'),
-                                React.createElement('th', { className: 'px-6 py-3 text-right' }, 'Actions')
+                                React.createElement('th', { className: 'px-6 py-3 text-left' }, T('Original Term')),
+                                React.createElement('th', { className: 'px-6 py-3 text-left' }, T('Replacement Term')),
+                                React.createElement('th', { className: 'px-6 py-3 text-right' }, T('Actions'))
                             ])),
                             React.createElement('tbody', {
                                 key: 'tbody',
@@ -190,7 +190,7 @@ const SynonymManager = () => {
                                                 key: 'save',
                                                 onClick: () => handleUpdate(editingSynonym),
                                                 className: 'text-green-600 hover:text-green-900'
-                                            }, 'Save'),
+                                            }, T('Save')),
                                             React.createElement('button', {
                                                 key: 'cancel',
                                                 onClick: () => setEditingSynonym(null),
@@ -202,7 +202,7 @@ const SynonymManager = () => {
                                                 key: 'edit',
                                                 onClick: () => setEditingSynonym({ ...synonym }),
                                                 className: 'text-blue-600 hover:text-blue-900'
-                                            }, 'Edit'),
+                                            }, T('Edit')),
                                             React.createElement('button', {
                                                 key: 'delete',
                                                 onClick: () => handleDelete(synonym.syn_id),

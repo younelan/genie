@@ -62,7 +62,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
                         onClick: () => setShowLeftMenu(!showLeftMenu)
                     }, [
-                        React.createElement('span', { key: 'left-text' }, '🌳 Tree'),
+                        React.createElement('span', { key: 'left-text' }, T('Tree')),
                         React.createElement('span', { key: 'left-arrow' }, '▼')
                     ]),
                     showLeftMenu && React.createElement('div', {
@@ -78,7 +78,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                             onClick: item.onClick,  // Add this line
                             className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
                             role: 'menuitem'
-                        }, item.label)
+                        }, T(item.label))
                     )))
                 ])
             ]),
@@ -123,7 +123,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                                 onClick: item.onClick,
                                 className: 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100',
                                 role: 'menuitem'
-                            }, item.label)
+                            }, T(item.label))
                         ))
                     )
                 ])
@@ -146,7 +146,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                         key: `mobile-left-item-${index}`,
                         href: item.href,
                         className: 'block py-2 text-white hover:bg-gray-600 px-4'
-                    }, item.label)
+                    }, T(item.label))
                 ),
                 React.createElement('hr', { key: 'mobile-left-divider', className: 'my-2 border-gray-600' })
             ]),
@@ -162,7 +162,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                         href: item.href,
                         onClick: item.onClick,
                         className: 'block py-2 text-white hover:bg-gray-600 px-4'
-                    }, item.label)
+                    }, T(item.label))
                 )
             ])
         ])
@@ -172,7 +172,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
 // Helper function to create tree menu items
 Navigation.createTreeMenu = (treeId) => ([
     { 
-        label: 'List Members', 
+        label: T('List Members'), 
         href: `#/tree/${treeId}/members`,
         onClick: (e) => {
             e.preventDefault();
@@ -180,7 +180,7 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
-        label: 'Add Member', 
+        label: T('Add Member'), 
         href: `#/tree/${treeId}/member/add`,
         onClick: (e) => {
             e.preventDefault();
@@ -188,7 +188,7 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
-        label: 'Visualize Tree', 
+        label: T('Visualize Tree'), 
         href: `#/tree/${treeId}/visualize`,
         onClick: (e) => {
             e.preventDefault();
@@ -196,7 +196,7 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
-        label: 'Manage Synonyms', 
+        label: T('Manage Synonyms'), 
         href: `#/tree/${treeId}/synonyms`,
         onClick: (e) => {
             e.preventDefault();
@@ -204,7 +204,7 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
-        label: 'Tree Settings', 
+        label: T('Tree Settings'), 
         href: `#/tree/${treeId}/edit`,
         onClick: (e) => {
             e.preventDefault();
@@ -212,7 +212,7 @@ Navigation.createTreeMenu = (treeId) => ([
         }
     },
     { 
-        label: 'Export GEDCOM', 
+        label: T('Export GEDCOM'), 
         href: `api/trees.php?action=export_gedcom&tree_id=${treeId}`,
         onClick: (e) => {
             e.preventDefault();
@@ -224,7 +224,7 @@ Navigation.createTreeMenu = (treeId) => ([
 // Helper function to create user menu items
 Navigation.createUserMenu = () => ([
     { 
-        label: 'Profile', 
+        label: T('Profile'), 
         href: '#/profile',
         onClick: (e) => {
             e.preventDefault();
@@ -232,7 +232,7 @@ Navigation.createUserMenu = () => ([
         }
     },
     { 
-        label: 'Settings', 
+        label: T('Settings'), 
         href: '#/settings',
         onClick: (e) => {
             e.preventDefault();
@@ -240,7 +240,7 @@ Navigation.createUserMenu = () => ([
         }
     },
     { 
-        label: 'Logout', 
+        label: T('Logout'), 
         href: '#',
         onClick: (e) => {
             e.preventDefault();

@@ -52,8 +52,14 @@ background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
     <script src="res/vendor/react/react-dom.development.js"></script>
     <!-- Update React Bootstrap path -->
     <script src="res/vendor/react-bootstrap/dist/react-bootstrap.min.js"></script>
-    <!-- Move global declarations before component scripts -->
+    <!-- Move translation module before global declarations -->
+    <script src="res/js/translation.js"></script>
     <script>
+        // Add translation check
+        if (typeof T === 'undefined') {
+            console.error('Translation function not loaded!');
+            window.T = function(key) { return key; }
+        }
         window.ReactBootstrapComponents = ReactBootstrap;
         const { 
             Card, 

@@ -1,5 +1,10 @@
-// Remove AppFooter component
 const TreeList = () => {
+    // Add translation safety check at the top
+    if (typeof T === 'undefined') {
+        console.error('Translation function not available');
+        window.T = key => key;
+    }
+
   const [trees, setTrees] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
@@ -26,7 +31,7 @@ const TreeList = () => {
   };
 
   const deleteTree = async (treeId) => {
-    if (!confirm('Are you sure you want to delete this tree?')) return;
+    if (!confirm(T('Are you sure you want to delete this tree?'))) return;
     
     try {
       const response = await fetch(`api/trees.php?action=delete&id=${treeId}`, {
@@ -47,7 +52,7 @@ const TreeList = () => {
   };
 
   const handleEmptyTree = async (treeId) => {
-    if (!confirm('Are you sure you want to empty this tree? All members and relationships will be deleted. This cannot be undone.')) {
+    if (!confirm(T('Are you sure you want to empty this tree? All members and relationships will be deleted. This cannot be undone.'))) {
       return;
     }
     
@@ -156,7 +161,7 @@ const TreeList = () => {
             })
           ]),
           React.createElement('label', { 
-            key: 'public-field',
+            key: 'public-label',
             className: 'flex items-center gap-2 text-sm text-gray-600'
           }, [
             React.createElement('input', {
@@ -166,7 +171,7 @@ const TreeList = () => {
               onChange: (e) => setFormData(prev => ({ ...prev, is_public: e.target.checked })),
               className: 'rounded text-blue-600 focus:ring-blue-500'
             }),
-            'Make this tree public'
+            T('Make this tree public')
           ]),
           React.createElement('div', { 
             key: 'button-group',
@@ -324,40 +329,40 @@ const TreeList = () => {
   // Move createDropdownItems before treeCard
   const createDropdownItems = (tree) => [
     {
-      label: 'View Members',
+      label: T('View Members'),
       onClick: (e) => {
         e.preventDefault();
         window.location.hash = `#/tree/${tree.id}/members`;
       }
     },
     {
-      label: 'Edit Settings',
+      label: T('Tree Settings'),
       onClick: (e) => {
         e.preventDefault();
         window.location.hash = `#/tree/${tree.id}/edit`;
       }
     },
     {
-      label: 'Manage Synonyms',
+      label: T('Manage Synonyms'),
       onClick: (e) => {
         e.preventDefault();
         window.location.hash = `#/tree/${tree.id}/synonyms`;
       }
     },
     {
-      label: 'Export GEDCOM',
+      label: T('Export GEDCOM'),
       onClick: (e) => {
         e.preventDefault();
         window.location = `api/trees.php?action=export_gedcom&tree_id=${tree.id}`;
       }
     },
     {
-      label: 'Empty Tree',
+      label: T('Empty Tree'),
       onClick: () => handleEmptyTree(tree.id),
       className: 'text-orange-600 hover:bg-orange-50'
     },
     {
-      label: 'Delete Tree',
+      label: T('Delete Tree'),
       onClick: () => deleteTree(tree.id),
       className: 'text-red-600 hover:bg-red-50'
     }
@@ -461,7 +466,7 @@ const TreeList = () => {
             strokeWidth: 2,
             d: 'M12 4v16m8-8H4'
           })),
-          'Create New Family Tree'
+          T('Create New Family Tree')
         ]),
         React.createElement('button', {
           className: 'inline-flex items-center px-6 py-3 bg-green-600 hover:opacity-90 text-white rounded shadow',
@@ -478,7 +483,7 @@ const TreeList = () => {
             strokeWidth: 2,
             d: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'
           })),
-          'Import GEDCOM'
+          T('Import GEDCOM')
         ])
       ])
     ]),

@@ -53,6 +53,7 @@ class AppAPI {
                 if (!isset($this->config['translations'][$lang])) {
                     $lang = 'fr';
                 }
+                $lang="fr";
                 echo json_encode([
                     'success' => true,
                     'translations' => $this->config['translations'][$lang],
