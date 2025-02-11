@@ -75,14 +75,14 @@ const Autocomplete = ({ type, memberId, treeId, onSelect }) => {
         ref: wrapperRef,
         className: 'relative'
     }, [
-        // Input field
+        // Input field with translated placeholder
         React.createElement('input', {
             key: 'search-input',
             type: 'text',
             className: 'form-control',
             value: query,
             onChange: handleInputChange,
-            placeholder: `Search for ${type}...`,
+            placeholder: T(`Search for ${type}...`), // Change this line to use T()
             autoComplete: 'off'
         }),
 

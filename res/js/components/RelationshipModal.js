@@ -505,7 +505,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     React.createElement('option', {
                         key: code,
                         value: code
-                    }, info.description)
+                    }, T(info.description)) // Add T() here to translate relationship types
                 ))
             ]),
             React.createElement('div', { key: 'type-selector' }, 
@@ -518,7 +518,23 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
     };
 
     const renderExistingPersonSection = (type) => {
-        const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+        // Customize search placeholder by type
+        const searchPlaceholders = {
+            'spouse': T('Search for spouse...'),
+            'child': T('Search for child...'),
+            'parent1': T('Search for first parent...'),
+            'parent2': T('Search for second parent...'),
+            'other': T('Search for person...')
+        };
+        
+        const typeLabels = {
+            'spouse': T('Spouse'),
+            'child': T('Child'),
+            'parent1': T('First Parent'),
+            'parent2': T('Second Parent'),
+            'other': T('Person')
+        };
+        
         return React.createElement('div', { 
             key: `${type}-existing-section`,
             className: 'form-group mb-3' 
@@ -526,12 +542,13 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
             React.createElement('label', { 
                 key: `${type}-label`,
                 htmlFor: `${type}_autocomplete`
-            }, `Select Existing ${typeLabel}:`),
+            }, T('Select Existing') + ' ' + typeLabels[type] + ':'),
             React.createElement(Autocomplete, {
                 key: `${type}-autocomplete`,
                 type: type,
                 memberId: member.id,
                 treeId: member.tree_id,
+                placeholder: searchPlaceholders[type],
                 onSelect: (selected) => {
                     setFormData(prev => ({
                         ...prev,
@@ -653,22 +670,27 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
     };
 
     const renderTabs = () => {
-        const tabs = ['spouse', 'child', 'parent', 'other'];
+        const tabs = [
+            { id: 'spouse', label: T('Spouse') },
+            { id: 'child', label: T('Child') },
+            { id: 'parent', label: T('Parent') },
+            { id: 'other', label: T('Other') }
+        ];
         return React.createElement('ul', {
             key: 'tabs-list',
             className: 'nav nav-tabs',
             role: 'tablist'
         }, tabs.map(tab => 
             React.createElement('li', {
-                key: `tab-item-${tab}`,
+                key: `tab-item-${tab.id}`,
                 className: 'nav-item',
                 role: 'presentation'
             }, [
                 React.createElement('button', {
-                    key: `tab-button-${tab}`,
-                    className: `nav-link ${activeTab === tab ? 'active' : ''}`,
-                    onClick: () => setActiveTab(tab)
-                }, tab.charAt(0).toUpperCase() + tab.slice(1))
+                    key: `tab-button-${tab.id}`,
+                    className: `nav-link ${activeTab === tab.id ? 'active' : ''}`,
+                    onClick: () => setActiveTab(tab.id)
+                }, tab.label)
             ])
         ));
     };

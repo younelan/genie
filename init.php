@@ -442,7 +442,37 @@ $translations["fr"] = [
    "Child first and last name are required" => "Le prénom et le nom de l'enfant sont requis",
    "Parent first and last name are required" => "Le prénom et le nom du parent sont requis",
    "Second parent first and last name are required" => "Le prénom et le nom du deuxième parent sont requis",
-   "Person first and last name are required" => "Le prénom et le nom de la personne sont requis"
+   "Person first and last name are required" => "Le prénom et le nom de la personne sont requis",
+   // Relationship Modal Tabs
+   "Spouse" => "Conjoint(e)",
+   "Child" => "Enfant",
+   "Parent" => "Parent",
+   "Other" => "Autre",
+   // Relationship search placeholders
+   "Search for spouse..." => "Rechercher un conjoint...",
+   "Search for child..." => "Rechercher un enfant...",
+   "Search for other..." => "Rechercher une personne...",
+   "Search for parent1..." => "Rechercher parent 1...",
+   "Search for parent2..." => "Rechercher parent 2...",
+   "Search for first parent..." => "Rechercher le premier parent...",
+   "Search for second parent..." => "Rechercher le deuxième parent...",
+   "Search for person..." => "Rechercher une personne...",
+   
+   // Relationship types descriptions (for dropdown)
+   "Sibling" => "Frère/Soeur",
+   "Father" => "Père",
+   "Mother" => "Mère",
+   "Half Sibling" => "Demi-Frère/Soeur",
+   "Husband" => "Mari",
+   "Wife" => "Femme",
+   "Partner" => "Partenaire",
+   "Friend" => "Ami(e)",
+   "Cousin" => "Cousin(e)",
+   "Uncle" => "Oncle",
+   "Aunt" => "Tante",
+   "Nephew" => "Neveu",
+   "Niece" => "Nièce",
+   "Step Sibling" => "Demi-Frère/Soeur",
 ];
 
 $keys = array_keys($translations['fr']);
