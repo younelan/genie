@@ -36,6 +36,8 @@ class AppAPI {
     }
 
     private function handleGet() {
+        header('Content-Type: application/json');
+        
         $action = $_GET['action'] ?? '';
         switch ($action) {
             case 'relationship_types':
@@ -45,7 +47,18 @@ class AppAPI {
                     'types' => $this->config['relationship_types']  // This is already an object with code => {description} structure
                 ]);
                 break;
-                
+
+            case 'translations':
+                $lang = $_GET['lang'] ?? 'fr';
+                if (!isset($this->config['translations'][$lang])) {
+                    $lang = 'fr';
+                }
+                echo json_encode([
+                    'success' => true,
+                    'translations' => $this->config['translations'][$lang],
+                ]);
+                break;
+
             default:
                 http_response_code(400);
                 echo json_encode([
