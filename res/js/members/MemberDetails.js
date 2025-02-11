@@ -293,12 +293,14 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     // In the renderBasicInfo function, update the Dropdown items array:
-    const renderBasicInfo = () => React.createElement(Card, { key: 'basic-info-card' }, [
-        React.createElement(Card.Header, { 
+    const renderBasicInfo = () => React.createElement('div', { 
+        className: 'bg-white shadow-md lg:rounded-lg' 
+    }, [
+        React.createElement('div', { 
             key: 'header',
-            className: 'flex justify-between items-center'
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
         }, [
-            React.createElement('h4', { key: 'title' }, T('Member Details')),
+            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Member Details')),
             React.createElement('div', {
                 key: 'dropdown',
             }, React.createElement(Dropdown, {
@@ -322,18 +324,23 @@ const MemberDetails = ({ treeId, memberId }) => {
                 ]
             }))
         ]),
-        React.createElement(Card.Body, { key: 'body' },
-            React.createElement('form', { onSubmit: handleSubmit }, [
+        React.createElement('div', { 
+            key: 'body',
+            className: 'p-4'
+        },
+            React.createElement('form', { 
+                onSubmit: handleSubmit,
+                className: 'space-y-4' 
+            }, [
                 // Name fields
-                React.createElement('div', { key: 'name-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'name-label' }, T('Name')),
+                React.createElement('div', { key: 'name-group', className: 'space-y-2' }, [
+                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Name')),
                     React.createElement('input', {
-                        key: 'first-name',
                         type: 'text',
                         name: 'first_name',
                         value: formData.first_name || '',
                         onChange: handleInputChange,
-                        className: 'form-control mb-2'
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
                     }),
                     React.createElement('input', {
                         key: 'last-name',
@@ -341,19 +348,19 @@ const MemberDetails = ({ treeId, memberId }) => {
                         name: 'last_name',
                         value: formData.last_name || '',
                         onChange: handleInputChange,
-                        className: 'form-control'
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
                     })
                 ]),
                 // Birth fields
-                React.createElement('div', { key: 'birth-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'birth-label' }, T('Birth')),
+                React.createElement('div', { key: 'birth-group', className: 'space-y-2' }, [
+                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Birth')),
                     React.createElement('input', {
                         key: 'birth-date',
                         type: 'date',
                         name: 'birth_date',
                         value: formData.birth_date || '',
                         onChange: handleInputChange,
-                        className: 'form-control mb-2'
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
                     }),
                     React.createElement('input', {
                         key: 'birth-place',
@@ -361,26 +368,26 @@ const MemberDetails = ({ treeId, memberId }) => {
                         name: 'birth_place',
                         value: formData.birth_place || '',
                         onChange: handleInputChange,
-                        className: 'form-control',
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary',
                         placeholder: T('Place of Birth')
                     })
                 ]),
                 // Gender and Alive
-                React.createElement('div', { key: 'status-group', className: 'mb-3' }, [
-                    React.createElement('div', { key: 'gender-field', className: 'mb-2' }, [
-                        React.createElement('label', { key: 'gender-label' }, T('Gender')),
+                React.createElement('div', { key: 'status-group', className: 'space-y-2' }, [
+                    React.createElement('div', { key: 'gender-field', className: 'space-y-2' }, [
+                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Gender')),
                         React.createElement('select', {
                             key: 'gender-select',
                             name: 'gender',
                             value: formData.gender,
                             onChange: handleInputChange,
-                            className: 'form-select'
+                            className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
                         }, [
                             React.createElement('option', { key: 'male', value: 'M' }, T('Male')),
                             React.createElement('option', { key: 'female', value: 'F' }, T('Female'))
                         ])
                     ]),
-                    React.createElement('div', { key: 'alive-field', className: 'form-check' }, [
+                    React.createElement('div', { key: 'alive-field', className: 'flex items-center space-x-2' }, [
                         React.createElement('input', {
                             key: 'alive-checkbox',
                             type: 'checkbox',
@@ -399,20 +406,20 @@ const MemberDetails = ({ treeId, memberId }) => {
                         React.createElement('label', {
                             key: 'alive-label',
                             htmlFor: 'alive',
-                            className: 'form-check-label'
+                            className: 'block text-sm font-medium text-gray-700'
                         }, T('Alive'))
                     ])
                 ]),
                 // Death fields (shown if not alive)
-                !showDeathFields ? null : React.createElement('div', { key: 'death-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'death-label' }, T('Death')),
+                !showDeathFields ? null : React.createElement('div', { key: 'death-group', className: 'space-y-2' }, [
+                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Death')),
                     React.createElement('input', {
                         key: 'death-date',
                         type: 'date',
                         name: 'death_date',
                         value: formData.death_date || '',
                         onChange: handleInputChange,
-                        className: 'form-control mb-2'
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
                     }),
                     React.createElement('input', {
                         key: 'death-place',
@@ -420,7 +427,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                         name: 'death_place',
                         value: formData.death_place || '',
                         onChange: handleInputChange,
-                        className: 'form-control',
+                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary',
                         placeholder: T('Place of Death')
                     })
                 ]),
@@ -514,27 +521,36 @@ const MemberDetails = ({ treeId, memberId }) => {
         ]);
     };
 
-    const renderFamilyTabs = () => React.createElement(Card, { key: 'family-card' }, [
-        React.createElement(Card.Header, { key: 'header' }, T('Families')),
-        React.createElement(Card.Body, { key: 'body' }, [
-            React.createElement(Nav, {
+    const renderFamilyTabs = () => React.createElement('div', { 
+        className: 'bg-white shadow-md lg:rounded-lg' 
+    }, [
+        React.createElement('div', { 
+            key: 'header',
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg'
+        }, React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Families'))),
+        React.createElement('div', { 
+            key: 'body',
+            className: 'p-4'
+        }, [
+            React.createElement('div', {
                 key: 'family-nav',
-                variant: 'tabs',
-                className: 'mb-3'
+                className: 'flex space-x-2 mb-3'
             }, [
                 ...spouseFamilies.map(family => 
-                    React.createElement(Nav.Item, { 
-                        key: `family-tab-${family.id}`
+                    React.createElement('div', { 
+                        key: `family-tab-${family.id}`,
+                        className: 'flex items-center'
                     }, 
                         renderFamilyTab(family)
                     )
                 ),
-                React.createElement(Nav.Item, {
+                React.createElement('div', {
                     key: 'add-family',
                     className: 'ms-2'
-                }, React.createElement(Nav.Link, {
+                }, React.createElement('button', {
                     key: 'add-family-link',
-                    onClick: handleAddFamily
+                    onClick: handleAddFamily,
+                    className: 'text-primary hover:text-primary-dark'
                 }, '+'))
             ]),
             // Active family content
@@ -559,16 +575,16 @@ const MemberDetails = ({ treeId, memberId }) => {
                         tagType: 'FAM'         // Use FAM type for family tags
                     }),
                     React.createElement('h6', { key: 'children-header' }, T('Children')),
-                    React.createElement(ListGroup, { key: 'children-list' },
+                    React.createElement('ul', { key: 'children-list', className: 'list-none space-y-2' },
                         (family.children || []).map(child =>
-                            React.createElement(ListGroup.Item, {
+                            React.createElement('li', {
                                 key: `child-${child.id}`,
-                                className: 'd-flex justify-content-between align-items-center'
+                                className: 'flex justify-between items-center'
                             }, [
                                 React.createElement('a', {
                                     key: 'child-link',
                                     href: `#/tree/${currentTreeId}/member/${child.id}`,
-                                    className: 'text-decoration-none',
+                                    className: 'text-primary hover:text-primary-dark',
                                     onClick: (e) => {
                                         e.preventDefault();
                                         window.location.hash = `#/tree/${currentTreeId}/member/${child.id}`;
@@ -620,12 +636,14 @@ const MemberDetails = ({ treeId, memberId }) => {
         }
     };
 
-    const renderParents = () => React.createElement(Card, { key: 'parents-card', className: 'mt-3' }, [
-        React.createElement(Card.Header, { 
+    const renderParents = () => React.createElement('div', { 
+        className: 'bg-white shadow-md lg:rounded-lg mt-4' 
+    }, [
+        React.createElement('div', { 
             key: 'header',
-            className: 'flex justify-between items-center'
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
         }, [
-            React.createElement('h4', { key: 'title' }, T('Parents')),
+            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Parents')),
             React.createElement(Dropdown, {
                 key: 'parents-actions',
                 trigger: '⚙️',
@@ -644,28 +662,31 @@ const MemberDetails = ({ treeId, memberId }) => {
                 ]
             })
         ]),
-        React.createElement(Card.Body, { key: 'body' },
+        React.createElement('div', { 
+            key: 'body',
+            className: 'p-4'
+        },
             childFamilies.length === 0 ?
                 React.createElement('div', { className: 'text-muted' }, T('No parents added')) :
                 childFamilies.map(family => 
                     React.createElement('div', { 
                         key: `family-${family.id}`, 
-                        className: 'd-flex justify-between align-items-center mb-2'
+                        className: 'flex justify-between items-center mb-2'
                     }, [
                         React.createElement('div', { 
                             key: 'parents-names',
-                            className: 'd-flex gap-2' 
+                            className: 'flex gap-2' 
                         }, [
                             family.husband_id && React.createElement('a', {
                                 key: 'father',
                                 href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
-                                className: 'text-decoration-none'
+                                className: 'text-primary hover:text-primary-dark'
                             }, family.husband_name),
                             (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
                             family.wife_id && React.createElement('a', {
                                 key: 'mother',
                                 href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
-                                className: 'text-decoration-none'
+                                className: 'text-primary hover:text-primary-dark'
                             }, family.wife_name)
                         ]),
                         React.createElement('button', {
@@ -751,17 +772,15 @@ const MemberDetails = ({ treeId, memberId }) => {
 
         return React.createElement('li', {
             key: `rel-${rel.id}`,
-            className: 'list-group-item d-flex justify-content-between align-items-center'
+            className: 'flex justify-between items-center px-4 py-2 hover:bg-gray-50'
         }, [
-            React.createElement('div', { key: 'info' }, [
+            React.createElement('div', { className: 'flex items-center gap-2' }, [
                 React.createElement('a', {
-                    key: 'name',
                     href: `#/tree/${currentTreeId}/member/${otherPersonId}`,
-                    className: 'text-decoration-none'
+                    className: 'text-primary hover:text-primary-dark'
                 }, otherPerson),
                 React.createElement('span', { 
-                    key: 'type', 
-                    className: 'text-muted ms-2' 
+                    className: 'text-sm text-gray-500' 
                 }, `(${rel.description})`)
             ]),
             React.createElement('div', { key: 'actions' }, [
@@ -793,7 +812,8 @@ const MemberDetails = ({ treeId, memberId }) => {
     }
     if (!member) return React.createElement('div', { className: 'alert alert-warning' }, 'Member not found');
 
-    return React.createElement('div', { className: 'container-fluid' }, [
+    // Update main layout structure
+    return React.createElement('div', { className: 'min-h-screen flex flex-col' }, [
         React.createElement(Navigation, { 
             key: 'nav',
             title: `${member.first_name} ${member.last_name}`,
@@ -802,21 +822,328 @@ const MemberDetails = ({ treeId, memberId }) => {
         }),
         React.createElement('main', { 
             key: 'main',
-            className: 'container mx-auto px-4 py-16 mt-16 mb-16'
+            className: 'w-full lg:container lg:mx-auto px-0 lg:px-4 py-2 mt-14 flex-grow'
         }, 
-            React.createElement(Row, { key: 'content-row' }, [
-                React.createElement(Col, { key: 'col-basic', lg: 4 }, renderBasicInfo()),
-                React.createElement(Col, { key: 'col-families', lg: 4 }, [
-                    renderFamilyTabs(),
-                    renderParents()
-                ]),
-                React.createElement(Col, { key: 'col-other', lg: 4 }, 
-                    React.createElement(Card, { key: 'other-card' }, [
-                        React.createElement(Card.Header, { 
-                            key: 'other-header',
-                            className: 'flex justify-between items-center'
+            React.createElement('div', { 
+                className: 'grid grid-cols-1 lg:grid-cols-3 gap-4 mt-0 lg:mt-16'
+            }, [
+                // Basic Info Column
+                React.createElement('div', { key: 'col-basic' },
+                    React.createElement('div', { 
+                        className: 'bg-white shadow-md lg:rounded-lg' 
+                    }, [
+                        React.createElement('div', { 
+                            key: 'header',
+                            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
                         }, [
-                            React.createElement('h4', { key: 'title' }, T('Other Relationships')),
+                            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Member Details')),
+                            React.createElement('div', {
+                                key: 'dropdown',
+                            }, React.createElement(Dropdown, {
+                                trigger: '⚙️',
+                                items: [
+                                    {
+                                        label: T('Visualize Descendants'),
+                                        href: `#/tree/${currentTreeId}/member/${currentMemberId}/descendants`,
+                                        className: 'text-gray-700' // Add text color class
+                                    },
+                                    {
+                                        label: T('Add Relationship'),
+                                        onClick: () => setShowRelationshipModal(true),
+                                        className: 'text-gray-700' // Add text color class
+                                    },
+                                    {
+                                        label: T('Delete Member'),
+                                        onClick: handleDeleteMember,
+                                        className: 'text-red-600' // Keep red for delete
+                                    }
+                                ]
+                            }))
+                        ]),
+                        React.createElement('div', { 
+                            key: 'body',
+                            className: 'p-4'
+                        },
+                            React.createElement('form', { 
+                                onSubmit: handleSubmit,
+                                className: 'space-y-4' 
+                            }, [
+                                // Name fields
+                                React.createElement('div', { key: 'name-group', className: 'space-y-2' }, [
+                                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Name')),
+                                    React.createElement('input', {
+                                        type: 'text',
+                                        name: 'first_name',
+                                        value: formData.first_name || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
+                                    }),
+                                    React.createElement('input', {
+                                        key: 'last-name',
+                                        type: 'text',
+                                        name: 'last_name',
+                                        value: formData.last_name || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
+                                    })
+                                ]),
+                                // Birth fields
+                                React.createElement('div', { key: 'birth-group', className: 'space-y-2' }, [
+                                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Birth')),
+                                    React.createElement('input', {
+                                        key: 'birth-date',
+                                        type: 'date',
+                                        name: 'birth_date',
+                                        value: formData.birth_date || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
+                                    }),
+                                    React.createElement('input', {
+                                        key: 'birth-place',
+                                        type: 'text',
+                                        name: 'birth_place',
+                                        value: formData.birth_place || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary',
+                                        placeholder: T('Place of Birth')
+                                    })
+                                ]),
+                                // Gender and Alive
+                                React.createElement('div', { key: 'status-group', className: 'space-y-2' }, [
+                                    React.createElement('div', { key: 'gender-field', className: 'space-y-2' }, [
+                                        React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Gender')),
+                                        React.createElement('select', {
+                                            key: 'gender-select',
+                                            name: 'gender',
+                                            value: formData.gender,
+                                            onChange: handleInputChange,
+                                            className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
+                                        }, [
+                                            React.createElement('option', { key: 'male', value: 'M' }, T('Male')),
+                                            React.createElement('option', { key: 'female', value: 'F' }, T('Female'))
+                                        ])
+                                    ]),
+                                    React.createElement('div', { key: 'alive-field', className: 'flex items-center space-x-2' }, [
+                                        React.createElement('input', {
+                                            key: 'alive-checkbox',
+                                            type: 'checkbox',
+                                            id: 'alive',
+                                            name: 'alive',
+                                            checked: formData.alive,
+                                            onChange: e => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    alive: e.target.checked
+                                                }));
+                                                setShowDeathFields(!e.target.checked);
+                                            },
+                                            className: 'form-check-input'
+                                        }),
+                                        React.createElement('label', {
+                                            key: 'alive-label',
+                                            htmlFor: 'alive',
+                                            className: 'block text-sm font-medium text-gray-700'
+                                        }, T('Alive'))
+                                    ])
+                                ]),
+                                // Death fields (shown if not alive)
+                                !showDeathFields ? null : React.createElement('div', { key: 'death-group', className: 'space-y-2' }, [
+                                    React.createElement('label', { className: 'block text-sm font-medium text-gray-700' }, T('Death')),
+                                    React.createElement('input', {
+                                        key: 'death-date',
+                                        type: 'date',
+                                        name: 'death_date',
+                                        value: formData.death_date || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary'
+                                    }),
+                                    React.createElement('input', {
+                                        key: 'death-place',
+                                        type: 'text',
+                                        name: 'death_place',
+                                        value: formData.death_place || '',
+                                        onChange: handleInputChange,
+                                        className: 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary',
+                                        placeholder: T('Place of Death')
+                                    })
+                                ]),
+                                // Fix the TagInput props here - change memberId to rowId
+                                React.createElement(TagInput, {
+                                    key: 'tags',
+                                    rowId: currentMemberId,  // Use currentMemberId for rowId
+                                    treeId: currentTreeId,
+                                    tagType: 'INDI'
+                                }),
+                                React.createElement('button', {
+                                    key: 'submit',
+                                    type: 'submit',
+                                    className: 'btn btn-primary'
+                                }, T('Save Changes'))
+                            ])
+                        )
+                    ])
+                ),
+                // Column 2: Families
+                React.createElement('div', { key: 'col-families' }, [
+                    React.createElement('div', { 
+                        className: 'bg-white shadow-md lg:rounded-lg'
+                    }, [
+                        React.createElement('div', { 
+                            key: 'header',
+                            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg'
+                        }, React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Families'))),
+                        React.createElement('div', { 
+                            key: 'body',
+                            className: 'p-4'
+                        }, [
+                            React.createElement('div', {
+                                key: 'family-nav',
+                                className: 'flex space-x-2 mb-3'
+                            }, [
+                                ...spouseFamilies.map(family => 
+                                    React.createElement('div', { 
+                                        key: `family-tab-${family.id}`,
+                                        className: 'flex items-center'
+                                    }, 
+                                        renderFamilyTab(family)
+                                    )
+                                ),
+                                React.createElement('div', {
+                                    key: 'add-family',
+                                    className: 'ms-2'
+                                }, React.createElement('button', {
+                                    key: 'add-family-link',
+                                    onClick: handleAddFamily,
+                                    className: 'text-primary hover:text-primary-dark'
+                                }, '+'))
+                            ]),
+                            // Active family content
+                            spouseFamilies.map(family => 
+                                family.id === activeFamily && React.createElement('div', {
+                                    key: `family-content-${family.id}`
+                                }, [
+                                    React.createElement('div', { key: 'marriage-details', className: 'mb-3' }, [
+                                        React.createElement('strong', { key: 'marriage-label' }, T('Marriage Date:')),
+                                        React.createElement('span', { key: 'marriage-date' }, family.marriage_date || 'Unknown'),
+                                        family.divorce_date && [
+                                            React.createElement('br', { key: 'br' }),
+                                            React.createElement('strong', { key: 'divorce-label' }, T('Divorce Date:')),
+                                            React.createElement('span', { key: 'divorce-date' }, family.divorce_date)
+                                        ]
+                                    ]),
+                                    // Add TagInput for family before the children section
+                                    React.createElement(TagInput, {
+                                        key: `family-tags-${family.id}`,
+                                        rowId: family.id,      // Use family.id instead of memberId
+                                        treeId: currentTreeId,
+                                        tagType: 'FAM'         // Use FAM type for family tags
+                                    }),
+                                    React.createElement('h6', { key: 'children-header' }, T('Children')),
+                                    React.createElement('ul', { key: 'children-list', className: 'list-none space-y-2' },
+                                        (family.children || []).map(child =>
+                                            React.createElement('li', {
+                                                key: `child-${child.id}`,
+                                                className: 'flex justify-between items-center'
+                                            }, [
+                                                React.createElement('a', {
+                                                    key: 'child-link',
+                                                    href: `#/tree/${currentTreeId}/member/${child.id}`,
+                                                    className: 'text-primary hover:text-primary-dark',
+                                                    onClick: (e) => {
+                                                        e.preventDefault();
+                                                        window.location.hash = `#/tree/${currentTreeId}/member/${child.id}`;
+                                                    }
+                                                }, `${child.gender === 'M' ? '♂️' : '♀️'} ${child.first_name} ${child.last_name}`),
+                                                React.createElement('button', {
+                                                    key: 'delete-child',
+                                                    className: 'btn btn-sm btn-danger',
+                                                    onClick: (e) => {
+                                                        e.preventDefault();
+                                                        handleDeleteChild(child.id, family.id);
+                                                    }
+                                                }, '🗑️')
+                                            ])
+                                        )
+                                    )
+                                ])
+                            )
+                        ])
+                    ]),
+                    // Parents section
+                    React.createElement('div', { 
+                        className: 'bg-white shadow-md lg:rounded-lg mt-4'
+                    }, [
+                        React.createElement('div', { 
+                            key: 'header',
+                            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
+                        }, [
+                            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Parents')),
+                            React.createElement(Dropdown, {
+                                key: 'parents-actions',
+                                trigger: '⚙️',
+                                items: [
+                                    {
+                                        label: T('Add Parents'),
+                                        onClick: () => {
+                                            setRelationshipModalData({
+                                                tab: 'parent',
+                                                prefilledData: null
+                                            });
+                                            setShowRelationshipModal(true);
+                                        },
+                                        className: 'text-gray-700' // Add default text color
+                                    }
+                                ]
+                            })
+                        ]),
+                        React.createElement('div', { 
+                            key: 'body',
+                            className: 'p-4'
+                        },
+                            childFamilies.length === 0 ?
+                                React.createElement('div', { className: 'text-muted' }, T('No parents added')) :
+                                childFamilies.map(family => 
+                                    React.createElement('div', { 
+                                        key: `family-${family.id}`, 
+                                        className: 'flex justify-between items-center mb-2'
+                                    }, [
+                                        React.createElement('div', { 
+                                            key: 'parents-names',
+                                            className: 'flex gap-2' 
+                                        }, [
+                                            family.husband_id && React.createElement('a', {
+                                                key: 'father',
+                                                href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
+                                                className: 'text-primary hover:text-primary-dark'
+                                            }, family.husband_name),
+                                            (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
+                                            family.wife_id && React.createElement('a', {
+                                                key: 'mother',
+                                                href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
+                                                className: 'text-primary hover:text-primary-dark'
+                                            }, family.wife_name)
+                                        ]),
+                                        React.createElement('button', {
+                                            key: 'delete-button',
+                                            className: 'btn btn-sm btn-danger',
+                                            onClick: () => handleDeleteFromFamily(family.id),
+                                            title: 'Remove parent relationship'
+                                        }, '🗑️')
+                                    ])
+                                )
+                        )
+                    ])
+                ]),
+                // Column 3: Other Relationships
+                React.createElement('div', { key: 'col-other' },
+                    React.createElement('div', { 
+                        className: 'bg-white shadow-md lg:rounded-lg'
+                    }, [
+                        React.createElement('div', { 
+                            key: 'header',
+                            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
+                        }, [
+                            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Other Relationships')),
                             React.createElement(Dropdown, {
                                 key: 'other-actions',
                                 trigger: '⚙️',
@@ -835,10 +1162,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                                 ]
                             })
                         ]),
-                        React.createElement(Card.Body, { key: 'other-body' }, 
+                        React.createElement('div', { 
+                            key: 'body',
+                            className: 'p-4'
+                        }, 
                             relationships.length === 0 
                             ? React.createElement('div', { className: 'text-muted' }, T('No other relationships found'))
-                            : React.createElement('ul', { className: 'list-group' },
+                            : React.createElement('ul', { className: 'list-none space-y-2' },
                                 relationships.map(rel => 
                                     renderRelationship(rel)
                                 )
