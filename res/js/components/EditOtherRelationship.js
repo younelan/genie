@@ -46,6 +46,9 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
         });
     };
 
+    // Get the tree_id from the URL hash or from the relationship object
+    const currentTreeId = window.location.hash.split('/')[2] || relationship?.tree_id;
+
     if (!show) return null;
 
     return React.createElement('div', {
@@ -216,7 +219,14 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                                     }
                                 }
                             }, '↔️ Swap Persons')
-                        ])
+                        ]),
+                        // Add TagInput only if we have a valid relationship ID
+                        relationship?.id && React.createElement(TagInput, {
+                            key: 'relationship-tags',
+                            rowId: relationship.id,      // Pass the relationship ID as rowId
+                            treeId: currentTreeId,       // Pass the current tree ID
+                            tagType: 'REL'              // Explicitly set tag type for relationships
+                        })
                     ])
                 ),
                 React.createElement('div', {
