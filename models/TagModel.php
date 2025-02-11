@@ -62,24 +62,24 @@ class TagModel extends AppModel
     }
 
     public function deleteTag($delTag) {
-        // All fields are required
+        // All fields are required - change member_id to row_id
         $tree_id = intval($delTag['tree_id']);
-        $member_id = intval($delTag['member_id']);
+        $row_id = intval($delTag['row_id']);     // Changed from member_id
         $tag = trim($delTag['tag']);
         $tag_type = $delTag['tag_type'];
 
-        if (!$tree_id || !$member_id || !$tag || !$tag_type) {
+        if (!$tree_id || !$row_id || !$tag || !$tag_type) {
             return false;
         }
 
         $query = "DELETE FROM $this->notes_table 
                   WHERE tag = :tag_name 
                   AND tree_id = :tree_id 
-                  AND row_id = :member_id 
+                  AND row_id = :row_id           
                   AND tag_type = :tag_type";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':tag_name', $tag);
-        $stmt->bindParam(':member_id', $member_id);
+        $stmt->bindParam(':row_id', $row_id);    // Changed from member_id
         $stmt->bindParam(':tree_id', $tree_id);
         $stmt->bindParam(':tag_type', $tag_type);
         return $stmt->execute();

@@ -67,9 +67,9 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
             const postData = {
                 action: 'delete_tag',
                 tag: tagToDelete.trim(),
-                row_id: parseInt(rowId), // Ensure it's a number and explicitly using row_id
+                row_id: parseInt(rowId),       // Changed from member_id
                 tree_id: parseInt(treeId),
-                tag_type: tagType  // Make sure we pass the tag_type
+                tag_type: tagType
             };
 
             const response = await fetch('api/tags.php', {

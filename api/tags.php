@@ -89,14 +89,14 @@ class TagsAPI {
 
     private function deleteTag($data) {
         try {
-            // All fields are required
-            if (empty($data['tag']) || empty($data['member_id']) || empty($data['tree_id']) || empty($data['tag_type'])) {
-                throw new Exception('All fields are required: tag, member_id, tree_id, tag_type');
+            // All fields are required - change member_id to row_id
+            if (empty($data['tag']) || empty($data['row_id']) || empty($data['tree_id']) || empty($data['tag_type'])) {
+                throw new Exception('All fields are required: tag, row_id, tree_id, tag_type');
             }
 
             $result = $this->tagModel->deleteTag([
                 'tag' => trim($data['tag']),
-                'member_id' => $data['member_id'],
+                'row_id' => $data['row_id'],     // Changed from member_id
                 'tree_id' => $data['tree_id'],
                 'tag_type' => $data['tag_type']
             ]);
@@ -105,7 +105,7 @@ class TagsAPI {
                 throw new Exception('Failed to delete tag');
             }
 
-            $tags = $this->tagModel->getTagString($data['member_id'], $data['tag_type']);
+            $tags = $this->tagModel->getTagString($data['row_id'], $data['tag_type']);  // Changed from member_id
             $this->sendResponse(['tags' => $tags]);
         } catch (Exception $e) {
             $this->sendError($e->getMessage());

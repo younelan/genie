@@ -548,6 +548,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                             React.createElement('span', { key: 'divorce-date' }, family.divorce_date)
                         ]
                     ]),
+                    // Add TagInput for family before the children section
+                    React.createElement(TagInput, {
+                        key: `family-tags-${family.id}`,
+                        rowId: family.id,      // Use family.id instead of memberId
+                        treeId: currentTreeId,
+                        tagType: 'FAM'         // Use FAM type for family tags
+                    }),
                     React.createElement('h6', { key: 'children-header' }, 'Children'),
                     React.createElement(ListGroup, { key: 'children-list' },
                         (family.children || []).map(child =>
