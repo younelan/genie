@@ -104,14 +104,12 @@ const MembersList = () => {
     const mainContent = [
         React.createElement('main', { 
             key: 'main',
-            // Remove top margin and reduce padding
-            className: 'container mx-auto px-0 lg:px-4 py-2 flex-grow'
+            className: 'w-full lg:container lg:mx-auto px-0 lg:px-4 py-2 flex-grow' // Adjusted for full width on mobile
         }, [
             // Mobile tabs - adjust position to stick right under nav
             React.createElement('div', {
                 key: 'mobile-tabs',
-                // Adjust top position to align with navigation
-                className: 'lg:hidden sticky top-[3.5rem] bg-white z-10 shadow-sm'
+                className: 'lg:hidden sticky top-14 bg-white z-10 shadow-sm' // Adjusted top position
             }, [
                 React.createElement('div', {
                     className: 'flex bg-gray-100'
@@ -129,13 +127,15 @@ const MembersList = () => {
             ]),
 
             // Desktop view (3 columns)
-            React.createElement(Row, { 
+            React.createElement('div', { 
                 key: 'desktop-view',
-                // Add top margin for desktop view only
-                className: 'hidden lg:flex lg:gap-4 lg:mt-16'
+                className: 'hidden lg:grid lg:grid-cols-3 lg:gap-4 lg:mt-16'
             }, [
                 // Members List Column
-                React.createElement(Col, { key: 'members-col', lg: 4, className: 'mb-4' },
+                React.createElement('div', { 
+                    key: 'members-col',
+                    className: 'mb-4'
+                },
                     React.createElement(Card, { key: 'members-card' }, [
                         React.createElement(Card.Header, { key: 'members-header' }, T('Family Members')),
                         React.createElement(Card.Body, { key: 'members-body' }, [
@@ -170,7 +170,10 @@ const MembersList = () => {
                     ])
                 ),
                 // Statistics Column
-                React.createElement(Col, { key: 'stats-col', lg: 4, className: 'mb-4' },
+                React.createElement('div', { 
+                    key: 'stats-col',
+                    className: 'mb-4'
+                },
                     React.createElement(Card, { key: 'stats-card' }, [
                         React.createElement(Card.Header, { key: 'stats-header' }, T('Statistics')),
                         React.createElement(Card.Body, { key: 'stats-body' },
@@ -196,7 +199,10 @@ const MembersList = () => {
                     ])
                 ),
                 // Recent Updates Column
-                React.createElement(Col, { key: 'updates-col', lg: 4, className: 'mb-4' },
+                React.createElement('div', { 
+                    key: 'updates-col',
+                    className: 'mb-4'
+                },
                     React.createElement(Card, { key: 'updates-card' }, [
                         React.createElement(Card.Header, { key: 'updates-header' }, T('Recent Updates')),
                         React.createElement(Card.Body, { key: 'updates-body' },
@@ -209,12 +215,12 @@ const MembersList = () => {
             // Mobile view - adjust padding to account for new tab position
             React.createElement('div', {
                 key: 'mobile-view',
-                className: 'lg:hidden pt-12'
+                className: 'lg:hidden w-full' // Removed mt-14, added w-full
             }, [
                 activeTab === 0 && React.createElement('div', { className: 'w-full' },
                     React.createElement(Card, { 
                         key: 'members-card',
-                        className: 'border-0 rounded-none'
+                        className: 'border-x-0 rounded-none' // Changed border-0 to border-x-0
                     }, [
                         React.createElement(Card.Header, { key: 'members-header' }, T('Family Members')),
                         React.createElement(Card.Body, { key: 'members-body' }, [
