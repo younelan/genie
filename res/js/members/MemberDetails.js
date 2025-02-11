@@ -421,12 +421,12 @@ const MemberDetails = ({ treeId, memberId }) => {
                         placeholder: 'Place of Death'
                     })
                 ]),
-                // Add TagInput before the submit button
+                // Fix the TagInput props here - change memberId to rowId
                 React.createElement(TagInput, {
                     key: 'tags',
-                    memberId: currentMemberId,
+                    rowId: currentMemberId,  // Use currentMemberId for rowId
                     treeId: currentTreeId,
-                    member: member // Pass the entire member object
+                    tagType: 'INDI'
                 }),
                 React.createElement('button', {
                     key: 'submit',

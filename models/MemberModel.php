@@ -118,69 +118,6 @@ class MemberModel extends AppModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getTags($memberId)
-    {
-        $query = "SELECT * FROM $this->notes_table t
-        WHERE row_id = :member_id AND tag_type = 'INDI'";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':member_id', $memberId);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    public function listTags( $memberId)
-    {
-        $raw_tags = $this->getTags($memberId);
-        $tagList = [];
-        foreach ($raw_tags as $tag) {
-            if(!in_array($tag['tag'],$tagList)) {
-                $tagList[] = $tag['tag'];
-
-            }
-        }
-        return $tagList;
-    }
-    public function getTagString($memberId) {
-        $raw_concat_tags = $this->listTags( $memberId);
-        $concat_tags = implode(",", $raw_concat_tags);
-        return $concat_tags;
-    }
-    public function addTag($newTag) {
-        $tree_id = intval($newTag['tree_id'])?? false;
-        $row_id = intval($newTag['member_id'])?? false;
-        $tag = $newTag['tag']?? false;
-        if(!$tree_id || !$row_id || !$tag) {
-            return false;
-        };
-        $query = "INSERT INTO $this->notes_table (tag, tree_id, row_id, tag_type, created_at, updated_at) 
-                  VALUES (:tag_name, :tree_id, :row_id, 'INDI', NOW(), NOW())";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':tag_name', $tag);
-        $stmt->bindParam(':row_id', $row_id);
-        $stmt->bindParam(':tree_id', $tree_id);
-        $result = $stmt->execute();        
-
-        return $this->db->lastInsertId();
-    }
-    public function deleteTag($delTag) {
-        $tree_id = intval($delTag['tree_id'])?? false;
-        $row_id = intval($delTag['member_id'])?? false;
-        $tag = $delTag['tag']?? false;
-        if(!$tree_id || !$row_id || !$tag) {
-            return false;
-        };
-        $query = "DELETE FROM $this->notes_table 
-                  WHERE tag = :tag_name 
-                  AND tree_id = :tree_id 
-                  AND row_id = :row_id 
-                  AND tag_type = 'INDI'";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':tag_name', $tag);
-        $stmt->bindParam(':row_id', $row_id);
-        $stmt->bindParam(':tree_id', $tree_id);
-        $result = $stmt->execute();
-        return $result;
-    }
-
     public function autocompleteMember($term, $memberId, $tree_id = 1)
     {
         $query = "SELECT id, first_name, last_name FROM $this->person_table  WHERE 

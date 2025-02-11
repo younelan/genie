@@ -11,7 +11,7 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
 
     const loadTags = async () => {
         try {
-            const response = await fetch(`api/individuals.php?action=tags&member_id=${rowId}&tag_type=${tagType}`);
+            const response = await fetch(`api/tags.php?row_id=${rowId}&tag_type=${tagType}`);
             const data = await response.json();
             if (data.success && data.data.tags) {
                 const tagArray = data.data.tags.split(',')
@@ -29,15 +29,18 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
 
     const handleAddTag = async (tag) => {
         try {
+            console.log('rowId:', rowId); // Debug log
             const postData = {
                 action: 'add_tag',
                 tag: tag.trim(),
-                member_id: rowId,
-                tree_id: treeId,
+                row_id: parseInt(rowId), // Ensure it's a number and explicitly using row_id
+                tree_id: parseInt(treeId),
                 tag_type: tagType
             };
 
-            const response = await fetch('api/individuals.php', {
+            console.log('Sending tag data:', postData); // Add debugging
+
+            const response = await fetch('api/tags.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -46,10 +49,12 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
             });
 
             const data = await response.json();
+            console.log('Received response:', data); // Add debugging
+
             if (data.success) {
                 await loadTags();
             } else {
-                throw new Error(data.message || 'Failed to add tag');
+                throw new Error(data.error || 'Failed to add tag');
             }
         } catch (error) {
             console.error('Error adding tag:', error);
@@ -62,12 +67,12 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
             const postData = {
                 action: 'delete_tag',
                 tag: tagToDelete.trim(),
-                member_id: rowId,
-                tree_id: treeId,
-                tag_type: tagType
+                row_id: parseInt(rowId), // Ensure it's a number and explicitly using row_id
+                tree_id: parseInt(treeId),
+                tag_type: tagType  // Make sure we pass the tag_type
             };
 
-            const response = await fetch('api/individuals.php', {
+            const response = await fetch('api/tags.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -14,6 +14,7 @@ class IndividualsAPI {
     private $memberModel;
     private $familyModel;
     private $treeModel;
+    private $tagModel;  // Add this line
     private $userId;
     private $db; // Add this line
 
@@ -28,6 +29,7 @@ class IndividualsAPI {
         $this->memberModel = new MemberModel($config);
         $this->treeModel = new TreeModel($config);
         $this->familyModel = new FamilyModel($config);
+        $this->tagModel = new TagModel($config);  // Add this line
         $this->db = $config['connection']; // Add this line
     }
 
@@ -70,9 +72,6 @@ class IndividualsAPI {
             case 'details':
                 $this->getMemberDetails();
                 break;
-            case 'tags':
-                $this->getTags();
-                break;
             case 'get_descendants':
                 $this->getDescendants();
                 break;
@@ -97,6 +96,10 @@ class IndividualsAPI {
                     echo json_encode(['success' => true, 'relationships' => $relationships]);
                 }
                 break;
+            case 'tags':
+                // Remove this case - tags are now handled by TagsAPI
+                $this->sendError('Tags endpoint moved to /api/tags.php');
+                break;
             default:
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid action']);
@@ -118,10 +121,8 @@ class IndividualsAPI {
             
             switch ($action) {
                 case 'add_tag':
-                    $this->addTag($data);
-                    break;
                 case 'delete_tag':
-                    $this->deleteTag($data);
+                    $this->sendError('Tags endpoint moved to /api/tags.php');
                     break;
                 case 'create': // Added case for creating a member
                     $this->createMember($data);
@@ -263,12 +264,8 @@ class IndividualsAPI {
                 throw new Exception('Member not found');
             }
 
-            // Ensure alive value is consistent
-            //$member['alive'] = $member['alive'] === '1' ? '1' : '0';
-            logapache("Member alive value: " . $member['alive']);
-
-            // Get member's tags as a comma-separated string
-            $tags = $this->memberModel->getTagString($memberId);
+            // Get member's tags using TagModel
+            $tags = $this->tagModel->getTagString($memberId);
             $member['tags'] = $tags;
 
             // Get additional data
@@ -287,30 +284,6 @@ class IndividualsAPI {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Failed to fetch member details',
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    private function getTags() {
-        $memberId = $_GET['member_id'] ?? null;
-        
-        if (!$memberId) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Member ID required']);
-            return;
-        }
-
-        try {
-            $tags = $this->memberModel->getTagString($memberId);
-            echo json_encode([
-                'success' => true,
-                'data' => ['tags' => $tags]
-            ]);
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
@@ -419,76 +392,6 @@ class IndividualsAPI {
             http_response_code(500);
             echo json_encode([
                 'error' => 'Failed to delete member',
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    private function addTag($data) {
-        try {
-            logapache("Adding tag with data:");
-            logapache($data);
-
-            if (empty($data['tag']) || empty($data['member_id']) || empty($data['tree_id'])) {
-                throw new Exception('Missing required tag data');
-            }
-
-            $newTag = [
-                'tag' => trim($data['tag']),
-                'member_id' => $data['member_id'],
-                'tree_id' => $data['tree_id']
-            ];
-
-            $result = $this->memberModel->addTag($newTag);
-            if ($result) {
-                // Return updated tag list
-                $tags = $this->memberModel->getTagString($data['member_id']);
-                echo json_encode([
-                    'success' => true,
-                    'data' => ['tags' => $tags]
-                ]);
-            } else {
-                throw new Exception('Failed to add tag');
-            }
-        } catch (Exception $e) {
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
-
-    private function deleteTag($data) {
-        try {
-            logapache("Deleting tag with data:");
-            logapache($data);
-
-            if (empty($data['tag']) || empty($data['member_id']) || empty($data['tree_id'])) {
-                throw new Exception('Missing required tag data');
-            }
-
-            $tagToDelete = [
-                'tag' => trim($data['tag']),
-                'member_id' => $data['member_id'],
-                'tree_id' => $data['tree_id']
-            ];
-
-            $result = $this->memberModel->deleteTag($tagToDelete);
-            if ($result) {
-                // Return updated tag list
-                $tags = $this->memberModel->getTagString($data['member_id']);
-                echo json_encode([
-                    'success' => true,
-                    'data' => ['tags' => $tags]
-                ]);
-            } else {
-                throw new Exception('Failed to delete tag');
-            }
-        } catch (Exception $e) {
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
