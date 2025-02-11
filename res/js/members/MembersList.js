@@ -116,7 +116,7 @@ const MembersList = () => {
                 React.createElement('div', {
                     className: 'flex bg-gray-100'
                 }, [
-                    ['Members', 'Statistics', 'Updates'].map((tab, index) =>
+                    [T('Members'), T('Statistics'), T('Updates')].map((tab, index) =>
                         React.createElement('button', {
                             key: `tab-${index}`,
                             onClick: () => setActiveTab(index),
@@ -300,7 +300,7 @@ const MembersList = () => {
     }, [
         React.createElement(Navigation, { 
             key: 'nav',
-            title: 'Family Members',
+            title: T('Family Members'), // Add translation
             leftMenuItems: Navigation.createTreeMenu(treeId),
             rightMenuItems: Navigation.createUserMenu()
         }),

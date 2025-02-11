@@ -127,6 +127,9 @@ $translations["fr"] = [
    "Add New Member"=> "Rajouter Nouveau Membre",
    "Select Existing Member"=>"Choix Membre Existant",
    "Delete Member"=>"Effacer Membre",
+   "Delete Tree"=>"Effacer Tree",
+   "User"=>"Utilisateur",
+   "User Menu"=>"Menu Utilisateur",
    "Add Relation"=>"Ajout Relation",
    "List Members"=>"Liste de Membres",
    "Add Relationship With Existing Member"=>"Ajouter Relation Avec Membre Existant",
@@ -299,6 +302,88 @@ $translations["fr"] = [
    "With" => "Avec",
    "Create Empty Family" => "Créer Famille Vide",
    "Back to Trees" => "Retour aux Arbres",
+   "Original Term" => "Terme Original",
+   "Replacement Term" => "Terme de Remplacement",
+   "Add Synonym" => "Ajouter Synonyme",
+   "Manage Synonyms" => "Gérer les Synonymes",
+   "Save" => "Enregistrer",
+   "Edit" => "Éditer", 
+   "Recent Updates" => "Mises à Jour Récentes",
+   "Family Trees" => "Arbres Généalogiques",
+   "Make this tree public" => "Rendre cet arbre public",
+   "Empty Tree" => "Vider l'Arbre",
+   "Export GEDCOM" => "Exporter GEDCOM",
+   "Tree Settings" => "Paramètres de l'Arbre",
+   "View Members" => "Voir les Membres",
+   "Are you sure you want to delete this synonym?" => "Êtes-vous sûr de vouloir supprimer ce synonyme?",
+   // Tabs
+   "Members" => "Membres",
+   "Updates" => "Mises à jour",
+   
+   // Tree Menu Items
+   "List Members" => "Liste des Membres",
+   "Add Member" => "Ajouter un Membre",
+   "Visualize Tree" => "Visualiser l'Arbre", 
+   "Manage Synonyms" => "Gérer les Synonymes",
+   "Tree Settings" => "Paramètres de l'Arbre",
+
+   // User Menu Items
+   "Profile" => "Profil",
+   "Settings" => "Paramètres",
+   "Logout" => "Déconnexion",
+
+   // Statistics Categories
+   "By Gender" => "Par Genre",
+   "By Age" => "Par Âge",
+   "By Status" => "Par Statut",
+   "By Location" => "Par Lieu",
+   
+   // Member List
+   "Search by name..." => "Rechercher par nom...",
+   "No results found" => "Aucun résultat trouvé",
+   "Page" => "Page",
+   
+   // Common Actions
+   "Add" => "Ajouter",
+   "Edit" => "Modifier",
+   "Delete" => "Supprimer",
+   "Cancel" => "Annuler",
+   "Save" => "Enregistrer",
+   "Create" => "Créer",
+   "Import" => "Importer",
+   
+   // Modal Labels
+   "Create New Tree" => "Créer Nouvel Arbre",
+   "Import GEDCOM File" => "Importer Fichier GEDCOM",
+   "Tree Name" => "Nom de l'Arbre",
+   "Description" => "Description",
+   
+   // Stats
+   "Total Members" => "Total des Membres",
+   "Active Members" => "Membres Actifs",
+   "Recent Activity" => "Activité Récente",
+   "Last Updated" => "Dernière Mise à Jour",
+   
+   // Navigation
+   "Back" => "Retour",
+   "Next" => "Suivant",
+   "Previous" => "Précédent",
+   // Navigation titles
+   "Visualize" => "Visualisation",
+   "Member Details" => "Détails du Membre",
+   "Add Member" => "Ajouter un Membre",
+   "View Members" => "Liste des Membres",
+   "Manage Synonyms" => "Gestion des Synonymes",
+   "Tree Settings" => "Configuration de l'Arbre",
+   "Edit Tree" => "Modifier l'Arbre",
+   // User menu items rewrite for clarity
+   "Profile" => "Mon Profil", 
+   "Settings" => "Configuration",
+   "Logout" => "Déconnexion",
+   // Page titles
+   "Family Trees" => "Arbres Généalogiques",
+   // User label
+   "User" => "Utilisateur",
 ];
 
 $keys = array_keys($translations['fr']);

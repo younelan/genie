@@ -106,7 +106,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                         className: 'px-4 py-2 hover:bg-gray-700 rounded-md flex items-center gap-2',
                         onClick: () => setShowRightMenu(!showRightMenu)
                     }, [
-                        React.createElement('span', { key: 'right-text' }, '👤 User'),
+                        React.createElement('span', { key: 'right-text' }, '👤 ' + T('User Menu')), // Change from 'User' to T('User Menu')
                         React.createElement('span', { key: 'right-arrow', className: 'ml-1' }, '▼')
                     ]),
                     showRightMenu && React.createElement('div', {
@@ -140,7 +140,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                 React.createElement('div', { 
                     key: 'mobile-left-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
-                }, 'Tree Menu'),
+                }, T('Tree Menu')),
                 ...leftMenuItems.map((item, index) =>
                     React.createElement('a', {
                         key: `mobile-left-item-${index}`,
@@ -155,7 +155,7 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
                 React.createElement('div', { 
                     key: 'mobile-right-title',
                     className: 'text-sm font-bold text-gray-400 px-4 py-2'
-                }, 'User Menu'),
+                }, T('User Menu')),
                 ...rightMenuItems.map((item, index) =>
                     React.createElement('a', {
                         key: `mobile-right-item-${index}`,
@@ -173,79 +173,42 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
 Navigation.createTreeMenu = (treeId) => ([
     { 
         label: T('List Members'), 
-        href: `#/tree/${treeId}/members`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = `#/tree/${treeId}/members`;
-        }
+        href: `#/tree/${treeId}/members`
     },
     { 
         label: T('Add Member'), 
-        href: `#/tree/${treeId}/member/add`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = `#/tree/${treeId}/member/add`;
-        }
+        href: `#/tree/${treeId}/member/add`
     },
     { 
         label: T('Visualize Tree'), 
-        href: `#/tree/${treeId}/visualize`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = `#/tree/${treeId}/visualize`;
-        }
+        href: `#/tree/${treeId}/visualize`
     },
     { 
         label: T('Manage Synonyms'), 
-        href: `#/tree/${treeId}/synonyms`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = `#/tree/${treeId}/synonyms`;
-        }
+        href: `#/tree/${treeId}/synonyms`
     },
     { 
         label: T('Tree Settings'), 
-        href: `#/tree/${treeId}/edit`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = `#/tree/${treeId}/edit`;
-        }
+        href: `#/tree/${treeId}/edit`
     },
     { 
         label: T('Export GEDCOM'), 
-        href: `api/trees.php?action=export_gedcom&tree_id=${treeId}`,
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.href = `api/trees.php?action=export_gedcom&tree_id=${treeId}`;
-        }
+        href: `api/trees.php?action=export_gedcom&tree_id=${treeId}`
     }
 ]);
 
 // Helper function to create user menu items
 Navigation.createUserMenu = () => ([
     { 
-        label: T('Profile'), 
-        href: '#/profile',
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = '#/profile';
-        }
+        label: T('Profile'), // Change to use T()
+        href: '#/profile'
     },
     { 
-        label: T('Settings'), 
-        href: '#/settings',
-        onClick: (e) => {
-            e.preventDefault();
-            window.location.hash = '#/settings';
-        }
+        label: T('Settings'), // Change to use T()
+        href: '#/settings'
     },
     { 
-        label: T('Logout'), 
-        href: '#',
-        onClick: (e) => {
-            e.preventDefault();
-            console.log('Logout clicked');
-            // Add logout logic here
-        }
+        label: T('Logout'), // Change to use T() 
+        href: '#/logout'
     }
 ]);

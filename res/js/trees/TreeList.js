@@ -115,7 +115,7 @@ const TreeList = () => {
           React.createElement('h3', { 
             key: 'modal-title',
             className: 'text-xl font-semibold text-white'
-          }, 'Create New Family Tree'),
+          }, T('Create New Tree')),
           React.createElement('button', {
             key: 'modal-close',
             onClick: () => setShowAddModal(false),
@@ -182,12 +182,12 @@ const TreeList = () => {
               type: 'button',
               onClick: () => setShowAddModal(false),
               className: 'px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md'
-            }, 'Cancel'),
+            }, T('Cancel')),
             React.createElement('button', {
               key: 'submit-button',
               type: 'submit',
               className: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm'
-            }, 'Create Tree')
+            }, T('Create'))
           ])
         ])
       ])
@@ -240,7 +240,7 @@ const TreeList = () => {
         }, [
           React.createElement('h3', {
             className: 'text-xl font-semibold text-white'
-          }, 'Import GEDCOM File'),
+          }, T('Import GEDCOM File')),
           React.createElement('button', {
             onClick: () => setShowImportModal(false),
             className: 'text-white hover:text-blue-100 text-2xl font-bold'
@@ -285,11 +285,11 @@ const TreeList = () => {
               type: 'button',
               onClick: () => setShowImportModal(false),
               className: 'px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md'
-            }, 'Cancel'),
+            }, T('Cancel')),
             React.createElement('button', {
               type: 'submit',
               className: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md'
-            }, 'Import')
+            }, T('Import'))
           ])
         ])
       ])
@@ -422,7 +422,7 @@ const TreeList = () => {
           React.createElement('span', {
             className: 'bg-primary text-white px-3 py-1 rounded-md mr-2 text-lg font-bold'
           }, tree.member_count || 0),
-          'Members'
+          T('Members')
         ]),
         // Stop event propagation on dropdown click
         React.createElement('div', {
@@ -500,7 +500,7 @@ const TreeList = () => {
   }, [
     React.createElement(Navigation, { 
         key: 'nav',
-        title: 'Family Trees',
+        title: T('Family Trees'), // Add translation
         rightMenuItems: Navigation.createUserMenu()
     }),
     React.createElement('div', { 
