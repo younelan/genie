@@ -374,12 +374,12 @@ const TreeList = () => {
 
   const treeCard = (tree) => React.createElement('div', {
     key: tree.id,
-    className: 'bg-white rounded shadow hover:shadow-lg transition-all duration-200'
+    className: 'bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-200'
   }, [
     React.createElement('a', {
       key: `header-${tree.id}`,
       href: `#/tree/${tree.id}/members`,
-      className: 'block p-3 bg-primary rounded-t cursor-pointer hover:opacity-90'
+      className: 'block p-4 bg-primary rounded-t-lg cursor-pointer hover:opacity-90'
     }, [
       React.createElement('h3', {
         key: `title-${tree.id}`,
@@ -404,20 +404,20 @@ const TreeList = () => {
 
     React.createElement('div', { 
       key: `content-${tree.id}`,
-      className: 'p-3 bg-[#dcd8e0]' 
+      className: 'p-4 bg-gray-100' 
     }, [
       React.createElement('p', { 
         key: `desc-${tree.id}`,
-        className: 'text-[#2c0a2a] mb-2 h-10 md:h-14 overflow-hidden text-base' // Increased height and font size
+        className: 'text-gray-700 mb-3 h-14 overflow-hidden text-base'
       }, tree.description || ''),
       React.createElement('div', {
         key: `stats-${tree.id}`,
-        className: 'flex items-center justify-between gap-4 pt-3 border-t border-gray-300 px-3 py-2'
+        className: 'flex items-center justify-between border-t border-gray-200 pt-3'
       }, [
         // Make stats clickable separately from dropdown
         React.createElement('a', {
           href: `#/tree/${tree.id}/members`,
-          className: 'flex items-center text-[#2c0a2a] hover:text-[#1e0a76] font-medium hover:bg-[#a7a2c5] rounded-lg px-3 py-2 transition-colors'
+          className: 'flex items-center text-gray-700 hover:text-primary font-medium hover:bg-gray-200 rounded-lg px-3 py-2 transition-colors'
         }, [
           React.createElement('span', {
             className: 'bg-primary text-white px-3 py-1 rounded-md mr-2 text-lg font-bold'
@@ -493,7 +493,7 @@ const TreeList = () => {
   ];
 
   if (loading) return React.createElement('div', { className: 'text-center p-4' }, 'Loading...');
-  if (error) return React.createElement('div', { className: 'alert alert-danger' }, error);
+  if (error) return React.createElement('div', { className: 'bg-red-100 text-red-700 p-4 rounded-lg' }, error);
 
   return React.createElement('div', { 
     className: 'min-h-screen flex flex-col' // Keep min-height and flex
