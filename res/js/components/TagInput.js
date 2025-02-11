@@ -148,13 +148,13 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
 
     return React.createElement('div', { className: 'tag-input-container mb-3' }, [
         React.createElement('label', { key: 'label', className: 'form-label d-flex justify-content-between' }, [
-            'Tags',
+            T('Tags'),
             React.createElement('button', {
                 key: 'copy-button',
                 type: 'button',
                 className: 'btn btn-sm btn-outline-secondary',
                 onClick: handleCopyTags
-            }, 'Copy')
+            }, T('Copy'))
         ]),
         React.createElement('div', { 
             key: 'tags-wrapper',
@@ -184,7 +184,7 @@ const TagInput = ({ rowId, treeId, tagType = 'INDI' }) => {
                 onChange: handleInputChange,
                 onKeyDown: handleKeyDown,
                 onPaste: handlePaste,
-                placeholder: 'Type and press Enter to add tags'
+                placeholder: T('Type and press Enter to add tags')
             })
         ])
     ]);

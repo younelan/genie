@@ -384,6 +384,65 @@ $translations["fr"] = [
    "Family Trees" => "Arbres Généalogiques",
    // User label
    "User" => "Utilisateur",
+   // Member Details
+   "Loading..." => "Chargement...",
+   "Return to Members List" => "Retour à la Liste des Membres",
+   "Member not found" => "Membre non trouvé",
+   "Member Details" => "Détails du Membre",
+   "Select Gender" => "Sélectionner le Genre",
+   "Visualize Descendants" => "Visualiser les Descendants",
+   "Add Relationship" => "Ajouter une Relation",
+   "Delete Member" => "Supprimer le Membre",
+   "Are you sure you want to delete this member?" => "Êtes-vous sûr de vouloir supprimer ce membre?",
+   
+   // Tag Input
+   "Tags" => "Étiquettes",
+   "Copy" => "Copier",
+   "Type and press Enter to add tags" => "Tapez et appuyez sur Entrée pour ajouter des étiquettes",
+   
+   // Relationship Modal
+   "Add Relationship" => "Ajouter une Relation",
+   "Close" => "Fermer",
+   "Save" => "Enregistrer",
+   "Create Empty Family" => "Créer une Famille Vide",
+   "Existing Person" => "Personne Existante",
+   "New Person" => "Nouvelle Personne",
+   "Select Existing" => "Sélectionner Existant",
+   "First Name" => "Prénom",
+   "Last Name" => "Nom",
+   "Marriage Date" => "Date de Mariage",
+   "Marriage Place" => "Lieu de Mariage",
+   "Divorce Date" => "Date de Divorce",
+   "Birth Date" => "Date de Naissance",
+   "First Parent" => "Premier Parent",
+   "Second Parent" => "Deuxième Parent",
+   "Single Parent" => "Parent Unique",
+   "Family:" => "Famille:",
+   "With" => "Avec",
+   "Unknown Spouse" => "Conjoint Inconnu",
+   "New Family (No Spouse)" => "Nouvelle Famille (Sans Conjoint)",
+   
+   // Edit Other Relationship
+   "Edit Relationship" => "Modifier la Relation",
+   "Person 1:" => "Personne 1:",
+   "Person 2:" => "Personne 2:",
+   "Relationship Type:" => "Type de Relation:",
+   "Start Date:" => "Date de Début:",
+   "End Date:" => "Date de Fin:",
+   "Swap Persons" => "Échanger les Personnes",
+   "Are you sure you want to remove this parent relationship?" => "Êtes-vous sûr de vouloir supprimer cette relation parentale?",
+   "Are you sure you want to remove the spouse from this family?" => "Êtes-vous sûr de vouloir supprimer le conjoint de cette famille?",
+   "Are you sure you want to remove this child?" => "Êtes-vous sûr de vouloir supprimer cet enfant?",
+   "No parents added" => "Aucun parent ajouté",
+   "Please select a spouse" => "Veuillez sélectionner un conjoint",
+   "Please select first parent" => "Veuillez sélectionner le premier parent",
+   "Please select second parent" => "Veuillez sélectionner le deuxième parent",
+   "Please select a relationship type" => "Veuillez sélectionner un type de relation",
+   "Please select a person" => "Veuillez sélectionner une personne",
+   "Child first and last name are required" => "Le prénom et le nom de l'enfant sont requis",
+   "Parent first and last name are required" => "Le prénom et le nom du parent sont requis",
+   "Second parent first and last name are required" => "Le prénom et le nom du deuxième parent sont requis",
+   "Person first and last name are required" => "Le prénom et le nom de la personne sont requis"
 ];
 
 $keys = array_keys($translations['fr']);

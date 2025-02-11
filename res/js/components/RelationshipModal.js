@@ -216,7 +216,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     form.append('spouse_type', formData.spouse_type);
                     if (formData.spouse_type === 'existing') {
                         if (!formData.spouse_id) {
-                            throw new Error('Please select a spouse');
+                            throw new Error(T('Please select a spouse'));
                         }
                         form.append('spouse_id', formData.spouse_id);
                     } else {
@@ -237,7 +237,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     
                     if (formData.child_type === 'existing') {
                         if (!formData.child_id) {
-                            throw new Error('Please select a child');
+                            throw new Error(T('Please select a child'));
                         }
                         form.append('child_id', formData.child_id);
                     } else {
@@ -297,7 +297,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     form.append('other_type', formData.other_type);
                     // Add relcode here
                     if (!formData.relcode) {
-                        throw new Error('Please select a relationship type');
+                        throw new Error(T('Please select a relationship type'));
                     }
                     form.append('relcode', formData.relcode);
                     
@@ -377,7 +377,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
                         htmlFor: 'existing_spouse'
-                    }, 'Existing Person'),
+                    }, T('Existing Person')),
                     React.createElement('input', {
                         key: 'new',
                         type: 'radio',
@@ -391,7 +391,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     React.createElement('label', {
                         className: 'btn btn-outline-primary',
                         htmlFor: 'new_spouse'
-                    }, 'New Person')
+                    }, T('New Person'))
                 ])
             ),
             formData.spouse_type === 'existing' ? 
@@ -464,9 +464,9 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     value: formData.second_parent_option || 'new', // Default to 'new'
                     onChange: handleSecondParentOptionChange
                 }, [
-                    React.createElement('option', { key: 'none', value: 'none' }, 'Single Parent'),
-                    React.createElement('option', { key: 'existing', value: 'existing' }, 'Existing Person'),
-                    React.createElement('option', { key: 'new', value: 'new' }, 'New Parent')
+                    React.createElement('option', { key: 'none', value: 'none' }, T('Single Parent')),
+                    React.createElement('option', { key: 'existing', value: 'existing' }, T('Existing Person')),
+                    React.createElement('option', { key: 'new', value: 'new' }, T('New Parent'))
                 ]),
 
                 formData.second_parent_option === 'existing' && 
@@ -562,7 +562,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 type: 'text',
                 className: 'form-control mb-2',
                 name: `${prefix}first_name`,
-                placeholder: 'First Name',
+                placeholder: T('First Name'),
                 onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
             }),
@@ -571,7 +571,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 type: 'text',
                 className: 'form-control mb-2',
                 name: `${prefix}last_name`,
-                placeholder: 'Last Name',
+                placeholder: T('Last Name'),
                 onChange: (e) => handleNewPersonInputChange(e, type),
                 required: true
             }),
@@ -589,9 +589,9 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 onChange: (e) => handleNewPersonInputChange(e, type),
                 value: defaultGender
             }, [
-                React.createElement('option', { key: 'select', value: '' }, 'Select Gender'),
-                React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
-                React.createElement('option', { key: 'female', value: 'F' }, 'Female')
+                React.createElement('option', { key: 'select', value: '' }, T('Select Gender')),
+                React.createElement('option', { key: 'male', value: 'M' }, T('Male')),
+                React.createElement('option', { key: 'female', value: 'F' }, T('Female'))
             ])
         ]);
     };
@@ -612,7 +612,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 key: `${type}-existing-label`,
                 className: 'btn btn-outline-primary',
                 htmlFor: `existing_${type}`
-            }, 'Existing Person'),
+            }, T('Existing Person')),
             React.createElement('input', {
                 key: `${type}-new`,
                 type: 'radio',
@@ -627,7 +627,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 key: `${type}-new-label`,
                 className: 'btn btn-outline-primary',
                 htmlFor: `new_${type}`
-            }, 'New Person')
+            }, T('New Person'))
         ]);
     };
 
@@ -692,7 +692,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     React.createElement('h5', { 
                         key: 'modal-title',
                         className: 'modal-title'
-                    }, 'Add Relationship'),
+                    }, T('Add Relationship')),
                     React.createElement('button', {
                         key: 'close-button',
                         type: 'button',
@@ -716,21 +716,21 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                         type: 'button',
                         className: 'btn btn-secondary',
                         onClick: onHide
-                    }, 'Close'),
+                    }, T('Close')),
                     activeTab === 'spouse' && formData.spouse_type === 'new' ?
                         React.createElement('button', {
                             key: 'empty-family-btn',
                             type: 'button',
                             className: 'btn btn-outline-primary',
                             onClick: handleAddEmptyFamily
-                        }, 'Create Empty Family')
+                        }, T('Create Empty Family'))
                         : null,
                     React.createElement('button', {
                         key: 'save-btn',
                         type: 'button',
                         className: 'btn btn-primary',
                         onClick: handleSave
-                    }, 'Save')
+                    }, T('Save'))
                 ])
             ])
         )

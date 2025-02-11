@@ -70,7 +70,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                     React.createElement('h5', {
                         key: 'title',
                         className: 'modal-title'
-                    }, 'Edit Relationship'),
+                    }, T('Edit Relationship')),
                     React.createElement('button', {
                         key: 'close',
                         type: 'button',
@@ -98,7 +98,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             key: 'person1-group',
                             className: 'mb-3'
                         }, [
-                            React.createElement('label', { key: 'label1' }, 'Person 1:'),
+                            React.createElement('label', { key: 'label1' }, T('Person 1:')),
                             React.createElement('input', {
                                 key: 'input1',
                                 type: 'text',
@@ -112,7 +112,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             key: 'person2-group',
                             className: 'mb-3'
                         }, [
-                            React.createElement('label', { key: 'label2' }, 'Person 2:'),
+                            React.createElement('label', { key: 'label2' }, T('Person 2:')),
                             React.createElement('input', {
                                 key: 'input2',
                                 type: 'text',
@@ -126,7 +126,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             key: 'type-group',
                             className: 'mb-3'
                         }, [
-                            React.createElement('label', { key: 'label3' }, 'Relationship Type:'),
+                            React.createElement('label', { key: 'label3' }, T('Relationship Type:')),
                             React.createElement('select', {
                                 key: 'select',
                                 id: 'edit_relationship_type',
@@ -149,7 +149,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             key: 'start-group',
                             className: 'mb-3'
                         }, [
-                            React.createElement('label', { key: 'label4' }, 'Start Date:'),
+                            React.createElement('label', { key: 'label4' }, T('Start Date:')),
                             React.createElement('input', {
                                 key: 'input4',
                                 type: 'date',
@@ -167,7 +167,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                             key: 'end-group',
                             className: 'mb-3'
                         }, [
-                            React.createElement('label', { key: 'label5' }, 'End Date:'),
+                            React.createElement('label', { key: 'label5' }, T('End Date:')),
                             React.createElement('input', {
                                 key: 'input5',
                                 type: 'date',
@@ -218,7 +218,7 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                                         alert('Failed to swap relationship: ' + error.message);
                                     }
                                 }
-                            }, '↔️ Swap Persons')
+                            }, T('Swap Persons'))
                         ]),
                         // Add TagInput only if we have a valid relationship ID
                         relationship?.id && React.createElement(TagInput, {
@@ -238,13 +238,13 @@ const EditOtherRelationship = ({ show, onHide, relationship, onSave }) => {
                         type: 'button',
                         className: 'btn btn-secondary',
                         onClick: onHide
-                    }, 'Cancel'),
+                    }, T('Cancel')),
                     React.createElement('button', {
                         key: 'save',
                         type: 'button',
                         className: 'btn btn-primary',
                         onClick: handleSubmit
-                    }, 'Save')
+                    }, T('Save'))
                 ])
             ])
         )
