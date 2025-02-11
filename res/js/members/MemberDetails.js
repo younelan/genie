@@ -299,25 +299,28 @@ const MemberDetails = ({ treeId, memberId }) => {
             className: 'flex justify-between items-center'
         }, [
             React.createElement('h4', { key: 'title' }, T('Member Details')),
-            React.createElement(Dropdown, {
-                key: 'actions',
+            React.createElement('div', {
+                key: 'dropdown',
+            }, React.createElement(Dropdown, {
                 trigger: '⚙️',
                 items: [
                     {
                         label: T('Visualize Descendants'),
-                        href: `#/tree/${currentTreeId}/member/${currentMemberId}/descendants`
+                        href: `#/tree/${currentTreeId}/member/${currentMemberId}/descendants`,
+                        className: 'text-gray-700' // Add text color class
                     },
                     {
                         label: T('Add Relationship'),
-                        onClick: () => setShowRelationshipModal(true)
+                        onClick: () => setShowRelationshipModal(true),
+                        className: 'text-gray-700' // Add text color class
                     },
                     {
                         label: T('Delete Member'),
                         onClick: handleDeleteMember,
-                        className: 'text-red-600'
+                        className: 'text-red-600' // Keep red for delete
                     }
                 ]
-            })
+            }))
         ]),
         React.createElement(Card.Body, { key: 'body' },
             React.createElement('form', { onSubmit: handleSubmit }, [
@@ -635,7 +638,8 @@ const MemberDetails = ({ treeId, memberId }) => {
                                 prefilledData: null
                             });
                             setShowRelationshipModal(true);
-                        }
+                        },
+                        className: 'text-gray-700' // Add default text color
                     }
                 ]
             })
@@ -825,7 +829,8 @@ const MemberDetails = ({ treeId, memberId }) => {
                                                 prefilledData: null
                                             });
                                             setShowRelationshipModal(true);
-                                        }
+                                        },
+                                        className: 'text-gray-700' // Add default text color
                                     }
                                 ]
                             })

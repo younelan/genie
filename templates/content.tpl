@@ -29,6 +29,20 @@ background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
             padding: 0;
             font-family: system-ui, -apple-system, sans-serif;
         }
+
+        /* Add default text color for all dropdown items */
+        [role="menu"] button,
+        [role="menu"] a {
+            color: #374151 !important; /* gray-700 */
+        }
+        
+        /* Keep custom colors for specific actions like delete */
+        [role="menu"] button.text-red-600,
+        [role="menu"] a.text-red-600,
+        [role="menu"] button.text-danger,
+        [role="menu"] a.text-danger {
+            color: rgb(220, 38, 38) !important; /* red-600 */
+        }
     </style>
     <!-- Replace CDN D3 with local version -->
     <!-- Move D3 before all component scripts -->
