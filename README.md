@@ -17,6 +17,10 @@ checkout [The history file](history.md) for changes
 - current version is in doc/version
 
 ## Version History:
+     - Version 0.4.1
+         - Tags For other relationships
+         - Tags For families
+         - Tags for individuals
      - Version 0.4
          - Gedcom Read
          - Gedcom Write

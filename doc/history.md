@@ -2,8 +2,6 @@
 Check out [The README file](README.md) for more info
 
 ## Backlog
-	* Edit Synonyms
-	* tags for relationships
 	* User registration 
 	* Add permission for users
 	* path between 2 people
@@ -11,6 +9,13 @@ Check out [The README file](README.md) for more info
 
 
 # current
+    - tags
+        - new tag endpoint
+        - tags now have a type
+        - individual tags are INDI
+        - family tags are FAM
+        - tags for other relationships are REL
+    - Edit Synonyms
     - No simplicity for auth, now react
     - Gedcom Support
         - closed: gedcom import
