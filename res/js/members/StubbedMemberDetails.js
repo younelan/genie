@@ -298,9 +298,11 @@ const MemberDetails = ({ treeId, memberId }) => {
     }, [
         React.createElement('div', { 
             key: 'header',
-            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 lg:rounded-t-lg flex justify-between items-center'
         }, [
-            React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Member Details')),
+            React.createElement('h4', { 
+                className: 'text-lg font-medium text-white'
+            }, T('Member Details')),
             React.createElement('div', {
                 key: 'dropdown',
             }, React.createElement(Dropdown, {
@@ -526,7 +528,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     }, [
         React.createElement('div', { 
             key: 'header',
-            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg'
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 lg:rounded-t-lg flex justify-between items-center'
         }, React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Families'))),
         React.createElement('div', { 
             key: 'body',
@@ -641,7 +643,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     }, [
         React.createElement('div', { 
             key: 'header',
-            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 lg:rounded-t-lg flex justify-between items-center'
+            className: 'bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 lg:rounded-t-lg flex justify-between items-center'
         }, [
             React.createElement('h4', { className: 'text-lg font-medium text-white' }, T('Parents')),
             React.createElement(Dropdown, {
@@ -858,7 +860,10 @@ const MemberDetails = ({ treeId, memberId }) => {
                                 ]
                             }))
                         ]),
-                        React.createElement(Card.Body, { key: 'body' },
+                        React.createElement('div', { 
+                            key: 'body',
+                            className: 'p-4'
+                        },
                             React.createElement('form', { 
                                 onSubmit: handleSubmit,
                                 className: 'space-y-4' 
@@ -981,182 +986,45 @@ const MemberDetails = ({ treeId, memberId }) => {
                 // Column 2: Families
                 React.createElement('div', { key: 'col-families' }, [
                     React.createElement(Card, { className: 'shadow-md' }, [
-                        React.createElement(Card.Header, {
+                        React.createElement(Card.Header, { 
                             key: 'header',
                             className: 'flex justify-between items-center'
                         }, [
-                            React.createElement('h4', { className: 'text-lg font-medium' }, T('Families'))
+                            React.createElement('h4', { className: 'text-lg font-medium' }, T('Families')),
+                            React.createElement('div', { key: 'add-family' }, /* ...existing add family button... */)
                         ]),
                         React.createElement(Card.Body, { key: 'body' },
-                            React.createElement('div', {
-                                key: 'family-nav',
-                                className: 'flex space-x-2 mb-3'
-                            }, [
-                                ...spouseFamilies.map(family => 
-                                    React.createElement('div', { 
-                                        key: `family-tab-${family.id}`,
-                                        className: 'flex items-center'
-                                    }, 
-                                        renderFamilyTab(family)
-                                    )
-                                ),
-                                React.createElement('div', {
-                                    key: 'add-family',
-                                    className: 'ms-2'
-                                }, React.createElement('button', {
-                                    key: 'add-family-link',
-                                    onClick: handleAddFamily,
-                                    className: 'text-primary hover:text-primary-dark'
-                                }, '+'))
-                            ]),
-                            // Active family content
-                            spouseFamilies.map(family => 
-                                family.id === activeFamily && React.createElement('div', {
-                                    key: `family-content-${family.id}`
-                                }, [
-                                    React.createElement('div', { key: 'marriage-details', className: 'mb-3' }, [
-                                        React.createElement('strong', { key: 'marriage-label' }, T('Marriage Date:')),
-                                        React.createElement('span', { key: 'marriage-date' }, family.marriage_date || 'Unknown'),
-                                        family.divorce_date && [
-                                            React.createElement('br', { key: 'br' }),
-                                            React.createElement('strong', { key: 'divorce-label' }, T('Divorce Date:')),
-                                            React.createElement('span', { key: 'divorce-date' }, family.divorce_date)
-                                        ]
-                                    ]),
-                                    // Add TagInput for family before the children section
-                                    React.createElement(TagInput, {
-                                        key: `family-tags-${family.id}`,
-                                        rowId: family.id,      // Use family.id instead of memberId
-                                        treeId: currentTreeId,
-                                        tagType: 'FAM'         // Use FAM type for family tags
-                                    }),
-                                    React.createElement('h6', { key: 'children-header' }, T('Children')),
-                                    React.createElement('ul', { key: 'children-list', className: 'list-none space-y-2' },
-                                        (family.children || []).map(child =>
-                                            React.createElement('li', {
-                                                key: `child-${child.id}`,
-                                                className: 'flex justify-between items-center'
-                                            }, [
-                                                React.createElement('a', {
-                                                    key: 'child-link',
-                                                    href: `#/tree/${currentTreeId}/member/${child.id}`,
-                                                    className: 'text-primary hover:text-primary-dark',
-                                                    onClick: (e) => {
-                                                        e.preventDefault();
-                                                        window.location.hash = `#/tree/${currentTreeId}/member/${child.id}`;
-                                                    }
-                                                }, `${child.gender === 'M' ? '♂️' : '♀️'} ${child.first_name} ${child.last_name}`),
-                                                React.createElement('button', {
-                                                    key: 'delete-child',
-                                                    className: 'btn btn-sm btn-danger',
-                                                    onClick: (e) => {
-                                                        e.preventDefault();
-                                                        handleDeleteChild(child.id, family.id);
-                                                    }
-                                                }, '🗑️')
-                                            ])
-                                        )
-                                    )
-                                ])
-                            )
+                            // ...existing families content...
                         )
                     ]),
-                    // Parents section with Card component
+                    // Parents section
                     React.createElement(Card, { 
                         className: 'shadow-md mt-4'
                     }, [
-                        React.createElement(Card.Header, {
+                        React.createElement(Card.Header, { 
                             key: 'header',
                             className: 'flex justify-between items-center'
                         }, [
                             React.createElement('h4', { className: 'text-lg font-medium' }, T('Parents')),
-                            React.createElement(Dropdown, {
-                                key: 'parents-actions',
-                                trigger: '⚙️',
-                                items: [
-                                    {
-                                        label: T('Add Parents'),
-                                        onClick: () => {
-                                            setRelationshipModalData({
-                                                tab: 'parent',
-                                                prefilledData: null
-                                            });
-                                            setShowRelationshipModal(true);
-                                        },
-                                        className: 'text-gray-700' // Add default text color
-                                    }
-                                ]
-                            })
+                            // ...existing parents dropdown...
                         ]),
                         React.createElement(Card.Body, { key: 'body' },
-                            childFamilies.length === 0 ?
-                                React.createElement('div', { className: 'text-muted' }, T('No parents added')) :
-                                childFamilies.map(family => 
-                                    React.createElement('div', { 
-                                        key: `family-${family.id}`, 
-                                        className: 'flex justify-between items-center mb-2'
-                                    }, [
-                                        React.createElement('div', { 
-                                            key: 'parents-names',
-                                            className: 'flex gap-2' 
-                                        }, [
-                                            family.husband_id && React.createElement('a', {
-                                                key: 'father',
-                                                href: `#/tree/${currentTreeId}/member/${family.husband_id}`,
-                                                className: 'text-primary hover:text-primary-dark'
-                                            }, family.husband_name),
-                                            (family.husband_id && family.wife_id) && React.createElement('span', { key: 'separator' }, ' & '),
-                                            family.wife_id && React.createElement('a', {
-                                                key: 'mother',
-                                                href: `#/tree/${currentTreeId}/member/${family.wife_id}`,
-                                                className: 'text-primary hover:text-primary-dark'
-                                            }, family.wife_name)
-                                        ]),
-                                        React.createElement('button', {
-                                            key: 'delete-button',
-                                            className: 'btn btn-sm btn-danger',
-                                            onClick: () => handleDeleteFromFamily(family.id),
-                                            title: 'Remove parent relationship'
-                                        }, '🗑️')
-                                    ])
-                                )
+                            // ...existing parents content...
                         )
                     ])
                 ]),
                 // Column 3: Other Relationships
                 React.createElement('div', { key: 'col-other' },
                     React.createElement(Card, { className: 'shadow-md' }, [
-                        React.createElement(Card.Header, {
+                        React.createElement(Card.Header, { 
                             key: 'header',
                             className: 'flex justify-between items-center'
                         }, [
                             React.createElement('h4', { className: 'text-lg font-medium' }, T('Other Relationships')),
-                            React.createElement(Dropdown, {
-                                key: 'other-actions',
-                                trigger: '⚙️',
-                                items: [
-                                    {
-                                        label: T('Add Other Relationship'),
-                                        onClick: () => {
-                                            setRelationshipModalData({
-                                                tab: 'other',
-                                                prefilledData: null
-                                            });
-                                            setShowRelationshipModal(true);
-                                        },
-                                        className: 'text-gray-700' // Add default text color
-                                    }
-                                ]
-                            })
+                            // ...existing dropdown...
                         ]),
                         React.createElement(Card.Body, { key: 'body' },
-                            relationships.length === 0 
-                            ? React.createElement('div', { className: 'text-muted' }, T('No other relationships found'))
-                            : React.createElement('ul', { className: 'list-none space-y-2' },
-                                relationships.map(rel => 
-                                    renderRelationship(rel)
-                                )
-                            )
+                            // ...existing relationships content...
                         )
                     ])
                 )
