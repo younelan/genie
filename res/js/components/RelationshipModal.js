@@ -243,7 +243,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     } else {
                         // For new child, append all child-related fields
                         if (!formData.child_first_name || !formData.child_last_name) {
-                            throw new Error('Child first and last name are required');
+                            throw new Error(T('Child first and last name are required'));
                         }
                         Object.entries(formData).forEach(([key, value]) => {
                             if (key.startsWith('child_') && value) {
@@ -256,13 +256,13 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     form.append('parent1_type', formData.parent1_type);
                     if (formData.parent1_type === 'existing') {
                         if (!formData.parent1_id) {
-                            throw new Error('Please select first parent');
+                            throw new Error(T('Please select first parent'));
                         }
                         form.append('parent1_id', formData.parent1_id);
                     } else {
                         // For new parent1
                         if (!formData.parent1_first_name || !formData.parent1_last_name) {
-                            throw new Error('Parent first and last name are required');
+                            throw new Error(T('Parent first and last name are required'));
                         }
                         Object.entries(formData).forEach(([key, value]) => {
                             if (key.startsWith('parent1_') && value) {
@@ -277,12 +277,12 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                         
                         if (formData.second_parent_option === 'existing') {
                             if (!formData.parent2_id) {
-                                throw new Error('Please select second parent');
+                                throw new Error(T('Please select second parent'));
                             }
                             form.append('parent2_id', formData.parent2_id);
                         } else if (formData.second_parent_option === 'new') {
                             if (!formData.parent2_first_name || !formData.parent2_last_name) {
-                                throw new Error('Second parent first and last name are required');
+                                throw new Error(T('Second parent first and last name are required'));
                             }
                             Object.entries(formData).forEach(([key, value]) => {
                                 if (key.startsWith('parent2_') && value) {
@@ -414,7 +414,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
             return React.createElement('option', {
                 key: `family-${family.id}`,
                 value: family.id
-            }, `With ${spouseName || 'Unknown Spouse'}`);
+            }, `${T('With')} ${spouseName || T('Unknown Spouse')}`);
         });
 
         return React.createElement('div', { className: 'tab-pane' }, [
@@ -422,7 +422,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 key: 'family-select',
                 className: 'form-group mb-3' 
             }, [
-                React.createElement('label', { key: 'family-label' }, 'Family:'),
+                React.createElement('label', { key: 'family-label' }, T('Family:')),
                 React.createElement('select', {
                     key: 'family-select',
                     className: 'form-control',
@@ -434,7 +434,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                     React.createElement('option', {
                         key: 'new-family',
                         value: 'new'
-                    }, 'New Family (No Spouse)')
+                    }, T('New Family (No Spouse)'))
                 ])
             ]),
             React.createElement('div', { key: 'type-selector' }, 
@@ -448,14 +448,14 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
 
     const renderParentTab = () => {
         return React.createElement('div', { className: 'tab-pane' }, [
-            React.createElement('h5', { key: 'parent1-header' }, 'First Parent'),
+            React.createElement('h5', { key: 'parent1-header' }, T('First Parent')),
             React.createElement('div', { key: 'parent1-section' }, [
                 renderPersonTypeSelector('parent1'),
                 formData.parent1_type === 'existing' ? 
                     renderExistingPersonSection('parent1') : 
                     renderNewPersonSection('parent1', true)
             ]),
-            React.createElement('h5', { key: 'parent2-header' }, 'Second Parent'),
+            React.createElement('h5', { key: 'parent2-header' }, T('Second Parent')),
             React.createElement('div', { key: 'parent2-section' }, [
                 React.createElement('select', {
                     key: 'second-parent-select',
@@ -494,7 +494,7 @@ const RelationshipModal = ({ show, onHide, member, onSave, initialTab = 'spouse'
                 key: 'relationship-type',
                 className: 'form-group mb-3' 
             }, [
-                React.createElement('label', { key: 'type-label' }, 'Relationship Type:'),
+                React.createElement('label', { key: 'type-label' }, T('Relationship Type:')),
                 React.createElement('select', {
                     key: 'type-select',
                     className: 'form-control',

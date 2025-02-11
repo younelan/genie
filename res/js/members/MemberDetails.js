@@ -185,7 +185,7 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     // Add handlers for family actions
     const handleAddFamily = async () => {
-        if (!confirm('Create a new family with no spouse?')) return;
+        if (!confirm(T('Create a new family with no spouse?'))) return;
         
         try {
             const response = await fetch('api/individuals.php', {
@@ -219,7 +219,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const handleDeleteFamily = async (familyId) => {
-        if (!confirm('Are you sure you want to delete this family? This will remove all relationships.')) return;
+        if (!confirm(T('Are you sure you want to delete this family? This will remove all relationships.'))) return;
         try {
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
@@ -245,7 +245,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const handleDeleteChild = async (childId, familyId) => {
-        if (!confirm('Are you sure you want to remove this child?')) return;
+        if (!confirm(T('Are you sure you want to remove this child?'))) return;
         try {
             const response = await fetch('api/families.php', {
                 method: 'POST',
@@ -298,21 +298,21 @@ const MemberDetails = ({ treeId, memberId }) => {
             key: 'header',
             className: 'flex justify-between items-center'
         }, [
-            React.createElement('h4', { key: 'title' }, 'Member Details'),
+            React.createElement('h4', { key: 'title' }, T('Member Details')),
             React.createElement(Dropdown, {
                 key: 'actions',
                 trigger: '⚙️',
                 items: [
                     {
-                        label: '🌳 Visualize Descendants',
+                        label: T('Visualize Descendants'),
                         href: `#/tree/${currentTreeId}/member/${currentMemberId}/descendants`
                     },
                     {
-                        label: '➕ Add Relationship',
+                        label: T('Add Relationship'),
                         onClick: () => setShowRelationshipModal(true)
                     },
                     {
-                        label: '🗑️ Delete Member',
+                        label: T('Delete Member'),
                         onClick: handleDeleteMember,
                         className: 'text-red-600'
                     }
@@ -323,7 +323,7 @@ const MemberDetails = ({ treeId, memberId }) => {
             React.createElement('form', { onSubmit: handleSubmit }, [
                 // Name fields
                 React.createElement('div', { key: 'name-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'name-label' }, 'Name'),
+                    React.createElement('label', { key: 'name-label' }, T('Name')),
                     React.createElement('input', {
                         key: 'first-name',
                         type: 'text',
@@ -343,7 +343,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                 ]),
                 // Birth fields
                 React.createElement('div', { key: 'birth-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'birth-label' }, 'Birth'),
+                    React.createElement('label', { key: 'birth-label' }, T('Birth')),
                     React.createElement('input', {
                         key: 'birth-date',
                         type: 'date',
@@ -359,13 +359,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                         value: formData.birth_place || '',
                         onChange: handleInputChange,
                         className: 'form-control',
-                        placeholder: 'Place of Birth'
+                        placeholder: T('Place of Birth')
                     })
                 ]),
                 // Gender and Alive
                 React.createElement('div', { key: 'status-group', className: 'mb-3' }, [
                     React.createElement('div', { key: 'gender-field', className: 'mb-2' }, [
-                        React.createElement('label', { key: 'gender-label' }, 'Gender'),
+                        React.createElement('label', { key: 'gender-label' }, T('Gender')),
                         React.createElement('select', {
                             key: 'gender-select',
                             name: 'gender',
@@ -373,8 +373,8 @@ const MemberDetails = ({ treeId, memberId }) => {
                             onChange: handleInputChange,
                             className: 'form-select'
                         }, [
-                            React.createElement('option', { key: 'male', value: 'M' }, 'Male'),
-                            React.createElement('option', { key: 'female', value: 'F' }, 'Female')
+                            React.createElement('option', { key: 'male', value: 'M' }, T('Male')),
+                            React.createElement('option', { key: 'female', value: 'F' }, T('Female'))
                         ])
                     ]),
                     React.createElement('div', { key: 'alive-field', className: 'form-check' }, [
@@ -397,12 +397,12 @@ const MemberDetails = ({ treeId, memberId }) => {
                             key: 'alive-label',
                             htmlFor: 'alive',
                             className: 'form-check-label'
-                        }, 'Alive')
+                        }, T('Alive'))
                     ])
                 ]),
                 // Death fields (shown if not alive)
                 !showDeathFields ? null : React.createElement('div', { key: 'death-group', className: 'mb-3' }, [
-                    React.createElement('label', { key: 'death-label' }, 'Death'),
+                    React.createElement('label', { key: 'death-label' }, T('Death')),
                     React.createElement('input', {
                         key: 'death-date',
                         type: 'date',
@@ -418,7 +418,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                         value: formData.death_place || '',
                         onChange: handleInputChange,
                         className: 'form-control',
-                        placeholder: 'Place of Death'
+                        placeholder: T('Place of Death')
                     })
                 ]),
                 // Fix the TagInput props here - change memberId to rowId
@@ -432,13 +432,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                     key: 'submit',
                     type: 'submit',
                     className: 'btn btn-primary'
-                }, 'Save Changes')
+                }, T('Save Changes'))
             ])
         )
     ]);
 
     const handleDeleteMember = async () => {
-        if (!confirm('Are you sure you want to delete this member?')) return;
+        if (!confirm(T('Are you sure you want to delete this member?'))) return;
         try {
             const response = await fetch(`api/individuals.php?id=${currentMemberId}`, {
                 method: 'DELETE'
@@ -466,11 +466,11 @@ const MemberDetails = ({ treeId, memberId }) => {
     const renderFamilyTab = (family) => {
         const dropdownItems = [
             family.spouse_id && {
-                label: 'View Spouse',
+                label: T('View Spouse'),
                 href: `#/tree/${currentTreeId}/member/${family.spouse_id}`
             },
             {
-                label: 'Add Child',
+                label: T('Add Child'),
                 onClick: () => {
                     setRelationshipModalData({
                         tab: 'child',
@@ -482,13 +482,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                 }
             },
             {
-                label: family.spouse_id ? 'Remove Spouse' : 'Add Spouse',
+                label: family.spouse_id ? T('Remove Spouse') : T('Add Spouse'),
                 onClick: family.spouse_id ? 
                     () => handleRemoveSpouse(family.id) : 
                     () => handleEditFamily(family.id)
             },
             {
-                label: 'Delete Family',
+                label: T('Delete Family'),
                 onClick: () => handleDeleteFamily(family.id),
                 className: 'text-danger'
             }
@@ -512,7 +512,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const renderFamilyTabs = () => React.createElement(Card, { key: 'family-card' }, [
-        React.createElement(Card.Header, { key: 'header' }, 'Families'),
+        React.createElement(Card.Header, { key: 'header' }, T('Families')),
         React.createElement(Card.Body, { key: 'body' }, [
             React.createElement(Nav, {
                 key: 'family-nav',
@@ -540,11 +540,11 @@ const MemberDetails = ({ treeId, memberId }) => {
                     key: `family-content-${family.id}`
                 }, [
                     React.createElement('div', { key: 'marriage-details', className: 'mb-3' }, [
-                        React.createElement('strong', { key: 'marriage-label' }, 'Marriage Date: '),
+                        React.createElement('strong', { key: 'marriage-label' }, T('Marriage Date:')),
                         React.createElement('span', { key: 'marriage-date' }, family.marriage_date || 'Unknown'),
                         family.divorce_date && [
                             React.createElement('br', { key: 'br' }),
-                            React.createElement('strong', { key: 'divorce-label' }, 'Divorce Date: '),
+                            React.createElement('strong', { key: 'divorce-label' }, T('Divorce Date:')),
                             React.createElement('span', { key: 'divorce-date' }, family.divorce_date)
                         ]
                     ]),
@@ -555,7 +555,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                         treeId: currentTreeId,
                         tagType: 'FAM'         // Use FAM type for family tags
                     }),
-                    React.createElement('h6', { key: 'children-header' }, 'Children'),
+                    React.createElement('h6', { key: 'children-header' }, T('Children')),
                     React.createElement(ListGroup, { key: 'children-list' },
                         (family.children || []).map(child =>
                             React.createElement(ListGroup.Item, {
@@ -588,7 +588,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     ]);
 
     const handleDeleteFromFamily = async (familyId) => {
-        if (!confirm('Are you sure you want to remove this parent relationship?')) return;
+        if (!confirm(T('Are you sure you want to remove this parent relationship?'))) return;
         try {
             const response = await fetch('api/families.php', {
                 method: 'POST',
@@ -622,13 +622,13 @@ const MemberDetails = ({ treeId, memberId }) => {
             key: 'header',
             className: 'flex justify-between items-center'
         }, [
-            React.createElement('h4', { key: 'title' }, 'Parents'),
+            React.createElement('h4', { key: 'title' }, T('Parents')),
             React.createElement(Dropdown, {
                 key: 'parents-actions',
                 trigger: '⚙️',
                 items: [
                     {
-                        label: '➕ Add Parents',
+                        label: T('Add Parents'),
                         onClick: () => {
                             setRelationshipModalData({
                                 tab: 'parent',
@@ -642,7 +642,7 @@ const MemberDetails = ({ treeId, memberId }) => {
         ]),
         React.createElement(Card.Body, { key: 'body' },
             childFamilies.length === 0 ?
-                React.createElement('div', { className: 'text-muted' }, 'No parents added') :
+                React.createElement('div', { className: 'text-muted' }, T('No parents added')) :
                 childFamilies.map(family => 
                     React.createElement('div', { 
                         key: `family-${family.id}`, 
@@ -677,7 +677,7 @@ const MemberDetails = ({ treeId, memberId }) => {
 
     // Add this new handler function
     const handleDeleteRelationship = async (relationshipId) => {
-        if (!confirm('Are you sure you want to delete this relationship?')) return;
+        if (!confirm(T('Are you sure you want to delete this relationship?'))) return;
         
         try {
             const response = await fetch('api/individuals.php', {
@@ -709,7 +709,7 @@ const MemberDetails = ({ treeId, memberId }) => {
     };
 
     const handleRemoveSpouse = async (familyId) => {
-        if (!confirm('Are you sure you want to remove the spouse from this family?')) return;
+        if (!confirm(T('Are you sure you want to remove the spouse from this family?'))) return;
         try {
             const response = await fetch('api/individuals.php', {
                 method: 'POST',
@@ -812,13 +812,13 @@ const MemberDetails = ({ treeId, memberId }) => {
                             key: 'other-header',
                             className: 'flex justify-between items-center'
                         }, [
-                            React.createElement('h4', { key: 'title' }, 'Other Relationships'),
+                            React.createElement('h4', { key: 'title' }, T('Other Relationships')),
                             React.createElement(Dropdown, {
                                 key: 'other-actions',
                                 trigger: '⚙️',
                                 items: [
                                     {
-                                        label: '➕ Add Other Relationship',
+                                        label: T('Add Other Relationship'),
                                         onClick: () => {
                                             setRelationshipModalData({
                                                 tab: 'other',
@@ -832,7 +832,7 @@ const MemberDetails = ({ treeId, memberId }) => {
                         ]),
                         React.createElement(Card.Body, { key: 'other-body' }, 
                             relationships.length === 0 
-                            ? React.createElement('div', { className: 'text-muted' }, 'No other relationships found')
+                            ? React.createElement('div', { className: 'text-muted' }, T('No other relationships found'))
                             : React.createElement('ul', { className: 'list-group' },
                                 relationships.map(rel => 
                                     renderRelationship(rel)
