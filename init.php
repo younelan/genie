@@ -14,17 +14,12 @@ function logapache($foo) {
 
 require_once "$basedir/vendor/autoload.php";
 require_once "$basedir/AppBase.php";
-//require_once "$basedir/models/Auth.php";
 require_once "$basedir/models/UserModel.php";
 require_once "$basedir/models/TreeModel.php";
 require_once "$basedir/models/GedcomModel.php";
 require_once "$basedir/models/MemberModel.php";
 require_once "$basedir/models/TagModel.php";
 require_once "$basedir/models/FamilyModel.php";
-#require_once "$basedir/controllers/TreeController.php";
-#require_once "$basedir/controllers/MemberController.php";
-#require_once "$basedir/controllers/FamilyController.php";
-require_once "$basedir/models/Migrate.php";
 
 $config = [];
 $vars = [
