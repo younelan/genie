@@ -4,44 +4,51 @@
     <title>{{ app_title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="res/vendor/tailwind/tailwind.js"></script>
-    <link href="res/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <badlink href="dres/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
-.card-header {
- background-color: #1e0a76;
-color: white;
-font-weight: 500;
-font-size: 1.2em;
-}
-.ceard-body {
-background: #a7a2c5
-}
-.bg-primary {
-background: rgb(94 9 113) !important
-}
-.list-group-item {
-background: #dcd8e0;
-color: #2c0a2a;
-}
+        /* Base styles */
         body {
-background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
+            background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
             min-height: 100vh;
             margin: 0;
             padding: 0;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        /* Add default text color for all dropdown items */
-        [role="menu"] button,
-        [role="menu"] a {
-            color: #374151 !important; /* gray-700 */
+        /* Card header styling to match previous bootstrap style */
+        .card-header {
+            @apply bg-gradient-to-r from-indigo-900 to-indigo-800 text-white font-medium text-lg py-3 px-4;
+        }
+
+        /* Card body styling */
+        .card-body {
+            @apply bg-gray-50;
+        }
+
+        /* Mobile tab styling */
+        .mobile-tab {
+            @apply py-3 px-4 text-center font-medium;
         }
         
-        /* Keep custom colors for specific actions like delete */
+        .mobile-tab.active {
+            @apply bg-indigo-900 text-white;
+        }
+
+        .mobile-tab:not(.active) {
+            @apply bg-white text-gray-600 hover:bg-gray-50;
+        }
+
+        /* Dropdown menu styling */
+        [role="menu"] button,
+        [role="menu"] a {
+            @apply text-gray-700;
+        }
+        
         [role="menu"] button.text-red-600,
         [role="menu"] a.text-red-600,
         [role="menu"] button.text-danger,
         [role="menu"] a.text-danger {
-            color: rgb(220, 38, 38) !important; /* red-600 */
+            @apply text-red-600;
         }
     </style>
     <!-- Replace CDN D3 with local version -->

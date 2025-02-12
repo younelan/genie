@@ -20,11 +20,11 @@ const Navigation = function({ title = '', leftMenuItems = [], rightMenuItems = [
     }, []);
 
     return React.createElement('nav', {
-        className: 'bg-gray-800 text-white px-4 py-2 fixed w-full top-0 z-50'
+        className: 'bg-gradient-to-r from-indigo-900 to-indigo-800 text-white h-16 fixed w-full top-0 z-50 shadow-lg'
     }, [
         React.createElement('div', {
             key: 'nav-container',
-            className: 'max-w-7xl mx-auto flex justify-between items-center'
+            className: 'h-full max-w-7xl mx-auto px-4 flex justify-between items-center'
         }, [
             React.createElement('div', {
                 key: 'left-section',
