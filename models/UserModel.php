@@ -10,7 +10,7 @@
 
 class UserModel extends AppModel
 {
-    public function __construct( $config = null) {
+    public function __construct(private $config = null) {
         parent::__construct($config);
         $this->config = $config;
         //$this->auth = new Auth();
