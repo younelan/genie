@@ -7,6 +7,24 @@
     <badlink href="dres/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Base styles */
+
+        .card-header {
+        background-color: #1e0a76;
+        color: white;
+        font-weight: 500;
+        font-size: 1.2em;
+        }
+        .ceard-body {
+        background: #a7a2c5
+        }
+        .bg-primary {
+        background: rgb(94 9 113) !important
+        }
+        .list-group-item {
+        background: #dcd8e0;
+        color: #2c0a2a;
+        }
+
         body {
             background: linear-gradient(135deg, #576088 0%, #c1cde5 100%);
             min-height: 100vh;
@@ -50,6 +68,9 @@
         [role="menu"] a.text-danger {
             @apply text-red-600;
         }
+
+
+
     </style>
     <!-- Replace CDN D3 with local version -->
     <!-- Move D3 before all component scripts -->
