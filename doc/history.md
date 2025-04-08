@@ -7,8 +7,10 @@ Check out [The README file](README.md) for more info
 	* path between 2 people
 	* need better visualisation, works ok until 100 people then looks things really get hard to read
 
-
 # current
+        - Fixed missin styles in tree list
+
+# 20250507
     - tags
         - new tag endpoint
         - tags now have a type
